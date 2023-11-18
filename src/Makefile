@@ -1,7 +1,7 @@
 CC = g++
 CPPFLAGS = -std=c++20 -Wall -Wextra
 
-.PHONY=run
+.PHONY: run
 run: main
 	./main
 
@@ -10,4 +10,6 @@ main: main.o
 main.o: main.cpp
 	$(CC) $(CPPFLAGS) -c $^ -o $@
 
-
+.PHONY: clean
+clean:
+	rm *.o
