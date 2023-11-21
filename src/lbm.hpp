@@ -6,6 +6,7 @@
 #include <vector>
 #include "lattice.hpp"
 #include "collisionModel.hpp"
+#include "velocitySet.hpp"
 
 class lbm
 {
@@ -13,11 +14,12 @@ private:
     
    
     Lattice Lattice;
-    std::vector<int> velocitySet;
+    VelocitySet velocitySet;
 
+    // TODO: aggiungere tutte le costanti del caso
     int const tao;
     int const deltaT;
-    
+
 
 
     /*
