@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "latticeNode.hpp"
+#include "lattice.hpp"
 #include "collisionModel.hpp"
 
 class lbm
@@ -12,9 +12,12 @@ class lbm
 private:
     
    
-    std::vector<std::vector<LatticeNode>> LBMMatrix;
+    Lattice Lattice;
     std::vector<int> velocitySet;
 
+    int const tao;
+    int const deltaT;
+    
 
 
     /*
