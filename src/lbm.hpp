@@ -12,8 +12,6 @@ class lbm
 {
 private:
     
-   
-    Lattice Lattice;
     VelocitySet velocitySet;
 
     // TODO: aggiungere tutte le costanti del caso

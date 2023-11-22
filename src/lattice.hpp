@@ -11,6 +11,7 @@ class Lattice
 {
 private:
     std::vector<std::vector<LatticeNode<dim, numVelocities>> LBMMatrix;
+    
 public:
     Lattice(std::string matrixTemplate);
     

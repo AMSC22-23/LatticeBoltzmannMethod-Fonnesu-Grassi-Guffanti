@@ -6,20 +6,23 @@
 #include <string>
 #include <vector>
 
+
 class VelocitySet
 {
 private:
     // TODO: vedere se cambiare implementazione
 
-    int D;
-    int Q;
-    std::vector<int> directions;
-    std::vector<int> weigths;
+    const std::size_t D;
+    const int Q;
+    std::vector<std::vector<int>> directions;
+    std::vector<double> weigths;
 public:
-    VelocitySet(std::string velocitySet);
+    VelocitySet(const std::size_t D, const int Q);
+    
 
-    int getDirection(int i);
-    int getWeight(int i);
+    int getDirections(int i);
+    int getWeights(int i);
 };
+
 
 #endif

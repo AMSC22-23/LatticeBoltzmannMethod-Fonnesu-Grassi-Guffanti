@@ -1,9 +1,8 @@
 #include <iostream>
-
+#include "velocitySet.hpp"
 
 int main()
 {
-    std::cout << "Hello Luca" << std::endl;
-    std::cout << "Hello, world" << std::endl;
+    VelocitySet Prova(1,3);
     return 0;
 }
