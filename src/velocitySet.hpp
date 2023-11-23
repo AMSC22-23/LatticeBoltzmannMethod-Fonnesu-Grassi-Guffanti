@@ -12,10 +12,15 @@ class VelocitySet
 private:
     // TODO: vedere se cambiare implementazione
 
+    struct WeightedDirection{
+        std::vector<int> direction;
+        double weight;
+    };
+
     const std::size_t D;
     const int Q;
-    std::vector<std::vector<int>> directions;
-    std::vector<double> weigths;
+    std::vector<WeightedDirection> Set;
+    
 public:
     VelocitySet(const std::size_t D, const int Q);
     
@@ -23,6 +28,8 @@ public:
     int getDirections(int i);
     int getWeights(int i);
 };
+
+
 
 
 #endif
