@@ -1,13 +1,5 @@
 #include "collisionModel.hpp"
 
-/*
-The BGL method takes as arguments:
-    f: vector containing distribution functions of a node
-    fEq: vector containing equilibrium distribution functions of a node
-    tConst: deltaT/tau
-    tConj: 1-tConst
-and return the post-collision distribution functions
-*/
 std::vector<double> BGK::calcCollision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const
 {
     std::vector<double> fStar(f.size());
