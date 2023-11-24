@@ -24,9 +24,17 @@ private:
 public:
     VelocitySet(const std::size_t D, const int Q);
     
+    const size_t getDimensions() const{
+        return D;
+    }
 
-    int getDirections(int i);
-    int getWeights(int i);
+    const int getSetSize() const{
+        return Q;
+    }
+
+    const std::vector<WeightedDirection> getVelocitySets() const{
+        return this->Set;
+    }
 };
 
 
