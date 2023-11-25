@@ -16,7 +16,7 @@ public:
 };
 
 //template <std::size_t q>
-class BGK : public CollisionMode //<q>
+class BGK : public CollisionModel //<q>
 {
 public:
     /*
@@ -50,7 +50,7 @@ public:
     std::vector<double> calcCollision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
 
     /*
-    virtual std::array<double, q> calcCollision(const std::array<double, q> &f, const std::array<double, q> &fEq, double tConst, double tConj) const override
+    std::array<double, q> calcCollision(const std::array<double, q> &f, const std::array<double, q> &fEq, double tConst, double tConj) const override
     {
         
     }
@@ -65,7 +65,7 @@ public:
     std::vector<double> calcCollision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
 
     /*
-    virtual std::array<double, q> calcCollision(const std::array<double, q> &f, const std::array<double, q> &fEq, double tConst, double tConj) const override
+    std::array<double, q> calcCollision(const std::array<double, q> &f, const std::array<double, q> &fEq, double tConst, double tConj) const override
     {
         
     }
