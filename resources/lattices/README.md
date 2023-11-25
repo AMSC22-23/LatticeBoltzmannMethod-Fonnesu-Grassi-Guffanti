@@ -1,4 +1,4 @@
-# Lattice File format .ltc
+# Lattice File format
 
 The lattice file describes the computational domain of the simulation. A .ltc file is composed of a header that contains
 
