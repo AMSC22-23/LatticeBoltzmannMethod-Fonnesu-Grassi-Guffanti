@@ -1,10 +1,11 @@
 CC = g++
 CPPFLAGS = -std=c++20 -Wall -Wextra
-SRCS = main.cpp velocitySet.cpp
+SRCS = main.cpp velocitySet.cpp lattice.cpp lattice2D.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: main
 	./main
+
 .PHONY: run
 
 main: $(OBJS)

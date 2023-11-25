@@ -6,16 +6,15 @@
 #include <string>
 #include <vector>
 
+struct WeightedDirection{
+    std::vector<int> direction;
+    double weight;
+};
 
 class VelocitySet
 {
 private:
     // TODO: vedere se cambiare implementazione
-
-    struct WeightedDirection{
-        std::vector<int> direction;
-        double weight;
-    };
 
     const std::size_t D;
     const int Q;
