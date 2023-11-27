@@ -10,6 +10,7 @@
 /**
  * Abstract representation of the lattice of points, realized into two
  * different implementations for the 2D and the 3D use-case.
+ * @author Luca Guffanti
 */
 class Lattice
 {
@@ -19,23 +20,31 @@ protected:
      * Path to the input file where the domain of the computation is described
     */
     const std::string input_file_path;
+    
     /**
      * Path to the output directory where all the files will be saved
     */
     const std::string output_dir_path;
+    
     /**
      * Number of dimensions of the lattice
     */
     const std::size_t dimensions;
+    
     /**
      * Name of the domain
     */
     std::string lattice_name;
+    
+    /**
+     * The chosen velocity set
+    */
+    const VelocitySet velocity_set;
     /**
      * Saves output data to the file passed as a constructor to the lattice object
     */
     virtual void save_output_data() const = 0; 
-
+    
     /**
      * Reads the input file producing the lattice.
     */
@@ -52,8 +61,9 @@ public:
      * @param input_file_path path to the input file, containing the representation of the simulation domain, used to produce the lattice
      * @param output_file_path_ path to where the output files will be stored
      * @param dimensions_ number of dimensions of the lattice
+     * @param velocity_set_ the velocity set used in the lattice
     */
-    Lattice(const std::string& input_file_path_, const std::string& output_dir_path_, const int dimensions_);
+    Lattice(const std::string& input_file_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_);
 
     virtual ~Lattice() = default;
 

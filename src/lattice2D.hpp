@@ -9,13 +9,27 @@
 #include "lattice.hpp"
 #include "latticeNode.hpp"
 
+/**
+ * 2D implementation of the Lattice abstract class
+ * @author Luca Guffanti
+*/
 class Lattice2D : public Lattice
 {
 private:
+    
     /**
      * Dimensions of the lattice
     */
     static constexpr std::size_t dim = 2;
+    
+    /**
+     * Width of the lattice
+    */
+    std::size_t lattice_width;
+    /**
+     * Height of the lattice
+    */
+    std::size_t lattice_height;
    
     /**
      * Lattice, represented as a two-dimensional array
@@ -44,8 +58,9 @@ public:
     /**
      * @param input_file_path path to the input file
      * @param output_dir_path path to the output directory
+     * @param velocity_set_ velocity set used to perform operations on the lattice
     */
-    Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_);
+    Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set_);
     virtual ~Lattice2D() = default;
 
     /**
@@ -55,7 +70,7 @@ public:
     virtual void perform_simulation_step() override;
     
     /**
-     * Initializes the 2D lattice to default values of populations and fields.
+     * Initializes the 2D lattice to default values of populations and macroscopic variables.
     */
     virtual void initialize_lattice() override;
 };

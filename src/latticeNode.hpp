@@ -24,8 +24,12 @@ template <std::size_t dim>
 class LatticeNode
 {
 private:
+    
     // array of discrete populations (fi)
     std::vector<double> populations;
+    
+    // array of equilibrium populations (feq)
+    std::vector <double> eq_populations;
     
     // type of the node
     Node_type type;
@@ -33,6 +37,7 @@ private:
     // macroscopic quantities
     // density of the fluid
     double rho;
+    
     // velocity of the fluid
     std::array<double, dim> u;
 
@@ -43,6 +48,7 @@ public:
     ) :
     type (type_),
     populations ({0.0}),
+    eq_populations ({0.0}),
     rho (0.0),
     u ({0.0})
     {};
@@ -99,8 +105,8 @@ public:
         return rho;
     }
 
-
     /**
+     * Computes, returns and updates the macroscopic density scalar and velocity vector.
      * @param velocity_set the velocity set from which velocities are taken
      * @return the macroscopic density of the fluid and the velocity as a vector
     */
@@ -109,7 +115,6 @@ public:
 
         rho = 0.0;
         u = {0.0};
-        populations = {1.0, 2.0, 3.0};
         // calculating the density
         for (const auto& population : populations) 
         {
@@ -135,9 +140,46 @@ public:
         return {rho, u};
     }
 
-    void initialize_node(const double rho, const std::array<double, dim> u)
+    /**
+     * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
+     * @param set_of_weights the weighted directions composing the velocity set
+    */
+    void initialize_node(const std::vector<WeightedDirection>& set_of_weights)
     {
+        populations.resize(set_of_weights.size());
+        eq_populations.resize(set_of_weights.size());
+
+        if (type == FLUID)
+        {
+            // setting the macroscopic density
+            rho = 1.0;
+
+            // setting the macroscopic velocity
+            u = {0.0};
+            
+            // setting the populations
+            populations = {0.0};
+            
+            // setting the equilibrium populations: since u = 0 and rho = 1, the equation describing the 
+            // equilibrium populations results only into the wi factor, which is the weight of a specific direction.
+            std::size_t size = set_of_weights.size();
+            for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
+            {
+                eq_populations[velocity_index] = set_of_weights[velocity_index].weight;
+            }
+        } else 
+        {
+            rho = 0.0;
+            u = {0.0};
+            populations = {0.0};
+            eq_populations = {0.0};
+        }
         
+    }
+
+    void compute_equilibrium_populations(const std::vector<WeightedDirection>& set_of_weights) 
+    {
+        //TODO: not yet implemented.
     }
 };
 
