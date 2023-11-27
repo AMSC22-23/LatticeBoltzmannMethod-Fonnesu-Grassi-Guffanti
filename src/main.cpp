@@ -1,9 +1,9 @@
 #include <iostream>
-#include "velocitySet.hpp"
+#include "lbm.hpp"
 
 int main()
 {
-    
+    lbm Prova(2,9,"../resources/lattices/2d_5_5_test1");
     
     /*
     PROVA CREZIONE VELOCITYSETS

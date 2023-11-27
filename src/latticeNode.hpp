@@ -116,7 +116,7 @@ public:
             rho += population;
         }
 
-        const std::vector<WeightedDirection> vs_content = velocity_set.getVelocitySets();
+        const std::vector<WeightedDirection> vs_content = velocity_set.get_velocity_set();
         const std::size_t size = vs_content.size();
 
         // calculating the momentum density 

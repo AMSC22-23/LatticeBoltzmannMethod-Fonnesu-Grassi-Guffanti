@@ -2,10 +2,7 @@
 #include <fstream>
 #include "velocitySet.hpp"
 
-
-VelocitySet::VelocitySet(const std::size_t D_, const int Q_):
-    D(D_),
-    Q(Q_)
+void VelocitySet::set_velocity_set()
     {
         std::string type="D" + std::to_string(D) + "Q" + std::to_string(Q);
         std::ifstream Sets("../resources/velocitySets");
