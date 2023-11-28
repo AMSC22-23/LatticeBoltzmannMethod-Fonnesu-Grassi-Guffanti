@@ -3,6 +3,10 @@
 
 #include <vector>
 
+/**
+ * General class that will be extended by other classes to implement vatious collision models
+ * @author Lorenzo Fonnesu
+*/
 class CollisionModel
 {
 public:
@@ -11,12 +15,16 @@ public:
     virtual ~CollisionModel() = default;
 };
 
+/**
+ * Implementation of the BGK method for collisions
+ * @author Lorenzo Fonnesu
+*/
 class BGK : public CollisionModel
 {
 public:
     /**
-    * @param f array containing distribution functions of a node
-    * @param fEq array containing equilibrium distribution functions of a node
+    * @param f vector containing distribution functions of a node
+    * @param fEq vector containing equilibrium distribution functions of a node
     * @param tConst deltaT/tau
     * @param tConj 1-tConst
     * @return the post-collision distribution functions
