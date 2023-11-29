@@ -44,6 +44,7 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
                     #file.write("\033[37ml\033[0m")
                 elif(is_solid(pixel)):
                     file.write("S")
+                    nonzeros=nonzeros+1
                     mtx.write(f"{x} {y} 3\n")
                     #file.write("\033[34ml\033[0m")
                 else: 
