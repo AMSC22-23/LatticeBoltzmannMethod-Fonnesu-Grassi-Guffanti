@@ -3,7 +3,7 @@
 
 int main()
 {
-    lbm Prova(2,9,"../resources/lattices/2d_5_5_test1");
+    lbm Prova(2,9,"../resources/lattices/2d_5_6_test1","BGK","ZH");
     
     /*
     PROVA CREZIONE VELOCITYSETS
