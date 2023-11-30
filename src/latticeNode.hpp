@@ -9,7 +9,7 @@
 /**
  * Enumeration that describes the type of node
 */
-enum Node_type{FLUID, BOUNDARY, SOLID};
+enum Node_type{FLUID, OPEN_BOUNDARY, BOUNDARY, SOLID};
 
 /**
  * object that represents a single node of the lattice:
@@ -41,6 +41,9 @@ private:
     std::array<double, dim> u;
 
 public:
+
+    using PointInGrid = std::array<std::size_t, dim>;
+
     LatticeNode(
         const Node_type type_ = FLUID
     ) :
@@ -72,6 +75,11 @@ public:
     const bool is_fluid() const 
     {
         return type == FLUID;
+    }
+
+    const bool is_open_boundary() const 
+    {
+        return type == OPEN_BOUNDARY;
     }
 
     const bool is_boundary() const 
@@ -117,7 +125,7 @@ public:
     void update_macroscopic_quantities(const VelocitySet& velocity_set) 
     {
         rho = 0.0;
-        u = {0.0};
+        u.fill(0.0);
         // calculating the density
         for (const auto& population : populations) 
         {
@@ -145,37 +153,51 @@ public:
     /**
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
+     * 
     */
-    void initialize_node(const std::vector<double>& set_of_weights)
+    void initialize_fluid_node(const std::vector<double>& set_of_weights)
     {
         populations.resize(set_of_weights.size());
         eq_populations.resize(set_of_weights.size());
 
-        if (type == FLUID)
-        {
-            // setting the macroscopic density
-            rho = 1.0;
+        // setting the macroscopic density
+        rho = 1.0;
 
-            // setting the macroscopic velocity
-            u = {0.0};
-            
-            // setting the populations
-            populations = {0.0};
-            
-            // setting the equilibrium populations: since u = 0 and rho = 1, the equation describing the 
-            // equilibrium populations results only into the wi factor, which is the weight of a specific direction.
-            std::size_t size = set_of_weights.size();
-            for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
-            {
-                eq_populations[velocity_index] = set_of_weights[velocity_index];
-            }
-        } else 
+        // setting the macroscopic velocity
+        u.fill(0.0);
+        
+        // setting the populations
+        std::fill(populations.begin(), populations.end(), 0.0);
+        
+        // setting the equilibrium populations: since u = 0 and rho = 1, the equation describing the 
+        // equilibrium populations results only into the wi factor, which is the weight of a specific direction.
+        std::size_t size = set_of_weights.size();
+        for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
         {
-            rho = 0.0;
-            u = {0.0};
-            populations = {0.0};
-            eq_populations = {0.0};
+            eq_populations[velocity_index] = set_of_weights[velocity_index];
         }
+    }
+
+    /**
+     * Initializes an open boundary node by setting its parameters based on functions passed as input
+     * @param velocity_set
+     * @param u_w
+    */
+    void initialize_open_boundary_node(const VelocitySet& velocity_set, const std::array<double, dim>& u_w, const double one_over_speed_of_sound_squared = 3.0)
+    {
+        
+        return;
+    }
+
+    /**
+     * Initializes a generic boundary by setting all the parameters to 0.0
+    */
+    void initialize_generic_boundary()
+    {
+        rho = 0.0;
+        u.fill(0.0);
+        std::fill(eq_populations.begin(), eq_populations.end(), 0.0);
+        std::fill(populations.begin(), populations.end(), 0.0);
     }
 
     /**
