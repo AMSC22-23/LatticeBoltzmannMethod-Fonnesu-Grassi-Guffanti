@@ -153,7 +153,6 @@ public:
     /**
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
-     * 
     */
     void initialize_fluid_node(const std::vector<double>& set_of_weights)
     {
@@ -180,12 +179,27 @@ public:
 
     /**
      * Initializes an open boundary node by setting its parameters based on functions passed as input
-     * @param velocity_set
-     * @param u_w
+     * @param velocity_set the velocity set, used to extract weights.
+     * @param rho_w desnity of the node
+     * @param u_w velocities of the node
+     * @param one_over_speed_of_sound_squared the reciprocal of the square of the speed of sound of the system. Defaults to 3.0.
     */
-    void initialize_open_boundary_node(const VelocitySet& velocity_set, const std::array<double, dim>& u_w, const double one_over_speed_of_sound_squared = 3.0)
+    void initialize_open_boundary_node(const VelocitySet& velocity_set, const double rho_w, const std::array<double, dim>& u_w, const double one_over_speed_of_sound_squared = 3.0)
     {
-        
+        rho = rho_w;
+        u = u_w;
+        const auto directions = velocity_set.get_velocity_set().direction;
+        const std::size_t size = directions.size();
+
+        for(std::size_t i=0; i < size; ++i)
+        {
+            double cu = c[i][0] * u[0] + c[i][1] * u[1];
+            populations[i] = velocity_set.get_velocity_set().weight[i] * rho * (
+                1.0 + one_over_speed_of_sound_squared * cu + 
+                0.5 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * cu * cu - 
+                0.5 * one_over_speed_of_sound_squared * (u[0] * u[0] + u[1] * u[1]));
+        }
+
         return;
     }
 
@@ -229,8 +243,8 @@ public:
 
             eq_populations[i] = weights[i] * rho * (
                 1.0 + one_over_speed_of_sound_squared * u_dot_ci + 
-                4.0 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * u_dot_ci * u_dot_ci -
-                2.0 * one_over_speed_of_sound_squared * u_dot_u);
+                0.5 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * u_dot_ci * u_dot_ci -
+                0.5 * one_over_speed_of_sound_squared * u_dot_u);
         }
     }
 };
