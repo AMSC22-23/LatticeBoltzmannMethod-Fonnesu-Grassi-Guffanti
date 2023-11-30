@@ -18,8 +18,8 @@ private:
     VelocitySet velocity_set;
 
     std::unique_ptr<Lattice> lattice_ptr;
-    std::unique_ptr<CollisionModel> collision_ptr;
-    std::unique_ptr<Boundary> boundary_ptr;
+    // std::unique_ptr<CollisionModel> collision_ptr;
+    // std::unique_ptr<Boundary> boundary_ptr;
     // TODO: aggiungere tutte le costanti del caso
     double const tau;
     double const delta_t;
@@ -65,6 +65,11 @@ public:
     std::unique_ptr<Boundary>& set_collision_ptr(){
         return boundary_ptr;
     }*/
+
+    void print()
+    {
+        lattice_ptr->save_output_data(0);
+    }
 
 };
 

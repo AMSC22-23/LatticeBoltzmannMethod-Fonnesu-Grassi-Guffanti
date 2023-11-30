@@ -56,17 +56,8 @@ void Lattice2D::read_input_file()
     std::getline(input_file, lattice_name);
     std::cout << "  Lattice name: " << lattice_name << std::endl;
 
-    // Read the dimensions of the lattice
-    std::getline(input_file, line);
-    std::size_t dim = std::stoul(line);
-    if (dim != Lattice2D::dimensions)
-    {
-        std::cerr << "[ERROR]   wrong format (wrong dimensions)" << std::endl;
-    }
-    std::cout << "  Lattice dimensions: " << dim << std::endl;
-
     // Read the width of the lattice
-    std::getline(input_file, line);
+    input_file >> line;
     std::size_t width = std::stoul(line);
     if (width == 0)
     {
@@ -74,9 +65,9 @@ void Lattice2D::read_input_file()
         assert(width > 0);
     }
     std::cout << "  Lattice width: " << width << std::endl;
-
+    
     // Read the height of the lattice
-    std::getline(input_file, line);
+    input_file >> line;
     std::size_t height = std::stoul(line);
     if (height == 0)
     {
@@ -85,35 +76,46 @@ void Lattice2D::read_input_file()
     }
     std::cout << "  Lattice height: " << height << std::endl;
 
+    // Read the number of non fluid nodes in the domain
+    input_file >> line;
+    std::size_t nnz = std::stoul(line);
+    std::cout << "  Non fluid nodes: " << line << "(" << (double)nnz/((double)width*height) * 100.0 << "%)" <<std::endl;
     // Read data
 
     // first reserve the size of the vector
     lattice.resize(height, std::vector<LatticeNode<2>>(width));
+    lattice_height = height;
+    lattice_width = width;
 
-    std::cout << "  reserved the size for the matrix" << std::endl;
-
+    std::cout << "  Reserved the size for the matrix" << std::endl;
 
     // the matrix is read from 
     Node_type type;
-    int type_i;
-    std::cout << "  reading data" << std::endl;
+    std::cout << "  Reading data" << std::endl;
 
-    for (std::size_t i = 0; i < height; i++)
+    // for each non zero element in the input matrix
+    std::size_t x, y;
+    std::size_t type_i;
+    for (std::size_t i = 0; i < nnz; i++)
     {
-        for (std::size_t j = 0; j < width; j++)
-        {
-            // std::cout << "  element " << i << " " << j << std::endl;
-            input_file >> type_i;
-            type = static_cast<Node_type>(type_i);
-            lattice[i][j].set_type() = type;
-        }
+        // read the x coordinate
+        input_file >> line;
+        x = std::stoul(line);
+        // read the y coordinate
+        input_file >> line;
+        y = std::stoul(line);
+        // read the type
+        input_file >> line;
+        type_i = std::stoul(line);
+        
+        type = static_cast<Node_type>(type_i);
+        lattice[y][x].set_type() = type;
     }
 
     std::cout << "  FINISHED READING!" << std::endl;
     input_file.close();
 
-    lattice_height = height;
-    lattice_width = width;
+
 }
 
 void Lattice2D::log_specific_data() const 
@@ -126,6 +128,8 @@ void Lattice2D::log_specific_data() const
 void Lattice2D::initialize_lattice() 
 {
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
+    std::cout << "              reading input data from file" << std::endl;
+
     const WeightedDirection set_elements = velocity_set.get_velocity_set();
 
     const auto weights = set_elements.weight;
@@ -135,8 +139,15 @@ void Lattice2D::initialize_lattice()
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
-            // std::cout << i << " " << j << std::endl;
-            lattice[i][j].initialize_node(weights);
+            if (lattice[i][j].is_fluid())
+            {
+                lattice[i][j].initialize_fluid_node(weights);
+            } else if (lattice[i][j].is_open_boundary())
+            {
+            } else 
+            {
+                lattice[i][j].initialize_generic_boundary();
+            }
         }
     }
 
@@ -165,6 +176,7 @@ void Lattice2D::perform_simulation_step()
     perform_streaming();
 
     // 4. Perform the propagation at the boundaries
+
 
     // 5. Update the macroscopic quantities
     for (std::size_t i = 0; i < lattice_height; i++)

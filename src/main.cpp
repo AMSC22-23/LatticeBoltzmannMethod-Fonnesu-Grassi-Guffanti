@@ -3,8 +3,8 @@
 
 int main()
 {
-    lbm Prova(2,9,"../resources/lattices/2d_5_6_test1","BGK","ZH");
-    
+    lbm Prova(2,9,"../resources/lattices/lid_driven_cavity/2d_100_100_lid_driven","BGK","ZH");
+    Prova.print();
     /*
     PROVA CREZIONE VELOCITYSETS
     VelocitySet ProvaD1Q3(1,3);

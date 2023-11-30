@@ -70,7 +70,7 @@ void VelocitySet::set_velocity_set()
                     // }
                 }
                 if (Sets.eof()) {
-                    std::cout << "Velocity set loaded" << std::endl;
+                    std::cout << "[VELOCITY SET] loaded velocity set" << std::endl;
                     break;
                 }
             }

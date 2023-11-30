@@ -1,7 +1,8 @@
 #comando per runnare
-#python scripts/translate.py immagine_input.jpg nome_output
+#python scripts/translate.py immagine_input.jpg nome_output sottocartella
 
 import sys
+import os
 from PIL import Image
 
 def is_boundary(pixel): #tendente al bianco
@@ -26,12 +27,14 @@ img = Image.open(f"resources/img/{args[1]}")
 length, height =img.size
 nonzeros = 0
 
+if not os.path.exists("resources/patterns"):
+    os.mkdir("resources/patterns")
+
 with open(f"resources/patterns/{args[2]}.txt", "w") as file:
-    with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
+    with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
         #mtx.write("%%MatrixMarket matrix coordinate real general\n")
         mtx.write(f"{args[2]}\n")
         mtx.write("\n")
-        mtx.write("2\n")
         for x in range(height):
             for y in range(length):
                 pixel=img.getpixel((y,x))
@@ -61,11 +64,11 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
             # Blu
             # Nero
 
-with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","r") as mtx:  
+with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","r") as mtx:  
     lines=mtx.readlines()
 lines[1]=f"{length} {height} {nonzeros}\n"
 
-with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","w") as mtx:
+with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","w") as mtx:
     mtx.writelines(lines)
 
 
