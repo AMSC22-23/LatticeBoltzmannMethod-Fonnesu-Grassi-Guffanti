@@ -17,31 +17,29 @@ void VelocitySet::set_velocity_set()
                     //Directions reading
 
                     std::getline(Sets, line);
-                    size_t separator =line.find(';');
+                    std::size_t separator =line.find(';');
                     while(line.length()!=0){
                         std::string direction=line.substr(0,separator);
                         line=line.substr(separator+1,line.length());
 
                         std::vector<int> dir;
                         while(direction.length()!=0){
-                            size_t temp=direction.find(',');
+                            std::size_t temp=direction.find(',');
                             
                             dir.push_back(std::stoi(direction.substr(0,temp)));
                             direction=direction.substr(temp+1,direction.length());
                             //std::cout << direction << " " << std::endl;
                         }
-                        WeightedDirection newDir;
-                        newDir.direction=dir;
-                        newDir.weight=1;
-                        this->Set.push_back(newDir);
-                        separator =line.find(';');
+                        this->Set.direction.push_back(dir);
+                        this->Set.weight.push_back(0);
+                        separator = line.find(';');
                     }
 
                     //Weight reading
                     
                     std::getline(Sets, line);
                     separator=line.find(",");
-                    for (auto &&currDir : this->Set)
+                    for (auto &&currDir : this->Set.weight)
                     {
                         
                         std::string weight=line.substr(0,separator);
@@ -55,20 +53,21 @@ void VelocitySet::set_velocity_set()
                         
                         double res=numerator/denominator;
                         //std::cout<< numerator << "/" << denominator << "=" << numerator/denominator << std::endl;
-                        currDir.weight = res;
+                        currDir = res;
                         
                         separator=line.find(",");
                         
                     }
                     
                     
-                    /* STAMPA VETTORE DIREZIONE E PESI   
-                    for (auto &&i : this->Set){   
-                        for (auto &&j : i.direction){
+                    //STAMPA VETTORE DIREZIONE E PESI  
+                    std::cout << "DATI" << std::endl; 
+                    for (auto i=0; i<Q; i++){   
+                        for (auto &&j : this->Set.direction[i]){
                             std::cout<< j << " ";
                         }
-                        std::cout <<" "<< i.weight <<std::endl<< std::endl;
-                    }*/
+                        std::cout <<" "<< Set.weight[i] <<std::endl<< std::endl;
+                    }
                 }
                 if (Sets.eof()) {
                     std::cout << "Hai letto tutto il file." << std::endl;

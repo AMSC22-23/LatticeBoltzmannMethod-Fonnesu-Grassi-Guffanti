@@ -7,8 +7,8 @@
 #include <vector>
 
 struct WeightedDirection{
-    std::vector<int> direction;
-    double weight;
+    std::vector<std::vector<int>> direction;
+    std::vector<double> weight;
 };
 
 class VelocitySet
@@ -18,7 +18,7 @@ private:
 
     std::size_t D;
     int Q;
-    std::vector<WeightedDirection> Set;
+    WeightedDirection Set;
     
 public:
     VelocitySet()=default;
@@ -31,7 +31,7 @@ public:
         return Q;
     }
 
-    const std::vector<WeightedDirection> get_velocity_set() const{
+    const WeightedDirection get_velocity_set() const{
         return this->Set;
     }
 
