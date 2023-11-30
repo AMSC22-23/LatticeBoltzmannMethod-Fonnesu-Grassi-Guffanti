@@ -1,5 +1,5 @@
 #comando per runnare
-#python src/Python_scripts/translate.py immagine_input.jpg nome_output
+#python scripts/translate.py immagine_input.jpg nome_output
 
 import sys
 from PIL import Image
@@ -27,9 +27,11 @@ length, height =img.size
 nonzeros = 0
 
 with open(f"resources/patterns/{args[2]}.txt", "w") as file:
-    with open(f"resources/patterns/{args[2]}.mtx","w") as mtx:
-        mtx.write("%%MatrixMarket matrix coordinate real general\n")
+    with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
+        #mtx.write("%%MatrixMarket matrix coordinate real general\n")
+        mtx.write(f"{args[2]}\n")
         mtx.write("\n")
+        mtx.write("2\n")
         for x in range(height):
             for y in range(length):
                 pixel=img.getpixel((y,x))
@@ -37,10 +39,15 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
                 if(is_boundary(pixel)) :
                     file.write("B")
                     nonzeros=nonzeros+1
-                    mtx.write(f"{x} {y} 1\n")
+                    mtx.write(f"{x} {y} 2\n")
                     #file.write("\033[30ml\033[0m")
                 elif(is_fluid(pixel)):
-                    file.write("W")
+                    if(x == 0 or y == 0 or x == (height-1) or y == (length-1)):
+                        file.write("O")
+                        mtx.write(f"{x} {y} 1\n")
+                        nonzeros=nonzeros+1
+                    else:
+                        file.write("W")
                     #file.write("\033[37ml\033[0m")
                 elif(is_solid(pixel)):
                     file.write("S")
@@ -54,11 +61,11 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
             # Blu
             # Nero
 
-with open(f"resources/patterns/{args[2]}.mtx","r") as mtx:  
+with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","r") as mtx:  
     lines=mtx.readlines()
 lines[1]=f"{length} {height} {nonzeros}\n"
 
-with open(f"resources/patterns/{args[2]}.mtx","w") as mtx:
+with open(f"resources/lattices/2d_{height}_{length}_{args[2]}","w") as mtx:
     mtx.writelines(lines)
 
 
