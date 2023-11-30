@@ -4,10 +4,15 @@
 #include <cassert>
 #include <fstream>
 #include <vector>
+#include <filesystem>
+#include <numeric>
+#include <cmath>
 #include <string>
 
 #include "lattice.hpp"
 #include "latticeNode.hpp"
+#include "collisionModel.hpp"
+#include "boundary.hpp"
 
 /**
  * 2D implementation of the Lattice abstract class
@@ -16,7 +21,7 @@
 class Lattice2D : public Lattice
 {
 private:
-    
+
     /**
      * Dimensions of the lattice
     */
@@ -37,16 +42,20 @@ private:
     std::vector<std::vector<LatticeNode<dim>>> lattice;
    
     /**
-     * Saves the output data to file dor the 2D lattice
-     * @note Implementation of Lattice class equivalent virtual method
-    */
-    virtual void save_output_data() const override; 
-   
-    /**
      * Reads an input file describing a 2D domain
      * @note Implementation of Lattice class equivalent virtual method
     */
     virtual void read_input_file() override;
+
+    /**
+     * Executes the collisions between particles 
+    */
+    virtual void perform_collisions() override;
+
+    /**
+     * Executes streaming of the populations
+    */
+    virtual void perform_streaming() override;
    
     /**
      * Logs specific data regarding the lattice
@@ -73,6 +82,12 @@ public:
      * Initializes the 2D lattice to default values of populations and macroscopic variables.
     */
     virtual void initialize_lattice() override;
+
+    /**
+     * Saves the output data to file dor the 2D lattice
+     * @note Implementation of Lattice class equivalent virtual method
+    */
+    virtual void save_output_data(std::size_t iteration_count) const override; 
 };
 
 #endif // HH_LATTICE_2D

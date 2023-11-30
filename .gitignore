@@ -3,3 +3,4 @@ src/main
 .vscode/*
 .DS_Store
 build/
+results/

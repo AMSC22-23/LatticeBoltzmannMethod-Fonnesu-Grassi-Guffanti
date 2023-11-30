@@ -7,11 +7,35 @@ Lattice(input_file_path_, output_dir_path_, dim, velocity_set)
     initialize_lattice();
 };
 
-void Lattice2D::save_output_data() const
+void Lattice2D::save_output_data(std::size_t iteration_count) const
 {
-    //TODO: not yet implemented
-    std::cout << "LATTICE 2D:   saving output data" << std::endl;
+    // file where the macroscopic density is saved
+    std::string output_file_path_rho = output_dir_path + "/output-" + std::to_string(iteration_count) + "rho.txt" ;
+    std::ofstream output_file_rho(output_file_path_rho);
 
+    // file where the norm of the velocity is saved
+    std::string output_file_path_u = output_dir_path + "/output-" + std::to_string(iteration_count) + "u.txt";
+    std::ofstream output_file_u(output_file_path_u);
+
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
+        {
+            auto [rho, u] = lattice[i][j].get_macroscopic_quantities();
+            // computing the two 2-norm of the vector
+            auto two_norm = std::sqrt(
+                u[0]*u[0] + u[1]*u[1]
+            );
+
+            output_file_rho << rho << " ";
+            output_file_u << two_norm << " ";
+        }
+        output_file_rho << std::endl;
+        output_file_u << std::endl;
+    }
+
+    output_file_rho.close();
+    output_file_u.close();
 }
 
 void Lattice2D::read_input_file()
@@ -94,30 +118,70 @@ void Lattice2D::read_input_file()
 
 void Lattice2D::log_specific_data() const 
 {
-    //TODO: not yet implemented
-    //std::cout << "  Lattice width  : " << Lattice2D::lattice.size() << std::endl;
-    //std::cout << "  Lattice height : " << Lattice2D::lattice[0].size() << std::endl;
-}
-
-void Lattice2D::perform_simulation_step() 
-{
-    //TODO: not yet implemented
+    std::cout << "  Lattice Name   : " << lattice_name << std::endl;
+    std::cout << "  Lattice width  : " << lattice_width << std::endl;
+    std::cout << "  Lattice height : " << lattice_height << std::endl;
 }
 
 void Lattice2D::initialize_lattice() 
 {
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
-    const std::vector<WeightedDirection> set_elements = velocity_set.get_velocity_set();
+    const WeightedDirection set_elements = velocity_set.get_velocity_set();
 
+    const auto weights = set_elements.weight;
+
+    // looping over all elements in the lattice
     for (std::size_t i = 0; i < lattice_height; ++i)
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
             // std::cout << i << " " << j << std::endl;
-            lattice[i][j].initialize_node(set_elements);
+            lattice[i][j].initialize_node(weights);
         }
     }
 
-    // looping over all elements in the lattice
     std::cout << "LATTICE 2D:   lattice initialized" << std::endl;
+}
+
+void Lattice2D::perform_simulation_step() 
+{
+    // The simulation step is composed of many substeps:
+
+    // 1. The equilibrium populations are calculated for each node
+    // -> parallelizable!
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
+        {
+            lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
+        }
+    }
+    // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
+
+    // 2. Perform the collisions
+    perform_collisions();
+
+    // 3. Perform the streaming
+    perform_streaming();
+
+    // 4. Perform the propagation at the boundaries
+
+    // 5. Update the macroscopic quantities
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
+        {
+            lattice[i][j].update_macroscopic_quantities(velocity_set);
+        }
+    }
+}
+
+void Lattice2D::perform_collisions() 
+{
+    // TODO: not yet implemented
+}
+
+void Lattice2D::perform_streaming()
+{
+    // TODO: not yet implemented
 }

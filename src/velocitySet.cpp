@@ -60,17 +60,17 @@ void VelocitySet::set_velocity_set()
                     }
                     
                     
-                    //STAMPA VETTORE DIREZIONE E PESI  
-                    std::cout << "DATI" << std::endl; 
-                    for (auto i=0; i<Q; i++){   
-                        for (auto &&j : this->Set.direction[i]){
-                            std::cout<< j << " ";
-                        }
-                        std::cout <<" "<< Set.weight[i] <<std::endl<< std::endl;
-                    }
+                    // STAMPA VETTORE DIREZIONE E PESI  
+                    // std::cout << "DATI" << std::endl; 
+                    // for (auto i=0; i<Q; i++){   
+                    //     for (auto &&j : this->Set.direction[i]){
+                    //         std::cout<< j << " ";
+                    //     }
+                    //     std::cout <<" "<< Set.weight[i] <<std::endl<< std::endl;
+                    // }
                 }
                 if (Sets.eof()) {
-                    std::cout << "Hai letto tutto il file." << std::endl;
+                    std::cout << "Velocity set loaded" << std::endl;
                     break;
                 }
             }

@@ -24,7 +24,6 @@ template <std::size_t dim>
 class LatticeNode
 {
 private:
-    
     // array of discrete populations (fi)
     std::vector<double> populations;
     
@@ -41,17 +40,17 @@ private:
     // velocity of the fluid
     std::array<double, dim> u;
 
-
 public:
     LatticeNode(
         const Node_type type_ = FLUID
     ) :
     type (type_),
-    populations ({0.0}),
-    eq_populations ({0.0}),
     rho (0.0),
     u ({0.0})
-    {};
+    {
+        populations.resize(0);
+        eq_populations.resize(0);
+    };
     
     ~LatticeNode() = default;
 
@@ -105,14 +104,18 @@ public:
         return rho;
     }
 
+    const std::tuple<double, std::array<double, dim>> get_macroscopic_quantities() const
+    {
+        return {rho, u};
+    }
+
     /**
      * Computes, returns and updates the macroscopic density scalar and velocity vector.
      * @param velocity_set the velocity set from which velocities are taken
      * @return the macroscopic density of the fluid and the velocity as a vector
     */
-    const std::tuple<double, std::array<double, dim>> macroscopic_quantities(const VelocitySet& velocity_set) 
+    void update_macroscopic_quantities(const VelocitySet& velocity_set) 
     {
-
         rho = 0.0;
         u = {0.0};
         // calculating the density
@@ -121,15 +124,15 @@ public:
             rho += population;
         }
 
-        const std::vector<WeightedDirection> vs_content = velocity_set.get_velocity_set();
-        const std::size_t size = vs_content.size();
+        const auto directions = velocity_set.get_velocity_set().direction;
+        const std::size_t size = directions.size();
 
         // calculating the momentum density 
         for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
         {
             for (std::size_t i = 0; i < dim; ++i) 
             {
-                u[i] += vs_content[velocity_index].direction[i] * populations[velocity_index];
+                u[i] += directions[velocity_index][i] * populations[velocity_index];
             }
         }
 
@@ -137,14 +140,13 @@ public:
         for (auto& momentum_density : u) {
             momentum_density = momentum_density / rho;
         }
-        return {rho, u};
     }
 
     /**
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
     */
-    void initialize_node(const std::vector<WeightedDirection>& set_of_weights)
+    void initialize_node(const std::vector<double>& set_of_weights)
     {
         populations.resize(set_of_weights.size());
         eq_populations.resize(set_of_weights.size());
@@ -165,7 +167,7 @@ public:
             std::size_t size = set_of_weights.size();
             for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
             {
-                eq_populations[velocity_index] = set_of_weights[velocity_index].weight;
+                eq_populations[velocity_index] = set_of_weights[velocity_index];
             }
         } else 
         {
@@ -174,12 +176,40 @@ public:
             populations = {0.0};
             eq_populations = {0.0};
         }
-        
     }
 
-    void compute_equilibrium_populations(const std::vector<WeightedDirection>& set_of_weights) 
-    {
-        //TODO: not yet implemented.
+    /**
+     * Method that computes the equilibrium populations using 
+     * a given speed of sound and a set. The speed of sound may be different due
+     * to debugging purposes or as DeltaT/Tau is not 1
+     * @param velocity_set the velocity set, used to extract weights.
+     * @param one_over_speed_of_sound_squared the reciprocal of the square of the speed of sound of the system. Defaults to 3.0.
+    */
+    void compute_equilibrium_populations(const WeightedDirection& velocity_set, const double one_over_speed_of_sound_squared = 3.0) 
+    {   
+        double u_dot_u;
+        double u_dot_ci;
+
+        auto directions = velocity_set.direction;
+        auto weights = velocity_set.weight;
+        auto size = directions.size();
+
+        for (std::size_t i = 0; i < size; ++i)
+        {
+            // computing the dot products
+            u_dot_u = 0.0;
+            u_dot_ci = 0.0;
+            for (std::size_t d = 0; d < dim; d++)
+            {
+                u_dot_u +=  u[d] * u[d];
+                u_dot_ci += u[d] * directions[i][d];
+            }
+
+            eq_populations[i] = weights[i] * rho * (
+                1.0 + one_over_speed_of_sound_squared * u_dot_ci + 
+                4.0 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * u_dot_ci * u_dot_ci -
+                2.0 * one_over_speed_of_sound_squared * u_dot_u);
+        }
     }
 };
 

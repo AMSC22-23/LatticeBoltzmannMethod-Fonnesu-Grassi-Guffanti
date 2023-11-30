@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
+#include <cassert>
 
 #include "latticeNode.hpp"
 
@@ -24,7 +26,7 @@ protected:
     /**
      * Path to the output directory where all the files will be saved
     */
-    const std::string output_dir_path;
+    std::string output_dir_path;
     
     /**
      * Number of dimensions of the lattice
@@ -40,10 +42,6 @@ protected:
      * The chosen velocity set
     */
     const VelocitySet velocity_set;
-    /**
-     * Saves output data to the file passed as a constructor to the lattice object
-    */
-    virtual void save_output_data() const = 0; 
     
     /**
      * Reads the input file producing the lattice.
@@ -55,6 +53,22 @@ protected:
      * - Number of elements
     */
     virtual void log_specific_data() const = 0;
+
+    /**
+     * Executes the collisions between particles 
+    */
+    virtual void perform_collisions() = 0;
+
+    /**
+     * Executes streaming of the populations
+    */
+    virtual void perform_streaming() = 0;
+
+    /**
+    * Creates the directory in which the results will be stored
+    */
+    void create_output_directory();
+
 public:
     
     /**
@@ -72,6 +86,13 @@ public:
      * Lattice Boltzmann discretized equations for each node of the lattice. 
     */
     virtual void perform_simulation_step() = 0;
+    
+    /**
+     * Saves output data to the file passed as a constructor to the lattice object
+     * @param iteration_count the current iteration number, in order to produce the correct output file
+    */
+    virtual void save_output_data(std::size_t iteration_count) const = 0; 
+
     /**
      * Performs the initialization of the lattice nodes.
     */
