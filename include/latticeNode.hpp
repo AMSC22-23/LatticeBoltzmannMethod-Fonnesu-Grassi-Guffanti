@@ -53,7 +53,7 @@ public:
         const Node_type type_ = FLUID
     ) :
     type (type_),
-    rho (0.0),
+    rho (0.0)
     {
         u.fill(0.0);
         collision_populations.resize(0);
@@ -170,7 +170,7 @@ public:
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
     */
-    void initialize_fluid_node(const std::vector<double>& set_of_weights, const double node_rho = 1.0, const std::array<double, dim> node_u)
+    void initialize_fluid_node(const std::vector<double>& set_of_weights, const std::array<double, dim> node_u, const double node_rho = 1.0)
     {
         populations.resize(set_of_weights.size());
         eq_populations.resize(set_of_weights.size());

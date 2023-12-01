@@ -141,7 +141,7 @@ void Lattice2D::initialize_lattice()
         {
             if (lattice[i][j].is_fluid())
             {
-                lattice[i][j].initialize_fluid_node(weights, 1.0, {0.0, 0.0});
+                lattice[i][j].initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
             } else if (lattice[i][j].is_open_boundary())
             {
             } else 

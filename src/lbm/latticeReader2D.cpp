@@ -1,2 +1,2 @@
-#include "include/tools/latticeReader2D.hpp"
+#include "latticeReader2D.hpp"
 
