@@ -73,6 +73,11 @@ public:
         return eq_populations;
     }
 
+    const std::vector<double> get_collision_populations() const
+    {
+        return collision_populations;
+    }
+
     const std::array<double, dim> get_u() const 
     {
         return u;
@@ -111,6 +116,11 @@ public:
     std::vector<double>& set_populations()
     {
         return populations;
+    }
+
+    double& set_population(std::size_t i)
+    {
+        return populations[i];
     }
 
     std::vector<double>& set_collision_populations()

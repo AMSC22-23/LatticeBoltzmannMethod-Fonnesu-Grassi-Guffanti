@@ -4,7 +4,11 @@ Lattice2D::Lattice2D(const std::string& input_dir_path, const std::string& outpu
 lattice_reader (input_dir_path),
 Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
 {
-    lattice_reader.read_lattice_structure();
+    if (!lattice_reader.read_lattice_structure(lattice, lattice_width, lattice_height))
+    {
+        std::cerr << "[!ERROR!] lattice structure matrix could not be read" << std::endl;
+        assert(false);
+    }
     initialize_lattice();
 };
 
@@ -79,6 +83,9 @@ void Lattice2D::perform_simulation_step()
 {
     // The simulation step is composed of many substeps:
 
+    const double t_const = delta_t/tau;
+    const double t_conj = 1-t_const;
+
     // 1. The equilibrium populations are calculated for each node
     // -> parallelizable!
     for (std::size_t i = 0; i < lattice_height; i++)
@@ -91,27 +98,52 @@ void Lattice2D::perform_simulation_step()
 
             // 2. Perform the collisions
             if(lattice(i, j).is_fluid()){
-                // lattice(i, j).set_collision_populations() = collision_model->calc_collision();
+                lattice(i, j).set_collision_populations() = collision_model->calc_collision(lattice(i, j).get_populations(), lattice(i, j).get_eq_populations(), t_const, t_conj);
             }
-
-            // 3. Perform the streaming
-            perform_streaming();
-
-            // 4. Perform the propagation at the boundaries
-
-            // 5. Update the macroscopic quantities
-            lattice(i, j).update_macroscopic_quantities(velocity_set);
-
         }
     }
-}
+    for(std::size_t i = 0; i< lattice_height; i++)
+    {
+        for(std::size_t j = 0; j < lattice_width; j++)
+        {
+            // 3. Perform the streaming
+            /*for(std::size_t q = 0; q < velocity_set.get_set_size(); q++)
+            {
+                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice(i, j).get_collision_populations()[q]; 
+            }*/
+            lattice(i, j).set_population(0) = lattice(i, j).get_collision_populations()[0];
+            lattice(i, j+1).set_population(1) = lattice(i, j).get_collision_populations()[1];
+            lattice(i-1, j).set_population(2) = lattice(i, j).get_collision_populations()[2];
+            lattice(i, j-1).set_population(3) = lattice(i, j).get_collision_populations()[3];
+            lattice(i+1, j).set_population(4) = lattice(i, j).get_collision_populations()[4];
+            lattice(i-1, j+1).set_population(5) = lattice(i, j).get_collision_populations()[5];
+            lattice(i-1, j-1).set_population(6) = lattice(i, j).get_collision_populations()[6];
+            lattice(i+1, j-1).set_population(7) = lattice(i, j).get_collision_populations()[7];
+            lattice(i+1, j+1).set_population(8) = lattice(i, j).get_collision_populations()[8];
+        }
+    }
 
-void Lattice2D::perform_collisions() 
-{
-    // TODO: not yet implemented
-}
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
+        {
+            // 4. Perform the propagation at the boundaries
+            if(lattice(i, j).is_boundary())
+            {
+                //TODO: we have to do a long sequence of if else to identify the type of boundary and do:
+                //lattice(i, j).set_collision_populations() = boundary_model->(method depends on the boundary)
 
-void Lattice2D::perform_streaming()
-{
-    // TODO: not yet implemented
+                //TODO: for streaming we can stream all nine population or select for every boundary what population we have to stream
+            }
+        }
+    }
+
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
+        {
+            // 5. Update the macroscopic quantities
+            lattice(i, j).update_macroscopic_quantities(velocity_set);
+        }
+    }
 }
