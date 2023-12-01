@@ -11,7 +11,7 @@
 /**
  * Enumeration that describes the type of node
 */
-enum Node_type{FLUID, OPEN_BOUNDARY, BOUNDARY, SOLID};
+enum Node_type{FLUID, OPEN_BOUNDARY, BOUNDARY, SOLID}; 
 
 /**
  * object that represents a single node of the lattice:
@@ -29,6 +29,9 @@ private:
     // array of discrete populations (fi)
     std::vector<double> populations;
     
+    // array of populations after collision (fi*)
+    std::vector<double> collision_populations;
+
     // array of equilibrium populations (feq)
     std::vector <double> eq_populations;
     
@@ -51,8 +54,9 @@ public:
     ) :
     type (type_),
     rho (0.0),
-    u ({0.0})
     {
+        u.fill(0.0);
+        collision_populations.resize(0);
         populations.resize(0);
         eq_populations.resize(0);
     };
@@ -109,6 +113,11 @@ public:
         return populations;
     }
 
+    std::vector<double>& set_collision_populations()
+    {
+        return collision_populations;
+    }
+
     std::array<double, dim>& set_u()
     {
         return u;
@@ -161,19 +170,21 @@ public:
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
     */
-    void initialize_fluid_node(const std::vector<double>& set_of_weights)
+    void initialize_fluid_node(const std::vector<double>& set_of_weights, const double node_rho = 1.0, const std::array<double, dim> node_u)
     {
         populations.resize(set_of_weights.size());
         eq_populations.resize(set_of_weights.size());
+        collision_populations.resize(set_of_weights.size());
 
         // setting the macroscopic density
-        rho = 1.0;
+        rho = node_rho;
 
         // setting the macroscopic velocity
-        u.fill(0.0);
+        u = node_u;
         
         // setting the populations
         std::fill(populations.begin(), populations.end(), 0.0);
+        std::fill(collision_populations.begin(), collision_populations.end(), 0.0);
         
         // setting the equilibrium populations: since u = 0 and rho = 1, the equation describing the 
         // equilibrium populations results only into the wi factor, which is the weight of a specific direction.
@@ -196,12 +207,21 @@ public:
         rho = rho_w;
         u = u_w;
         const auto directions = velocity_set.get_velocity_set().direction;
+        std::vector<double> weights = velocity_set.get_velocity_set().weight;
+        
+        collision_populations.resize(weights.size());
+        eq_populations.resize(weights.size());
+        populations.resize(weights.size());
+
+        std::fill(eq_populations.begin(), eq_populations.end(), 0.0);
+        std::fill(collision_populations.begin(), collision_populations.end(), 0.0);
+
         const std::size_t size = directions.size();
 
         for(std::size_t i=0; i < size; ++i)
         {
             double cu = directions[i][0] * u[0] + directions[i][1] * u[1];
-            populations[i] = velocity_set.get_velocity_set().weight[i] * rho * (
+            populations[i] = weights[i] * rho * (
                 1.0 + one_over_speed_of_sound_squared * cu + 
                 0.5 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * cu * cu - 
                 0.5 * one_over_speed_of_sound_squared * (u[0] * u[0] + u[1] * u[1]));
@@ -213,12 +233,22 @@ public:
     /**
      * Initializes a generic boundary by setting all the parameters to 0.0
     */
-    void initialize_generic_boundary()
-    {
+    void initialize_generic_boundary(const VelocitySet& velocity_set)
+    {   
+        
         rho = 0.0;
         u.fill(0.0);
+        
+        std::size_t size = velocity_set.get_set_size();
+
+        collision_populations.resize(size);
+        eq_populations.resize(size);
+        populations.resize(size);
+
         std::fill(eq_populations.begin(), eq_populations.end(), 0.0);
         std::fill(populations.begin(), populations.end(), 0.0);
+        std::fill(collision_populations.begin(), collision_populations.end(), 0.0);
+
     }
 
     /**

@@ -141,12 +141,12 @@ void Lattice2D::initialize_lattice()
         {
             if (lattice[i][j].is_fluid())
             {
-                lattice[i][j].initialize_fluid_node(weights);
+                lattice[i][j].initialize_fluid_node(weights, 1.0, {0.0, 0.0});
             } else if (lattice[i][j].is_open_boundary())
             {
             } else 
             {
-                lattice[i][j].initialize_generic_boundary();
+                lattice[i][j].initialize_generic_boundary(velocity_set);
             }
         }
     }
@@ -170,8 +170,7 @@ void Lattice2D::perform_simulation_step()
 
             // 2. Perform the collisions
             if(lattice[i][j].is_fluid()){
-                perform_collisions();
-                //std::vector<double> fTemp = collision_model->calc_collision();
+                // lattice[i][j].set_collision_populations() = collision_model->calc_collision();
             }
 
             // 3. Perform the streaming
