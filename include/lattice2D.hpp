@@ -15,7 +15,7 @@
 #include "latticeNode.hpp"
 #include "collisionModel.hpp"
 #include "boundary.hpp"
-#include "latticeReader2D.hpp"
+#include "latticeReader.hpp"
 
 /**
  * 2D implementation of the Lattice abstract class
@@ -49,12 +49,7 @@ private:
     /**
      * Object that implements methods to read a 2D lattice and various initialization values
     */
-    LatticeReader2D lattice_reader;
-
-    /**
-     * Executes the collisions between particles 
-    */
-    virtual void perform_collisions() override;
+    std::unique_ptr<LatticeReader2D> lattice_reader;
 
     /**
      * Executes streaming of the populations
@@ -80,7 +75,12 @@ public:
      * @param tau time constant
      * @param delta_t time lapse
     */ 
-    Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t);
+    Lattice2D(const std::string& input_file_path_,
+        const std::string& output_dir_path_,
+        const VelocitySet& velocity_set_,
+        std::shared_ptr<CollisionModel> collision_model_, 
+        std::shared_ptr<Boundary> boundary_model, 
+        const double tau, const double delta_t);
     virtual ~Lattice2D() = default;
 
     /**

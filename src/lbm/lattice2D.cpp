@@ -1,10 +1,16 @@
 #include "lattice2D.hpp"
 
-Lattice2D::Lattice2D(const std::string& input_dir_path, const std::string& output_dir_path_, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t):
-lattice_reader (input_dir_path),
+Lattice2D::Lattice2D(const std::string& input_dir_path, 
+    const std::string& output_dir_path_, 
+    const VelocitySet& velocity_set, 
+    std::shared_ptr<CollisionModel> collision_model, 
+    std::shared_ptr<Boundary> boundary_model, 
+    const double tau, 
+    const double delta_t):
 Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
 {
-    if (!lattice_reader.read_lattice_structure(lattice, lattice_width, lattice_height))
+    lattice_reader = std::make_unique<LatticeReader2D>(input_dir_path);
+    if (!lattice_reader->read_lattice_structure(lattice, lattice_width, lattice_height))
     {
         std::cerr << "[!ERROR!] lattice structure matrix could not be read" << std::endl;
         assert(false);
@@ -102,26 +108,9 @@ void Lattice2D::perform_simulation_step()
             }
         }
     }
-    for(std::size_t i = 0; i< lattice_height; i++)
-    {
-        for(std::size_t j = 0; j < lattice_width; j++)
-        {
-            // 3. Perform the streaming
-            /*for(std::size_t q = 0; q < velocity_set.get_set_size(); q++)
-            {
-                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice(i, j).get_collision_populations()[q]; 
-            }*/
-            lattice(i, j).set_population(0) = lattice(i, j).get_collision_populations()[0];
-            lattice(i, j+1).set_population(1) = lattice(i, j).get_collision_populations()[1];
-            lattice(i-1, j).set_population(2) = lattice(i, j).get_collision_populations()[2];
-            lattice(i, j-1).set_population(3) = lattice(i, j).get_collision_populations()[3];
-            lattice(i+1, j).set_population(4) = lattice(i, j).get_collision_populations()[4];
-            lattice(i-1, j+1).set_population(5) = lattice(i, j).get_collision_populations()[5];
-            lattice(i-1, j-1).set_population(6) = lattice(i, j).get_collision_populations()[6];
-            lattice(i+1, j-1).set_population(7) = lattice(i, j).get_collision_populations()[7];
-            lattice(i+1, j+1).set_population(8) = lattice(i, j).get_collision_populations()[8];
-        }
-    }
+    
+    // 3. Perform streaming
+    perform_streaming();
 
     for (std::size_t i = 0; i < lattice_height; i++)
     {
@@ -144,6 +133,30 @@ void Lattice2D::perform_simulation_step()
         {
             // 5. Update the macroscopic quantities
             lattice(i, j).update_macroscopic_quantities(velocity_set);
+        }
+    }
+}
+
+void Lattice2D::perform_streaming()
+{
+    for(std::size_t i = 0; i< lattice_height; i++)
+    {
+        for(std::size_t j = 0; j < lattice_width; j++)
+        {
+            // 3. Perform the streaming
+            /*for(std::size_t q = 0; q < velocity_set.get_set_size(); q++)
+            {
+                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice(i, j).get_collision_populations()[q]; 
+            }*/
+            lattice(i, j).set_population(0) = lattice(i, j).get_collision_populations()[0];
+            lattice(i, j+1).set_population(1) = lattice(i, j).get_collision_populations()[1];
+            lattice(i-1, j).set_population(2) = lattice(i, j).get_collision_populations()[2];
+            lattice(i, j-1).set_population(3) = lattice(i, j).get_collision_populations()[3];
+            lattice(i+1, j).set_population(4) = lattice(i, j).get_collision_populations()[4];
+            lattice(i-1, j+1).set_population(5) = lattice(i, j).get_collision_populations()[5];
+            lattice(i-1, j-1).set_population(6) = lattice(i, j).get_collision_populations()[6];
+            lattice(i+1, j-1).set_population(7) = lattice(i, j).get_collision_populations()[7];
+            lattice(i+1, j+1).set_population(8) = lattice(i, j).get_collision_populations()[8];
         }
     }
 }

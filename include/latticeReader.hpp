@@ -4,6 +4,14 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <cassert>
+
+#include <Eigen/Sparse>
+#include <Eigen/Dense>
+#include <unsupported/Eigen/SparseExtra>
+
+#include "latticeNode.hpp"
+
 
 /**
  * Abstract class that virtual methods that are overridden to implement the 
@@ -17,6 +25,19 @@ protected:
      * Path to the input directory which contains all the input files
     */
     const std::filesystem::path input_dir_path;
+    /**
+     * Path to the input matrix describing the lattice structure
+    */
+    const std::filesystem::path input_lattice_path;
+    /**
+    *  Path to the input matrix describing the lattice density field 
+    */
+    const std::filesystem::path input_rho_path;
+    /**
+    *  Path to the input matrix describing the lattice velocity fields 
+    */
+    const std::filesystem::path input_u_path;
+    
 private:
     /**
      * Method that validates the path passed as input
@@ -24,9 +45,29 @@ private:
     bool validate_path();
 public:
     LatticeReader(const std::string& input_dir_path_);
-    virtual ~LatticeReader() = 0;
+    ~LatticeReader() = default;
 };
 
+/**
+ * Implementation of the abstract LatticeReader class
+ * used to read the sets of matrices that describe a 2D lattice and
+ * the initialization values
+*/
+class LatticeReader2D : public LatticeReader
+{
+public:
+    /**
+     * Constructs the object
+     * @param input_dir_path the path to the input directory
+    */
+    LatticeReader2D(const std::string& input_dir_path_);
+    ~LatticeReader2D() = default;
+
+    bool read_lattice_structure(Eigen::Matrix<LatticeNode<2>, Eigen::Dynamic, Eigen::Dynamic>& lattice, std::size_t& width, std::size_t& height);
+    bool read_lattice_input_rho();
+    bool read_lattice_input_velocities();
+
+};
 
 
 #endif // HH_LATTICE_READER

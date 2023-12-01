@@ -1,11 +1,11 @@
 #include "lbm.hpp"
 
-lbm::lbm(std::size_t D, int Q, const std::string& input_file_path, const std::string &collision_model, const std::string& boundary_model):
+lbm::lbm(std::size_t D, int Q, const std::string& input_dir_path, const std::string &collision_model, const std::string& boundary_model):
 tau (1.0),
 delta_t (1.0)
 {
     velocity_set.initialize(D,Q);
-    std::string output_dir_path="../output";
+    std::string output_dir_path="../results";
     lattice_ptr=nullptr;
 
     if(collision_model == "BGK")
@@ -39,7 +39,7 @@ delta_t (1.0)
             lattice_ptr=nullptr;
             break;
         case 2:
-            lattice_ptr = std::make_unique<Lattice2D>(input_file_path, output_dir_path, velocity_set, collision_ptr, boundary_ptr, tau, delta_t);
+            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, boundary_ptr, tau, delta_t);
             break;
         case 3:
             //TODO: to implement
@@ -53,9 +53,9 @@ delta_t (1.0)
     //lattice_ptr->initialize_lattice();
 }
 
-int lbm::compute(const int n_iter){
+int lbm::compute(const std::size_t n_iter){
 
-    for (size_t i = 0; i < n_iter; i++)
+    for (std::size_t i = 0; i < n_iter; i++)
     {
         lattice_ptr->perform_simulation_step();
         //lattice_ptr->save_output_data();

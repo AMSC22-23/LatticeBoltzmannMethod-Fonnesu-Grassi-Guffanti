@@ -70,11 +70,6 @@ protected:
     virtual void log_specific_data() const = 0;
 
     /**
-     * Executes the collisions between particles 
-    */
-    virtual void perform_collisions() = 0;
-
-    /**
      * Executes streaming of the populations
     */
     virtual void perform_streaming() = 0;

@@ -55,12 +55,12 @@ public:
     /*
         Costructor taking input data from file
     */
-    lbm(size_t D, int Q, const std::string& input_file_path, const std::string& collision_model, const std::string& boundary_model);
+    lbm(size_t D, int Q, const std::string& input_dir_path, const std::string& collision_model, const std::string& boundary_model);
 
     /*
         Solving function, taked in input the iteration count t, creates files for every state of the matrix T and returns 0 if some error occured, 1 otherwise
     */
-    int compute(const int n_iter);
+    int compute(const std::size_t n_iter);
 
     double const get_tau() const{
         return tau;

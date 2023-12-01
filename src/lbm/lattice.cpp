@@ -1,7 +1,7 @@
 #include "lattice.hpp"
 
 Lattice::Lattice(const std::string& input_dir_path_,
- const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_) :
+const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_) :
 input_dir_path (input_dir_path_),
 output_dir_path (output_dir_path_),
 dimensions (dimensions_),
@@ -27,7 +27,7 @@ void Lattice::create_output_directory()
 {
     std::filesystem::path path;
     // if the path is not correct than the program defaults to ./results
-    if (std::filesystem::status(output_dir_path).type() != std::filesystem::file_type::directory)
+    if (!std::filesystem::is_directory(input_dir_path))
     {
         path = "../results/";
         output_dir_path = "../results";
