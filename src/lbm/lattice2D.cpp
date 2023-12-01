@@ -1,9 +1,10 @@
 #include "lattice2D.hpp"
 
-Lattice2D::Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t):
-Lattice(input_file_path_, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
+Lattice2D::Lattice2D(const std::string& input_dir_path, const std::string& output_dir_path_, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t):
+lattice_reader (input_dir_path),
+Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
 {
-    read_input_file();
+    lattice_reader.read_lattice_structure();
     initialize_lattice();
 };
 
@@ -21,7 +22,7 @@ void Lattice2D::save_output_data(std::size_t iteration_count) const
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            auto [rho, u] = lattice[i][j].get_macroscopic_quantities();
+            auto [rho, u] = lattice(i, j).get_macroscopic_quantities();
             // computing the two 2-norm of the vector
             auto two_norm = std::sqrt(
                 u[0]*u[0] + u[1]*u[1]
@@ -36,86 +37,6 @@ void Lattice2D::save_output_data(std::size_t iteration_count) const
 
     output_file_rho.close();
     output_file_u.close();
-}
-
-void Lattice2D::read_input_file()
-{
-    std::cout << "LATTICE 2D:   reading input file " << input_file_path << std::endl;
-    std::ifstream input_file(input_file_path);
-    
-    if (!input_file.is_open())
-    {
-        std::cerr << "LATTICE 2D:   could not open " << input_file_path << std::endl;
-        assert(input_file.is_open());
-    }
-
-    std::string line;
-    
-
-    // Read the name of the lattice
-    std::getline(input_file, lattice_name);
-    std::cout << "  Lattice name: " << lattice_name << std::endl;
-
-    // Read the width of the lattice
-    input_file >> line;
-    std::size_t width = std::stoul(line);
-    if (width == 0)
-    {
-        std::cerr << "[ERROR]   wrong format (no width)" << std::endl;
-        assert(width > 0);
-    }
-    std::cout << "  Lattice width: " << width << std::endl;
-    
-    // Read the height of the lattice
-    input_file >> line;
-    std::size_t height = std::stoul(line);
-    if (height == 0)
-    {
-        std::cerr << "[ERROR]   wrong format (no height)" << std::endl;
-        assert(height > 0);
-    }
-    std::cout << "  Lattice height: " << height << std::endl;
-
-    // Read the number of non fluid nodes in the domain
-    input_file >> line;
-    std::size_t nnz = std::stoul(line);
-    std::cout << "  Non fluid nodes: " << line << "(" << (double)nnz/((double)width*height) * 100.0 << "%)" <<std::endl;
-    // Read data
-
-    // first reserve the size of the vector
-    lattice.resize(height, std::vector<LatticeNode<2>>(width));
-    lattice_height = height;
-    lattice_width = width;
-
-    std::cout << "  Reserved the size for the matrix" << std::endl;
-
-    // the matrix is read from 
-    Node_type type;
-    std::cout << "  Reading data" << std::endl;
-
-    // for each non zero element in the input matrix
-    std::size_t x, y;
-    std::size_t type_i;
-    for (std::size_t i = 0; i < nnz; i++)
-    {
-        // read the x coordinate
-        input_file >> line;
-        x = std::stoul(line);
-        // read the y coordinate
-        input_file >> line;
-        y = std::stoul(line);
-        // read the type
-        input_file >> line;
-        type_i = std::stoul(line);
-        
-        type = static_cast<Node_type>(type_i);
-        lattice[y][x].set_type() = type;
-    }
-
-    std::cout << "  FINISHED READING!" << std::endl;
-    input_file.close();
-
-
 }
 
 void Lattice2D::log_specific_data() const 
@@ -139,14 +60,14 @@ void Lattice2D::initialize_lattice()
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
-            if (lattice[i][j].is_fluid())
+            if (lattice(i, j).is_fluid())
             {
-                lattice[i][j].initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
-            } else if (lattice[i][j].is_open_boundary())
+                lattice(i, j).initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
+            } else if (lattice(i, j).is_open_boundary())
             {
             } else 
             {
-                lattice[i][j].initialize_generic_boundary(velocity_set);
+                lattice(i, j).initialize_generic_boundary(velocity_set);
             }
         }
     }
@@ -164,13 +85,13 @@ void Lattice2D::perform_simulation_step()
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
+            lattice(i, j).compute_equilibrium_populations(velocity_set.get_velocity_set());
 
             // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
 
             // 2. Perform the collisions
-            if(lattice[i][j].is_fluid()){
-                // lattice[i][j].set_collision_populations() = collision_model->calc_collision();
+            if(lattice(i, j).is_fluid()){
+                // lattice(i, j).set_collision_populations() = collision_model->calc_collision();
             }
 
             // 3. Perform the streaming
@@ -179,7 +100,7 @@ void Lattice2D::perform_simulation_step()
             // 4. Perform the propagation at the boundaries
 
             // 5. Update the macroscopic quantities
-            lattice[i][j].update_macroscopic_quantities(velocity_set);
+            lattice(i, j).update_macroscopic_quantities(velocity_set);
 
         }
     }

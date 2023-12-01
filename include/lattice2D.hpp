@@ -9,10 +9,13 @@
 #include <cmath>
 #include <string>
 
+#include <Eigen/Dense>
+
 #include "lattice.hpp"
 #include "latticeNode.hpp"
 #include "collisionModel.hpp"
 #include "boundary.hpp"
+#include "latticeReader2D.hpp"
 
 /**
  * 2D implementation of the Lattice abstract class
@@ -20,6 +23,8 @@
 */
 class Lattice2D : public Lattice
 {
+public:
+    using LatticeGrid2D = Eigen::Matrix<LatticeNode<2>, Eigen::Dynamic, Eigen::Dynamic>;
 private:
 
     /**
@@ -39,13 +44,12 @@ private:
     /**
      * Lattice, represented as a two-dimensional array
     */
-    std::vector<std::vector<LatticeNode<dim>>> lattice;
-   
+    LatticeGrid2D lattice;
+
     /**
-     * Reads an input file describing a 2D domain
-     * @note Implementation of Lattice class equivalent virtual method
+     * Object that implements methods to read a 2D lattice and various initialization values
     */
-    virtual void read_input_file() override;
+    LatticeReader2D lattice_reader;
 
     /**
      * Executes the collisions between particles 
@@ -65,6 +69,8 @@ private:
 
 public:
     
+   
+
     /**
      * @param input_file_path path to the input file
      * @param output_dir_path path to the output directory

@@ -21,7 +21,7 @@ protected:
     /**
      * Path to the input file where the domain of the computation is described
     */
-    const std::string input_file_path;
+    const std::string input_dir_path;
     
     /**
      * Path to the output directory where all the files will be saved
@@ -62,11 +62,6 @@ protected:
      * Time lapse
     */
     const double delta_t;
-    
-    /**
-     * Reads the input file producing the lattice.
-    */
-    virtual void read_input_file() = 0;
 
     /**
      * Logs specific data regarding the lattice
@@ -92,7 +87,7 @@ protected:
 public:
     
     /**
-     * @param input_file_path path to the input file, containing the representation of the simulation domain, used to produce the lattice
+     * @param input_dir_path path to the input file, containing the representation of the simulation domain, used to produce the lattice
      * @param output_file_path_ path to where the output files will be stored
      * @param dimensions_ number of dimensions of the lattice
      * @param velocity_set_ the velocity set used in the lattice
@@ -101,7 +96,7 @@ public:
      * @param tau time constant
      * @param delta_t time lapse
     */
-    Lattice(const std::string& input_file_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_);
+    Lattice(const std::string& input_dir_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_);
 
     virtual ~Lattice() = default;
 

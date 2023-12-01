@@ -32,7 +32,7 @@ if not os.path.exists("resources/patterns"):
 
 with open(f"resources/patterns/{args[2]}.txt", "w") as file:
     with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
-        #mtx.write("%%MatrixMarket matrix coordinate real general\n")
+        mtx.write("%%MatrixMarket matrix coordinate real general\n")
         mtx.write(f"{args[2]}\n")
         mtx.write("\n")
         for x in range(height):

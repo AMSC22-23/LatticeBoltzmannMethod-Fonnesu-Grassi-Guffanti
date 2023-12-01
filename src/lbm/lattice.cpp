@@ -1,8 +1,8 @@
 #include "lattice.hpp"
 
-Lattice::Lattice(const std::string& input_file_path_,
+Lattice::Lattice(const std::string& input_dir_path_,
  const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_) :
-input_file_path (input_file_path_),
+input_dir_path (input_dir_path_),
 output_dir_path (output_dir_path_),
 dimensions (dimensions_),
 velocity_set (velocity_set_), 
@@ -18,7 +18,7 @@ void Lattice::log_data() const
 {
     std::cout << "LATTICE " << std::endl;
     std::cout << "  Dimensions  : " << dimensions << std::endl;
-    std::cout << "  Input file  : " << input_file_path << std::endl;
+    std::cout << "  Input dir   : " << input_dir_path << std::endl;
     std::cout << "  Output dir  : " << output_dir_path << std::endl;
     log_specific_data();
 }
