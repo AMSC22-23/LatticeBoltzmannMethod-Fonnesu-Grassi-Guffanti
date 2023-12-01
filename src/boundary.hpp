@@ -8,39 +8,7 @@
 class Boundary{
 public:
     Boundary()=default;
-    /**
-     * @param f vector containing distribution functions of a node
-     * @param uy0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
-    */
-    virtual std::vector<double> calc_top_wall_bounce(std::vector<double> &f, double uy0) const = 0;
-
-    /**
-     * @param f vector containing distribution functions of a node
-     * @param uy0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
-    */
-    virtual std::vector<double> calc_left_wall_bounce(std::vector<double> &f, double uy0) const = 0;
-
-    /**
-     * @param f vector containing distribution functions of a node
-     * @param ux0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
-    */
-    virtual std::vector<double> calc_right_wall_bounce(std::vector<double> &f, double ux0) const = 0;
-
-    /**
-     * @param f vector containing distribution functions of a node
-     * @param ux0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
-    */
-    virtual std::vector<double> calc_bottom_wall_bounce(std::vector<double> &f, double ux0) const = 0;
-
-
-    virtual std::vector<double> calc_top_left_corner_bounce() const = 0;
-    virtual std::vector<double> calc_top_right_corner_bounce() const = 0;
-    virtual std::vector<double> calc_bottom_left_corner_bounce() const = 0;
-    virtual std::vector<double> calc_bottom_right_corner_bounce() const = 0;
+    
     virtual ~Boundary() = default;
 };
 
@@ -49,14 +17,7 @@ class BounceBack : public Boundary
 {
 public:
     BounceBack() : Boundary(){};
-    std::vector<double> calc_top_wall_bounce(std::vector<double> &f, double uy0) const override{}
-    std::vector<double> calc_left_wall_bounce(std::vector<double> &f, double uy0) const override{}
-    std::vector<double> calc_right_wall_bounce(std::vector<double> &f, double ux0) const override{}
-    std::vector<double> calc_bottom_wall_bounce(std::vector<double> &f, double ux0) const override{}
-    std::vector<double> calc_top_left_corner_bounce() const override{}
-    std::vector<double> calc_top_right_corner_bounce() const override{}
-    std::vector<double> calc_bottom_left_corner_bounce() const override{}
-    std::vector<double> calc_bottom_right_corner_bounce() const override{}
+
     virtual ~BounceBack() = default;
 };
 
@@ -68,25 +29,41 @@ class NEBB : public Boundary
 {
 public:
     NEBB() : Boundary(){};
-    std::vector<double> calc_top_wall_bounce(std::vector<double> &f, double uy0) const override;
-    std::vector<double> calc_left_wall_bounce(std::vector<double> &f, double uy0) const override;
-    std::vector<double> calc_right_wall_bounce(std::vector<double> &f, double ux0) const override;
+    /**
+     * @param f vector containing distribution functions of a node
+     * @param uy0 vertical velocity of the node
+     * @return the pre-streaming vector of distribution functions of the node 
+    */
+    std::vector<double> calc_top_wall_bounce(std::vector<double> &f, double uy0) const;
+
+    /**
+     * @param f vector containing distribution functions of a node
+     * @param uy0 vertical velocity of the node
+     * @return the pre-streaming vector of distribution functions of the node 
+    */
+    std::vector<double> calc_left_wall_bounce(std::vector<double> &f, double uy0) const;
 
     /**
      * @param f vector containing distribution functions of a node
      * @param ux0 vertical velocity of the node
      * @return the pre-streaming vector of distribution functions of the node 
     */
-    std::vector<double> calc_bottom_wall_bounce(std::vector<double> &f, double ux0) const override;
+    std::vector<double> calc_right_wall_bounce(std::vector<double> &f, double ux0) const;
 
-    
-    std::vector<double> calc_top_left_corner_bounce() const override;
-    std::vector<double> calc_top_right_corner_bounce() const override;
-    std::vector<double> calc_bottom_left_corner_bounce() const override;
-    std::vector<double> calc_bottom_right_corner_bounce() const override;
-    
+    /**
+     * @param f vector containing distribution functions of a node
+     * @param ux0 vertical velocity of the node
+     * @return the pre-streaming vector of distribution functions of the node 
+    */
+    std::vector<double> calc_bottom_wall_bounce(std::vector<double> &f, double ux0) const;
 
-   virtual ~NEBB() = default;
+
+    std::vector<double> calc_top_left_corner_bounce() const;
+    std::vector<double> calc_top_right_corner_bounce() const;
+    std::vector<double> calc_bottom_left_corner_bounce() const;
+    std::vector<double> calc_bottom_right_corner_bounce() const;
+
+    virtual ~NEBB() = default;
 };
 
 #endif
