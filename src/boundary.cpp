@@ -75,7 +75,7 @@ std::vector<double> NEBB::calc_right_wall_bounce(std::vector<double> &f, double 
 
 std::vector<double> NEBB::calc_top_left_corner_bounce() const
 {
-
+    
 }
 
 std::vector<double> NEBB::calc_top_right_corner_bounce() const

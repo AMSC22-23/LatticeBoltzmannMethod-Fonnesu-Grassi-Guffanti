@@ -5,6 +5,8 @@
 #include <tuple>
 #include <algorithm>
 #include "velocitySet.hpp"
+#include "collisionModel.hpp"
+#include "boundary.hpp"
 
 /**
  * Enumeration that describes the type of node
@@ -60,6 +62,11 @@ public:
     const std::vector<double> get_populations() const 
     {
         return populations;
+    }
+
+    const std::vector<double> get_eq_populations() const 
+    {
+        return eq_populations;
     }
 
     const std::array<double, dim> get_u() const 
@@ -193,7 +200,7 @@ public:
 
         for(std::size_t i=0; i < size; ++i)
         {
-            double cu = c[i][0] * u[0] + c[i][1] * u[1];
+            double cu = directions[i][0] * u[0] + directions[i][1] * u[1];
             populations[i] = velocity_set.get_velocity_set().weight[i] * rho * (
                 1.0 + one_over_speed_of_sound_squared * cu + 
                 0.5 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * cu * cu - 

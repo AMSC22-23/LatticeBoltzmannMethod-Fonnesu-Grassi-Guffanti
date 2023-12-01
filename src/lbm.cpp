@@ -7,13 +7,39 @@ delta_t (1.0)
     velocity_set.initialize(D,Q);
     std::string output_dir_path="../output";
     lattice_ptr=nullptr;
+
+    if(collision_model == "BGK")
+    {
+        collision_ptr = std::make_shared<BGK>();
+    }else if(collision_model == "TRT")
+    {
+        collision_ptr = std::make_shared<TRT>();
+    }else if(collision_model == "MRT")
+    {
+        collision_ptr = std::make_shared<MRT>();
+    }else
+    {
+        std::cout << collision_model << " not yet implemented" << std::endl;
+    }
+
+    if(boundary_model == "BB")
+    {
+        boundary_ptr = std::make_shared<BounceBack>();
+    }else if(collision_model == "NEBB")
+    {
+        boundary_ptr = std::make_shared<NEBB>();
+    }else
+    {
+        std::cout << boundary_model << " not yet implemented" << std::endl;
+    }
+
     switch (D){
         case 1:
             //TODO: to implement? punto di domanda?
             lattice_ptr=nullptr;
             break;
         case 2:
-            lattice_ptr = std::make_unique<Lattice2D>(input_file_path, output_dir_path,velocity_set);
+            lattice_ptr = std::make_unique<Lattice2D>(input_file_path, output_dir_path, velocity_set, collision_ptr, boundary_ptr, tau, delta_t);
             break;
         case 3:
             //TODO: to implement
@@ -23,28 +49,6 @@ delta_t (1.0)
             std::cout << "Errore" << std::endl;
             break;
     }
-
-    /*switch (collision_model){
-        case "BGK":
-            collision_ptr = std::make_unique<BGK>();
-            break;
-        case "TRT":
-            collision_ptr = std::make_unique<TRT>();
-            break;
-        case "MRT":
-            collision_ptr = std::make_unique<MRT>();
-            break;
-        default: std::cout << collision_model << " not yet implemented" << std::endl;
-    }
-    switch (boundary_model){
-    case "BB":
-        boundary_ptr = std::make_unique<BounceBack>();
-        break;
-    
-    default:
-        std::cout << boundary_model << " not yet implemented" << std::endl;
-        break;
-    }*/
 
     //lattice_ptr->initialize_lattice();
 }

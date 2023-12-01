@@ -62,14 +62,19 @@ private:
      * - Number of elements per dimension
     */
     virtual void log_specific_data() const override;
+
 public:
     
     /**
      * @param input_file_path path to the input file
      * @param output_dir_path path to the output directory
      * @param velocity_set_ velocity set used to perform operations on the lattice
-    */
-    Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set_);
+     * @param collision_model model used to calculate collisions
+     * @param boundary_model model used to calculate collisions on boundaries
+     * @param tau time constant
+     * @param delta_t time lapse
+    */ 
+    Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t);
     virtual ~Lattice2D() = default;
 
     /**

@@ -22,6 +22,7 @@ public:
 class BGK : public CollisionModel
 {
 public:
+    BGK() = default;
     /**
     * @param f vector containing distribution functions of a node
     * @param fEq vector containing equilibrium distribution functions of a node
@@ -37,6 +38,7 @@ public:
 class TRT : public CollisionModel
 {
 public:
+    TRT() = default;
     virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
 
     virtual ~TRT() = default;
@@ -45,6 +47,7 @@ public:
 class MRT : public CollisionModel
 {
 public:
+    MRT() = default;
     std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
 
     virtual ~MRT() = default;

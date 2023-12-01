@@ -15,15 +15,35 @@ class lbm
 {
 private:
     
+    /**
+     * The chosen velocity set
+    */
     VelocitySet velocity_set;
 
+    /**
+     * Lattice of the simulation
+    */
     std::unique_ptr<Lattice> lattice_ptr;
-    // std::unique_ptr<CollisionModel> collision_ptr;
-    // std::unique_ptr<Boundary> boundary_ptr;
-    // TODO: aggiungere tutte le costanti del caso
-    double const tau;
-    double const delta_t;
 
+    /**
+     * Collision model used
+    */
+    std::shared_ptr<CollisionModel> collision_ptr;
+
+    /**
+     * Boundary model used to calculate collisions at the boundary
+    */
+    std::shared_ptr<Boundary> boundary_ptr;
+    
+    /**
+     * Time constant
+    */
+    double const tau;
+
+    /**
+     * Time lapse
+    */
+    double const delta_t;
 
 
     /*

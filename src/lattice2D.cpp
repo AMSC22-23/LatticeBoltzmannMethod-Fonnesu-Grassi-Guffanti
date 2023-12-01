@@ -1,7 +1,7 @@
 #include "lattice2D.hpp"
 
-Lattice2D::Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set):
-Lattice(input_file_path_, output_dir_path_, dim, velocity_set)
+Lattice2D::Lattice2D(const std::string& input_file_path_, const std::string& output_dir_path_, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model, std::shared_ptr<Boundary> boundary_model, const double tau, const double delta_t):
+Lattice(input_file_path_, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
 {
     read_input_file();
     initialize_lattice();
@@ -165,25 +165,23 @@ void Lattice2D::perform_simulation_step()
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
-        }
-    }
-    // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
 
-    // 2. Perform the collisions
-    perform_collisions();
+            // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
 
-    // 3. Perform the streaming
-    perform_streaming();
+            // 2. Perform the collisions
+            if(lattice[i][j].is_fluid()){
+                perform_collisions();
+                //std::vector<double> fTemp = collision_model->calc_collision();
+            }
 
-    // 4. Perform the propagation at the boundaries
+            // 3. Perform the streaming
+            perform_streaming();
 
+            // 4. Perform the propagation at the boundaries
 
-    // 5. Update the macroscopic quantities
-    for (std::size_t i = 0; i < lattice_height; i++)
-    {
-        for (std::size_t j = 0; j < lattice_width; j++)
-        {
+            // 5. Update the macroscopic quantities
             lattice[i][j].update_macroscopic_quantities(velocity_set);
+
         }
     }
 }

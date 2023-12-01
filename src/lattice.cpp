@@ -1,11 +1,15 @@
 #include "lattice.hpp"
 
 Lattice::Lattice(const std::string& input_file_path_,
- const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_) :
+ const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_) :
 input_file_path (input_file_path_),
 output_dir_path (output_dir_path_),
 dimensions (dimensions_),
-velocity_set (velocity_set_)
+velocity_set (velocity_set_), 
+collision_model (collision_model_),
+boundary_model (boundary_model_),
+tau (tau_),
+delta_t (delta_t_)
 {
     create_output_directory();
 };
