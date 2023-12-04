@@ -32,7 +32,7 @@ void Lattice2D::save_output_data(std::size_t iteration_count) const
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            auto [rho, u] = lattice(i, j).get_macroscopic_quantities();
+            auto [rho, u] = lattice[i][j].get_macroscopic_quantities();
             // computing the two 2-norm of the vector
             auto two_norm = std::sqrt(
                 u[0]*u[0] + u[1]*u[1]
@@ -70,14 +70,14 @@ void Lattice2D::initialize_lattice()
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
-            if (lattice(i, j).is_fluid())
+            if (lattice[i][j].is_fluid())
             {
-                lattice(i, j).initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
-            } else if (lattice(i, j).is_open_boundary())
+                lattice[i][j].initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
+            } else if (lattice[i][j].is_open_boundary())
             {
             } else 
             {
-                lattice(i, j).initialize_generic_boundary(velocity_set);
+                lattice[i][j].initialize_generic_boundary(velocity_set);
             }
         }
     }
@@ -99,13 +99,13 @@ void Lattice2D::perform_simulation_step()
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             // TODO: can it be done only for fluid?
-            lattice(i, j).compute_equilibrium_populations(velocity_set.get_velocity_set());
+            lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
 
             // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
 
             // 2. Perform the collisions
-            if(lattice(i, j).is_fluid()){
-                lattice(i, j).set_collision_populations() = collision_model->calc_collision(lattice(i, j).get_populations(), lattice(i, j).get_eq_populations(), t_const, t_conj);
+            if(lattice[i][j].is_fluid()){
+                lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations(), t_const, t_conj);
             }
         }
     }
@@ -120,10 +120,10 @@ void Lattice2D::perform_simulation_step()
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            if(lattice(i, j).is_boundary())
+            if(lattice[i][j].is_boundary())
             {
                 //TODO: we have to do a long sequence of if else to identify the type of boundary and do:
-                //lattice(i, j).set_collision_populations() = boundary_model->(method depends on the boundary)
+                //lattice[i][j].set_collision_populations() = boundary_model->(method depends on the boundary)
 
                 //TODO: for streaming we can stream all nine population or select for every boundary what population we have to stream
             }
@@ -135,7 +135,7 @@ void Lattice2D::perform_simulation_step()
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             // 5. Update the macroscopic quantities
-            lattice(i, j).update_macroscopic_quantities(velocity_set);
+            lattice[i][j].update_macroscopic_quantities(velocity_set);
         }
     }
 }
@@ -149,18 +149,18 @@ void Lattice2D::perform_streaming()
             // 3. Perform the streaming
             /*for(std::size_t q = 0; q < velocity_set.get_set_size(); q++)
             {
-                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice(i, j).get_collision_populations()[q]; 
+                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice[i][j].get_collision_populations()[q]; 
             }*/
-            if(lattice(i, j).is_fluid()){
-                lattice(i, j).set_population(0) = lattice(i, j).get_collision_populations()[0];
-                lattice(i, j+1).set_population(1) = lattice(i, j).get_collision_populations()[1];
-                lattice(i-1, j).set_population(2) = lattice(i, j).get_collision_populations()[2];
-                lattice(i, j-1).set_population(3) = lattice(i, j).get_collision_populations()[3];
-                lattice(i+1, j).set_population(4) = lattice(i, j).get_collision_populations()[4];
-                lattice(i-1, j+1).set_population(5) = lattice(i, j).get_collision_populations()[5];
-                lattice(i-1, j-1).set_population(6) = lattice(i, j).get_collision_populations()[6];
-                lattice(i+1, j-1).set_population(7) = lattice(i, j).get_collision_populations()[7];
-                lattice(i+1, j+1).set_population(8) = lattice(i, j).get_collision_populations()[8];
+            if(lattice[i][j].is_fluid()){
+                lattice[i][j].set_population(0) = lattice[i][j].get_collision_populations()[0];
+                lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];
+                lattice[i-1][j].set_population(2) = lattice[i][j].get_collision_populations()[2];
+                lattice[i][j-1].set_population(3) = lattice[i][j].get_collision_populations()[3];
+                lattice[i+1][j].set_population(4) = lattice[i][j].get_collision_populations()[4];
+                lattice[i-1][j+1].set_population(5) = lattice[i][j].get_collision_populations()[5];
+                lattice[i-1][j-1].set_population(6) = lattice[i][j].get_collision_populations()[6];
+                lattice[i+1][j-1].set_population(7) = lattice[i][j].get_collision_populations()[7];
+                lattice[i+1][j+1].set_population(8) = lattice[i][j].get_collision_populations()[8];
             }
         }
     }

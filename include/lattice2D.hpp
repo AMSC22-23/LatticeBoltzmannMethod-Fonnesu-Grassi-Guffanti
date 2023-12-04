@@ -9,7 +9,7 @@
 #include <cmath>
 #include <string>
 
-#include <Eigen/Dense>
+#include "aliases.hpp"
 
 #include "lattice.hpp"
 #include "latticeNode.hpp"
@@ -23,8 +23,6 @@
 */
 class Lattice2D : public Lattice
 {
-public:
-    using LatticeGrid2D = Eigen::Matrix<LatticeNode<2>, Eigen::Dynamic, Eigen::Dynamic>;
 private:
 
     /**
