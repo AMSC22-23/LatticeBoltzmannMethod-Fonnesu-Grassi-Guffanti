@@ -50,6 +50,11 @@ private:
     std::unique_ptr<LatticeReader2D> lattice_reader;
 
     /**
+     * Vector of tuples of boundaries and open boundaries and their coordinates
+    */
+    BoundaryList2D boundary_list;
+
+    /**
      * Executes streaming of the populations
     */
     virtual void perform_streaming() override;

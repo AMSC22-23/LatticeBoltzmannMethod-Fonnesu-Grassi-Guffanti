@@ -10,10 +10,14 @@ Lattice2D::Lattice2D(const std::string& input_dir_path,
 Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
 {
     lattice_reader = std::make_unique<LatticeReader2D>(input_dir_path);
-    if (!lattice_reader->read_lattice_structure(lattice, lattice_width, lattice_height))
+    if (!lattice_reader->read_lattice_structure(lattice, boundary_list , lattice_width, lattice_height))
     {
         std::cerr << "[!ERROR!] lattice structure matrix could not be read" << std::endl;
         assert(false);
+    }
+    for(std::tuple<LatticeNode<2>*, std::size_t, std::size_t> el : boundary_list)
+    {
+        std::cout << std::get<0>(el)->get_rho() << " " << std::get<1>(el) << " " << std::get<2>(el) << std::endl;
     }
     initialize_lattice();
 };
@@ -114,6 +118,12 @@ void Lattice2D::perform_simulation_step()
     perform_streaming();
 
     // 4. Perform the propagation at the boundaries
+
+    for (auto &Boundary : boundary_list)
+    {
+        
+    }
+    
 
     /* ERASABLE
     for (std::size_t i = 0; i < lattice_height; i++)
