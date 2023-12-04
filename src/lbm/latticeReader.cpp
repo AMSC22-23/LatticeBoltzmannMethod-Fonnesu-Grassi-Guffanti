@@ -6,11 +6,10 @@ input_lattice_path (input_dir_path_ + "/lattice.mtx"),
 input_rho_path (input_dir_path_ + "/rho.mtx"),
 input_u_path (input_dir_path_ + "/u.mtx")
 {   
-    bool result;
-    if (!(result = validate_path()))
+    if (!validate_path())
     {
         std::cout << "[!ERROR!] Path to input directory is invalid" << std::endl;
-        assert(result == true);
+        assert(false);
     }
 
     std::cout << "LatticeReader2D   correctly initialized" << std::endl;
@@ -29,33 +28,38 @@ LatticeReader2D::LatticeReader2D(const std::string& input_dir_path_):
 LatticeReader(input_dir_path_)
 {};
 
-bool LatticeReader2D::read_lattice_structure(Eigen::Matrix<LatticeNode<2>, Eigen::Dynamic, Eigen::Dynamic>& lattice, std::size_t& width, std::size_t& height)
+bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice, std::size_t& width, std::size_t& height)
 {
     Eigen::SparseMatrix<int> in;
 
     // loading the matrix in the mtx format
     std::cout << "reading data" << std::endl;
-    if (Eigen::loadMarket(in, input_lattice_path))
+    if (!Eigen::loadMarket(in, input_lattice_path))
     {  
         return false;
     }
 
     width = in.cols();
     height = in.rows();
-    
+    std::cout << "width of the domain      : " << width << std::endl;
+    std::cout << "height of the domain     : " << height << std::endl;
+    std::cout << "number of boundary nodes : " << in.nonZeros() << "(" << in.nonZeros()/(double)in.size() * 100.0 << "%)" << std::endl;
 
+    lattice.resize(in.rows(), std::vector<LatticeNode<2>>(in.cols()));
     Node_type type; 
     int type_i;
-    Eigen::Matrix<int, -1, -1> dense_in = in; 
+
+    Eigen::MatrixX<int> mat(in);
     for (std::size_t i = 0; i < height; ++i)
     {
-        for (std::size_t j = 0; j < width; ++i)
-        {
-            type_i = dense_in(i, j);
+        for (std::size_t j = 0; j < width; ++j)
+        { 
+            type_i = in.coeffRef(i, j);
             type = static_cast<Node_type>(type_i);
-            lattice(i, j).set_type() = type;
+            lattice[i][j].set_type() = type;
         }
     }
+    std::cout << "finished reading" << std::endl;
     return true;
 }
 

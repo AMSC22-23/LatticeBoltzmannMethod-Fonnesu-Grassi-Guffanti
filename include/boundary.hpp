@@ -46,7 +46,7 @@ public:
      * Function that handles the collision with a top wall
      * @param node whose data has to be updated
     */
-    void calc_top_wall_bounce(LatticeNode<2> &node);
+    void calc_top_wall_bounce(LatticeNode<2> &node) const;
 
     /**
      * Function that handles the collision with a left wall

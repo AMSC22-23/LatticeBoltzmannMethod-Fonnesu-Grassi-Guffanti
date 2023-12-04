@@ -5,12 +5,14 @@
 #include <string>
 #include <filesystem>
 #include <cassert>
+#include <string>
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/SparseExtra>
 
 #include "latticeNode.hpp"
+#include "aliases.hpp"
 
 
 /**
@@ -24,19 +26,19 @@ protected:
     /**
      * Path to the input directory which contains all the input files
     */
-    const std::filesystem::path input_dir_path;
+    const std::string input_dir_path;
     /**
      * Path to the input matrix describing the lattice structure
     */
-    const std::filesystem::path input_lattice_path;
+    const std::string input_lattice_path;
     /**
     *  Path to the input matrix describing the lattice density field 
     */
-    const std::filesystem::path input_rho_path;
+    const std::string input_rho_path;
     /**
     *  Path to the input matrix describing the lattice velocity fields 
     */
-    const std::filesystem::path input_u_path;
+    const std::string input_u_path;
     
 private:
     /**
@@ -63,7 +65,7 @@ public:
     LatticeReader2D(const std::string& input_dir_path_);
     ~LatticeReader2D() = default;
 
-    bool read_lattice_structure(Eigen::Matrix<LatticeNode<2>, Eigen::Dynamic, Eigen::Dynamic>& lattice, std::size_t& width, std::size_t& height);
+    bool read_lattice_structure(LatticeGrid2D& lattice, std::size_t& width, std::size_t& height);
     bool read_lattice_input_rho();
     bool read_lattice_input_velocities();
 
