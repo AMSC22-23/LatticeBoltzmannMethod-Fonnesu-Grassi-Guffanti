@@ -3,8 +3,12 @@
 
 #include <vector>
 #include <functional>
+#include "latticeNode.hpp"
 
-
+/**
+ * Class that handles all possible methods to calculate the bouncing at the boundaries
+ * @author Lorenzo Fonnesu
+*/
 class Boundary{
 public:
     Boundary()=default;
@@ -29,39 +33,61 @@ class NEBB : public Boundary
 {
 public:
     NEBB() : Boundary(){};
-    /**
-     * @param f vector containing distribution functions of a node
-     * @param uy0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
-    */
-    std::vector<double> calc_top_wall_bounce(std::vector<double> &f, double uy0) const;
 
     /**
-     * @param f vector containing distribution functions of a node
-     * @param uy0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
+     * Some useful constants
     */
-    std::vector<double> calc_left_wall_bounce(std::vector<double> &f, double uy0) const;
+    static constexpr double two_thirds = 2.0/3.0;
+    static constexpr double one_sixth = 1.0/6.0;
+    static constexpr double one_half = 0.5;
 
     /**
-     * @param f vector containing distribution functions of a node
-     * @param ux0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
+     * Function that handles the collision with a top wall
+     * @param node whose data has to be updated
     */
-    std::vector<double> calc_right_wall_bounce(std::vector<double> &f, double ux0) const;
+    void calc_top_wall_bounce(LatticeNode<2> &node) const;
 
     /**
-     * @param f vector containing distribution functions of a node
-     * @param ux0 vertical velocity of the node
-     * @return the pre-streaming vector of distribution functions of the node 
+     * Function that handles the collision with a left wall
+     * @param node whose data has to be updated
     */
-    std::vector<double> calc_bottom_wall_bounce(std::vector<double> &f, double ux0) const;
+    void calc_left_wall_bounce(LatticeNode<2> &node) const;
 
+    /**
+     * Function that handles the collision with a right wall
+     * @param node whose data has to be updated
+    */
+    void calc_right_wall_bounce(LatticeNode<2> &node) const;
 
-    std::vector<double> calc_top_left_corner_bounce() const;
-    std::vector<double> calc_top_right_corner_bounce() const;
-    std::vector<double> calc_bottom_left_corner_bounce() const;
-    std::vector<double> calc_bottom_right_corner_bounce() const;
+    /**
+     * Function that handles the collision with a bottom wall
+     * @param node whose data has to be updated
+    */
+    void calc_bottom_wall_bounce(LatticeNode<2> &node) const;
+
+    /**
+     * Function that handles the collision with a top left corner
+     * @param node whose data has to be updated
+    */
+    void calc_top_left_corner_bounce(LatticeNode<2> &node) const;
+
+    /**
+     * Function that handles the collision with a top right corner
+     * @param node whose data has to be updated
+    */
+    void calc_top_right_corner_bounce(LatticeNode<2> &node) const;
+
+    /**
+     * Function that handles the collision with a bottom left corner
+     * @param node whose data has to be updated
+    */
+    void calc_bottom_left_corner_bounce(LatticeNode<2> &node) const;
+     
+    /**
+     * Function that handles the collision with a right corner
+     * @param node whose data has to be updated
+    */
+    void calc_bottom_right_corner_bounce(LatticeNode<2> &node) const;
 
     virtual ~NEBB() = default;
 };
