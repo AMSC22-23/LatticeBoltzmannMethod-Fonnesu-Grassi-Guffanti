@@ -65,7 +65,7 @@ public:
     LatticeReader2D(const std::string& input_dir_path_);
     ~LatticeReader2D() = default;
 
-    bool read_lattice_structure(LatticeGrid2D& lattice, std::size_t& width, std::size_t& height);
+    bool read_lattice_structure(LatticeGrid2D& lattice, BoundaryList2D& boundary_list,std::size_t& width, std::size_t& height);
     bool read_lattice_input_rho();
     bool read_lattice_input_velocities();
 

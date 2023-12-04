@@ -28,7 +28,10 @@ LatticeReader2D::LatticeReader2D(const std::string& input_dir_path_):
 LatticeReader(input_dir_path_)
 {};
 
-bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice, std::size_t& width, std::size_t& height)
+bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice, 
+    BoundaryList2D& boundary_list,
+    std::size_t& width, 
+    std::size_t& height)
 {
     Eigen::SparseMatrix<int> in;
 
@@ -46,10 +49,13 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice, std::size_t
     std::cout << "number of boundary nodes : " << in.nonZeros() << "(" << in.nonZeros()/(double)in.size() * 100.0 << "%)" << std::endl;
 
     lattice.resize(in.rows(), std::vector<LatticeNode<2>>(in.cols()));
+    boundary_list.resize(in.nonZeros());
+
     Node_type type; 
     int type_i;
 
     Eigen::MatrixX<int> mat(in);
+    std::size_t k = 0;
     for (std::size_t i = 0; i < height; ++i)
     {
         for (std::size_t j = 0; j < width; ++j)
@@ -57,6 +63,11 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice, std::size_t
             type_i = in.coeffRef(i, j);
             type = static_cast<Node_type>(type_i);
             lattice[i][j].set_type() = type;
+            if (type != FLUID)
+            {
+                boundary_list[k] = {lattice[i][j], i, j};
+                k++;
+            }
         }
     }
     std::cout << "finished reading" << std::endl;
