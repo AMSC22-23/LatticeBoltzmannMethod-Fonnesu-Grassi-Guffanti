@@ -23,54 +23,72 @@ def is_solid(pixel): #condizioni da rivedere per ora pensavo qualsiasi sfumatura
 args=sys.argv
 
 img = Image.open(f"resources/img/{args[1]}")
+density_img= Image.open(f"resources/img/{args[4]}")
 
 length, height =img.size
 nonzeros = 0
+nonzeros_rho = 0
 
 if not os.path.exists("resources/patterns"):
     os.mkdir("resources/patterns")
 
 with open(f"resources/patterns/{args[2]}.txt", "w") as file:
-    with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
-        mtx.write("%%MatrixMarket matrix coordinate real general\n")
-        mtx.write(f"{args[2]}\n")
-        mtx.write("\n")
-        for x in range(height):
-            for y in range(length):
-                pixel=img.getpixel((y,x))
-                #print(f"Pixel alla posizione ({x}, {y}): {pixel}")
-                if(is_boundary(pixel)) :
-                    file.write("B")
-                    nonzeros=nonzeros+1
-                    mtx.write(f"{x} {y} 2\n")
-                    #file.write("\033[30ml\033[0m")
-                elif(is_fluid(pixel)):
-                    if(x == 0 or y == 0 or x == (height-1) or y == (length-1)):
-                        file.write("O")
-                        mtx.write(f"{x} {y} 1\n")
-                        nonzeros=nonzeros+1
-                    else:
-                        file.write("W")
-                    #file.write("\033[37ml\033[0m")
-                elif(is_solid(pixel)):
-                    file.write("S")
-                    nonzeros=nonzeros+1
-                    mtx.write(f"{x} {y} 3\n")
-                    #file.write("\033[34ml\033[0m")
-                else: 
-                    file.write("?")
-            file.write("\n")        
-            #file.write("                                                                                                                                                                           ")
-            # Blu
-            # Nero
+    with open(f"resources/lattices/{args[3]}/{args[2]}.mtx","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
+        with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","w") as mtx_rho:
+            mtx.write("%%MatrixMarket matrix coordinate real general\n")
+            mtx.write("\n")
 
-with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","r") as mtx:  
+            mtx_rho.write("%%MatrixMarket matrix coordinate real general\n")
+            mtx_rho.write("\n")
+            for x in range(height):
+                for y in range(length):
+                    pixel=img.getpixel((y,x))
+                    #print(f"Pixel alla posizione ({x}, {y}): {pixel}")
+                    if(is_boundary(pixel)) :
+                        file.write("B")
+                        nonzeros=nonzeros+1
+                        mtx.write(f"{x} {y} 2\n")
+                        #file.write("\033[30ml\033[0m")
+                    elif(is_fluid(pixel)):
+                        if(x == 0 or y == 0 or x == (height-1) or y == (length-1)):
+                            file.write("O")
+                            mtx.write(f"{x} {y} 1\n")
+                            nonzeros=nonzeros+1
+                        else:
+                            file.write("W")
+                        
+                        pixel_rho =density_img.getpixel((y,x))
+                        rho = 1 - ((pixel_rho[1] + pixel_rho[2])/ 510)
+                        print(f"{rho}\n")
+                        if(rho != 0):
+                            nonzeros_rho = nonzeros_rho +1
+                            mtx_rho.write(f"{x} {y} {rho}\n")
+                        #file.write("\033[37ml\033[0m")
+                    elif(is_solid(pixel)):
+                        file.write("S")
+                        nonzeros=nonzeros+1
+                        mtx.write(f"{x} {y} 3\n")
+                        #file.write("\033[34ml\033[0m")
+                    else: 
+                        file.write("?")
+                file.write("\n")        
+                #file.write("                                                                                                                                                                           ")
+                # Blu
+                # Nero
+
+with open(f"resources/lattices/{args[3]}/{args[2]}.mtx","r") as mtx:  
     lines=mtx.readlines()
 lines[1]=f"{length} {height} {nonzeros}\n"
 
-with open(f"resources/lattices/{args[3]}/2d_{height}_{length}_{args[2]}","w") as mtx:
+with open(f"resources/lattices/{args[3]}/{args[2]}.mtx","w") as mtx:
     mtx.writelines(lines)
 
+with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","r") as mtx_rho:  
+    lines=mtx_rho.readlines()
+lines[1]=f"{length} {height} {nonzeros_rho}\n"
 
-img.close
+with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","w") as mtx_rho:
+    mtx_rho.writelines(lines)
 
+img.close()
+density_img.close()
