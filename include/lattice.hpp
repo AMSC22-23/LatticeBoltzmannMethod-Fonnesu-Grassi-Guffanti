@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include "latticeNode.hpp"
+#include "boundary.hpp"
 
 /**
  * Abstract representation of the lattice of points, realized into two

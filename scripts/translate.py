@@ -34,7 +34,7 @@ if not os.path.exists("resources/patterns"):
 
 with open(f"resources/patterns/{args[2]}.txt", "w") as file:
     with open(f"resources/lattices/{args[3]}/{args[2]}.mtx","w") as mtx: # 0 fluid 1 open boundary 2 boundary 3 solid
-        with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","w") as mtx_rho:
+        with open(f"resources/lattices/{args[3]}/rho.mtx","w") as mtx_rho:
             mtx.write("%%MatrixMarket matrix coordinate real general\n")
             mtx.write("\n")
 
@@ -43,16 +43,18 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
             for x in range(height):
                 for y in range(length):
                     pixel=img.getpixel((y,x))
+                    x_=x+1
+                    y_=y+1
                     #print(f"Pixel alla posizione ({x}, {y}): {pixel}")
                     if(is_boundary(pixel)) :
                         file.write("B")
                         nonzeros=nonzeros+1
-                        mtx.write(f"{x} {y} 2\n")
+                        mtx.write(f"{x_} {y_} 2\n")
                         #file.write("\033[30ml\033[0m")
                     elif(is_fluid(pixel)):
                         if(x == 0 or y == 0 or x == (height-1) or y == (length-1)):
                             file.write("O")
-                            mtx.write(f"{x} {y} 1\n")
+                            mtx.write(f"{x_} {y_} 1\n")
                             nonzeros=nonzeros+1
                         else:
                             file.write("W")
@@ -62,12 +64,12 @@ with open(f"resources/patterns/{args[2]}.txt", "w") as file:
                         print(f"{rho}\n")
                         if(rho != 0):
                             nonzeros_rho = nonzeros_rho +1
-                            mtx_rho.write(f"{x} {y} {rho}\n")
+                            mtx_rho.write(f"{x_} {y_} {rho}\n")
                         #file.write("\033[37ml\033[0m")
                     elif(is_solid(pixel)):
                         file.write("S")
                         nonzeros=nonzeros+1
-                        mtx.write(f"{x} {y} 3\n")
+                        mtx.write(f"{x_} {y_} 3\n")
                         #file.write("\033[34ml\033[0m")
                     else: 
                         file.write("?")
@@ -83,11 +85,11 @@ lines[1]=f"{length} {height} {nonzeros}\n"
 with open(f"resources/lattices/{args[3]}/{args[2]}.mtx","w") as mtx:
     mtx.writelines(lines)
 
-with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","r") as mtx_rho:  
+with open(f"resources/lattices/{args[3]}/rho.mtx","r") as mtx_rho:  
     lines=mtx_rho.readlines()
 lines[1]=f"{length} {height} {nonzeros_rho}\n"
 
-with open(f"resources/lattices/{args[3]}/{args[2]}_rho.mtx","w") as mtx_rho:
+with open(f"resources/lattices/{args[3]}/rho.mtx","w") as mtx_rho:
     mtx_rho.writelines(lines)
 
 img.close()

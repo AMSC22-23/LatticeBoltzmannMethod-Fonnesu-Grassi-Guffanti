@@ -1,9 +1,10 @@
 #ifndef HH_BOUNDARY
 #define HH_BOUNDARY
 
+#include "latticeNode.hpp"
 #include <vector>
 #include <functional>
-#include "latticeNode.hpp"
+
 
 /**
  * Class that handles all possible methods to calculate the bouncing at the boundaries
@@ -45,7 +46,7 @@ public:
      * Function that handles the collision with a top wall
      * @param node whose data has to be updated
     */
-    void calc_top_wall_bounce(LatticeNode<2> &node) const;
+    void calc_top_wall_bounce(LatticeNode<2> &node);
 
     /**
      * Function that handles the collision with a left wall
