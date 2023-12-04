@@ -6,7 +6,6 @@
 #include <algorithm>
 #include "velocitySet.hpp"
 #include "collisionModel.hpp"
-#include "boundary.hpp"
 
 /**
  * Enumeration that describes the type of node
