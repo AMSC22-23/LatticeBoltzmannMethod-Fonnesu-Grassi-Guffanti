@@ -4,20 +4,15 @@ Lattice2D::Lattice2D(const std::string& input_dir_path,
     const std::string& output_dir_path_, 
     const VelocitySet& velocity_set, 
     std::shared_ptr<CollisionModel> collision_model, 
-    std::shared_ptr<Boundary> boundary_model, 
     const double tau, 
     const double delta_t):
-Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, boundary_model, tau, delta_t)
+Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, tau, delta_t)
 {
     lattice_reader = std::make_unique<LatticeReader2D>(input_dir_path);
     if (!lattice_reader->read_lattice_structure(lattice, boundary_list , lattice_width, lattice_height))
     {
         std::cerr << "[!ERROR!] lattice structure matrix could not be read" << std::endl;
         assert(false);
-    }
-    for(std::tuple<LatticeNode<2>*, std::size_t, std::size_t> el : boundary_list)
-    {
-        std::cout << std::get<0>(el)->get_rho() << " " << std::get<1>(el) << " " << std::get<2>(el) << std::endl;
     }
     initialize_lattice();
 };
@@ -117,11 +112,20 @@ void Lattice2D::perform_simulation_step()
     // 3. Perform streaming
     perform_streaming();
 
-    // 4. Perform the propagation at the boundaries
+    // 4. Perform the collision at the boundaries
 
-    for (auto &Boundary : boundary_list)
-    {
-        
+    std::size_t size = boundary_list.size();
+    for (std::size_t it = 0; it < size; it++)
+    {  
+        auto [i, j, type] = boundary_list[it];
+        if (type == BOTTOM_WALL_2D) boundary_model.calc_bottom_wall_bounce(lattice[i][j]);
+        else if (type == UPPER_WALL_2D ) boundary_model.calc_top_wall_bounce(lattice[i][j]);
+        else if (type == LEFT_WALL_2D ) boundary_model.calc_left_wall_bounce(lattice[i][j]);
+        else if (type == RIGHT_WALL_2D ) boundary_model.calc_right_wall_bounce(lattice[i][j]); 
+        else if (type == UPPER_LEFT_CORNER_2D ) boundary_model.calc_top_left_corner_bounce(lattice[i][j]);
+        else if (type == UPPER_RIGHT_CORNER_2D ) boundary_model.calc_top_right_corner_bounce(lattice[i][j]); 
+        else if (type == BOTTOM_LEFT_CORNER_2D ) boundary_model.calc_bottom_left_corner_bounce(lattice[i][j]); 
+        else if (type == BOTTOM_RIGHT_CORNER_2D ) boundary_model.calc_bottom_right_corner_bounce(lattice[i][j]);
     }
     
 
@@ -156,11 +160,7 @@ void Lattice2D::perform_streaming()
     {
         for(std::size_t j = 0; j < lattice_width; j++)
         {
-            // 3. Perform the streaming
-            /*for(std::size_t q = 0; q < velocity_set.get_set_size(); q++)
-            {
-                lattice(i - velocity_set.get_velocity_set().direction[q][1], j + velocity_set.get_velocity_set().direction[q][0]).set_population(q) = lattice[i][j].get_collision_populations()[q]; 
-            }*/
+            // 3. Perform the streaming of fluid populations
             if(lattice[i][j].is_fluid()){
                 lattice[i][j].set_population(0) = lattice[i][j].get_collision_populations()[0];
                 lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];

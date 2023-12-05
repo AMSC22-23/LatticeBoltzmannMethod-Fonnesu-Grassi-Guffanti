@@ -65,7 +65,6 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
             lattice[i][j].set_type() = type;
             if (type != FLUID)
             {
-
                 boundary_list[k] = {i, j, NONE};
                 k++;
             }
@@ -73,18 +72,19 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
     }
     std::cout << "finished reading" << std::endl;
 
-    for(std::tuple<std::size_t, std::size_t, BoundaryType2d> boundary : boundary_list)
+    // classifying the type of boundary
+    std::cout << "classifying the type of boundary" << std::endl;
+    for(std::tuple<std::size_t, std::size_t, BoundaryType2DEnum> boundary : boundary_list)
     {
-        //std::get<0>(el)->get_rho()
-        size_t i=std::get<0>(boundary);
-        size_t j=std::get<1>(boundary);
-        
+        size_t i = std::get<0>(boundary);
+        size_t j = std::get<1>(boundary);
+
 
         //CORNERS
         if(i!=0 && j!=0){
             if((lattice[i-1][j].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 !lattice[i-1][j-1].is_generic_boundary()){
-                    std::get<2>(boundary) == BOTTOM_RIGHT_CORNER_2D;
+                    std::get<2>(boundary) = BOTTOM_RIGHT_CORNER_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
@@ -92,7 +92,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(i!=(height-1) && j!=0){
             if((lattice[i+1][j].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 !lattice[i+1][j-1].is_generic_boundary()){
-                    std::get<2>(boundary) == UPPER_RIGHT_CORNER_2D;
+                    std::get<2>(boundary) = UPPER_RIGHT_CORNER_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
@@ -100,7 +100,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(i!=0 && j!=(width-1)){
             if((lattice[i-1][j].is_generic_boundary() && lattice[i][j+1].is_generic_boundary()) &&
                 !lattice[i-1][j+1].is_generic_boundary()){
-                    std::get<2>(boundary) == BOTTOM_LEFT_CORNER_2D;
+                    std::get<2>(boundary) = BOTTOM_LEFT_CORNER_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
@@ -108,7 +108,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(i!=(height-1) && j!=(width-1)){
             if((lattice[i+1][j].is_generic_boundary() && lattice[i][j+1].is_generic_boundary()) &&
                 !lattice[i+1][j+1].is_generic_boundary()){
-                    std::get<2>(boundary) == UPPER_LEFT_CORNER_2D;
+                    std::get<2>(boundary) = UPPER_LEFT_CORNER_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
@@ -119,7 +119,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(j!=0){
             if( (lattice[i+1][j].is_generic_boundary() && lattice[i-1][j].is_generic_boundary()) &&
                 (!lattice[i][j-1].is_generic_boundary())){
-                    std::get<2>(boundary) == RIGHT_WALL_2D;
+                    std::get<2>(boundary) = RIGHT_WALL_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
             }
@@ -127,7 +127,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(j!=(width-1)){ // il meno uno c'è? punto di domanda FIXME:
             if( (lattice[i+1][j].is_generic_boundary() && lattice[i-1][j].is_generic_boundary()) &&
                 (!lattice[i][j+1].is_generic_boundary())){
-                    std::get<2>(boundary) == LEFT_WALL_2D;
+                    std::get<2>(boundary) = LEFT_WALL_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
             }
@@ -135,7 +135,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(i!=0){
             if( (lattice[i][j+1].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 (!lattice[i-1][j].is_generic_boundary())){
-                    std::get<2>(boundary) == UPPER_WALL_2D;
+                    std::get<2>(boundary) = UPPER_WALL_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
             }
@@ -143,7 +143,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
         if(i!=(height-1)){
             if( (lattice[i][j+1].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 (!lattice[i+1][j].is_generic_boundary())){
-                    std::get<2>(boundary) == BOTTOM_WALL_2D;
+                    std::get<2>(boundary) = BOTTOM_WALL_2D;
                     std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
             }

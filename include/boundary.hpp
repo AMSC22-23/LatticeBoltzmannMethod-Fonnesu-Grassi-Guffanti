@@ -5,6 +5,21 @@
 #include <vector>
 #include <functional>
 
+/**
+ * The possible types of boundaries in the 2D case.
+*/
+enum BoundaryType2DEnum {
+    NONE,
+    OPEN,
+    BOTTOM_WALL_2D, 
+    UPPER_WALL_2D, 
+    LEFT_WALL_2D, 
+    RIGHT_WALL_2D,
+    UPPER_LEFT_CORNER_2D,
+    UPPER_RIGHT_CORNER_2D,
+    BOTTOM_LEFT_CORNER_2D,
+    BOTTOM_RIGHT_CORNER_2D
+};
 
 /**
  * Class that handles all possible methods to calculate the bouncing at the boundaries

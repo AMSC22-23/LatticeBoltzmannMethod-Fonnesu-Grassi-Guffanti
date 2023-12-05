@@ -45,7 +45,6 @@ private:
     */
     double const delta_t;
 
-
     /*
         function called by constructor setting all inital state
     */

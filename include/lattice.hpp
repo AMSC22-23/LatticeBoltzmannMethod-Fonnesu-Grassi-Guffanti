@@ -50,11 +50,6 @@ protected:
     std::shared_ptr<CollisionModel> collision_model;
 
     /**
-     * Boundary model used to calculate collisions at the boundary
-    */
-    std::shared_ptr<Boundary> boundary_model;
-
-    /**
      * Time constant
     */
     const double tau;
@@ -88,11 +83,10 @@ public:
      * @param dimensions_ number of dimensions of the lattice
      * @param velocity_set_ the velocity set used in the lattice
      * @param collision_model model used to calculate collisions
-     * @param boundary_model model used to calculate collisions on boundaries
      * @param tau time constant
      * @param delta_t time lapse
     */
-    Lattice(const std::string& input_dir_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, std::shared_ptr<Boundary> boundary_model_, const double tau_, const double delta_t_);
+    Lattice(const std::string& input_dir_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, const double tau_, const double delta_t_);
 
     virtual ~Lattice() = default;
 

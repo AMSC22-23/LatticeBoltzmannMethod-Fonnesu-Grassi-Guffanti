@@ -39,7 +39,7 @@ delta_t (1.0)
             lattice_ptr=nullptr;
             break;
         case 2:
-            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, boundary_ptr, tau, delta_t);
+            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, tau, delta_t);
             break;
         case 3:
             //TODO: to implement
@@ -49,8 +49,6 @@ delta_t (1.0)
             std::cout << "Errore" << std::endl;
             break;
     }
-
-    //lattice_ptr->initialize_lattice();
 }
 
 int lbm::compute(const std::size_t n_iter){

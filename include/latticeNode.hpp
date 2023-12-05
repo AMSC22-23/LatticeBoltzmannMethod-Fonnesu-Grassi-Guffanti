@@ -10,7 +10,12 @@
 /**
  * Enumeration that describes the type of node
 */
-enum Node_type{FLUID, OPEN_BOUNDARY, BOUNDARY, SOLID}; 
+enum Node_type{FLUID,
+    OPEN_BOUNDARY,
+    BOUNDARY,
+    SOLID
+};
+
 
 /**
  * object that represents a single node of the lattice:
@@ -100,6 +105,11 @@ public:
     const bool is_boundary() const 
     {
         return type == BOUNDARY;
+    }
+
+    const bool is_generic_boundary() const
+    {
+        return is_boundary() || is_open_boundary();
     }
     
     const bool is_solid() const 

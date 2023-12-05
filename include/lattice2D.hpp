@@ -10,7 +10,6 @@
 #include <string>
 
 #include "aliases.hpp"
-
 #include "lattice.hpp"
 #include "latticeNode.hpp"
 #include "collisionModel.hpp"
@@ -30,6 +29,10 @@ private:
     */
     static constexpr std::size_t dim = 2;
     
+    /**
+     * Boundary model
+    */
+    NEBB boundary_model;
     /**
      * Width of the lattice
     */
@@ -67,8 +70,6 @@ private:
 
 public:
     
-   
-
     /**
      * @param input_file_path path to the input file
      * @param output_dir_path path to the output directory
@@ -82,8 +83,8 @@ public:
         const std::string& output_dir_path_,
         const VelocitySet& velocity_set_,
         std::shared_ptr<CollisionModel> collision_model_, 
-        std::shared_ptr<Boundary> boundary_model, 
-        const double tau, const double delta_t);
+        const double tau, 
+        const double delta_t);
     virtual ~Lattice2D() = default;
 
     /**

@@ -13,7 +13,7 @@
 
 #include "latticeNode.hpp"
 #include "aliases.hpp"
-
+#include "boundary.hpp"
 
 /**
  * Abstract class that virtual methods that are overridden to implement the 
