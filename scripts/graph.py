@@ -9,8 +9,14 @@ def visualizza_griglia(matrice,i):
     plt.gca().invert_yaxis()  
     plt.savefig(f'scripts/image{i+1}.png')
 
-for i in range(50):
-    matrice_input = np.random.rand(100, 100)
+list =[]
+for file in os.listdir("resources/lattices/lid_driven_cavity/results"):
+    if file.endswith("rho.txt"):
+        list.append(f"resources/lattices/lid_driven_cavity/results/{file}")
+
+
+for i , file in enumerate(list):
+    matrice_input = np.loadtxt(file, usecols= range(100))
     visualizza_griglia(matrice_input,i)
 
 
