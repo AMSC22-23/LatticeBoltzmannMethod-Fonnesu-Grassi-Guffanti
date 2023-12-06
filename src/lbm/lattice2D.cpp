@@ -60,9 +60,21 @@ void Lattice2D::initialize_lattice()
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
     std::cout << "              reading input data from file" << std::endl;
     
+    for (size_t i = 0; i < lattice_height; i++)
+    {
+        for (size_t j = 0; j < lattice_width; j++)
+        {
+            lattice[i][j].initialize_generic_boundary(velocity_set);
+        }
+        
+    }
+    
     if (!lattice_reader->read_lattice_input_velocities(lattice))
     {
         std::cout << "PROGRAM ONLY SUPPORTS INPUT VELOCITY FIELDS FOR NOW." << std::endl;
+        assert(false);
+    }else if(!lattice_reader->read_lattice_input_rho(lattice)){
+        std::cout << "PROGRAM ONLY SUPPORTS INPUT RHO FIELDS FOR NOW." << std::endl;
         assert(false);
     }
 
@@ -78,11 +90,6 @@ void Lattice2D::initialize_lattice()
             if (lattice[i][j].is_fluid())
             {
                 lattice[i][j].initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
-            } else if (lattice[i][j].is_open_boundary())
-            {
-            } else 
-            {
-                lattice[i][j].initialize_generic_boundary(velocity_set);
             }
         }
     }

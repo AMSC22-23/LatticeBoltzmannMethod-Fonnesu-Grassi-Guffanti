@@ -5,6 +5,7 @@ int main()
 {
     lbm Prova(2,9,"../resources/lattices/lid_driven_cavity","BGK","ZH");
     Prova.print();
+    Prova.compute(10);
     /*
     PROVA CREZIONE VELOCITYSETS
     VelocitySet ProvaD1Q3(1,3);

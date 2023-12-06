@@ -3,7 +3,7 @@
 std::vector<double> BGK::calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const
 {
     std::vector<double> fStar;
-
+    fStar.resize(f.size());
     // This loop works for all DxQy, we can improve it deciding to remove D3Q19, because all the others y can be divided by 3
     for(int i=0; i<f.size(); i++){
         fStar[i] = f[i] * tConj + fEq[i] * tConst;

@@ -56,7 +56,7 @@ int lbm::compute(const std::size_t n_iter){
     for (std::size_t i = 0; i < n_iter; i++)
     {
         lattice_ptr->perform_simulation_step();
-        //lattice_ptr->save_output_data();
+        lattice_ptr->save_output_data(i);
     }
     return 1;
     
