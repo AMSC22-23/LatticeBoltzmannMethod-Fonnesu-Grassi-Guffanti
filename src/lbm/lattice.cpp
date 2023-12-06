@@ -25,24 +25,31 @@ void Lattice::log_data() const
 void Lattice::create_output_directory() 
 {
     std::filesystem::path path;
+    std::cout << "trying to move to inserted input directory to produce output" << std::endl;
+    std::cout << "  " << input_dir_path << std::endl;
+
     // if the path is not correct than the program defaults to ./results
-    if (!std::filesystem::is_directory(input_dir_path))
+    if (std::filesystem::is_directory(input_dir_path))
     {
-        path = "../results/";
+        output_dir_path = input_dir_path + "/results/";
+    } else {
         output_dir_path = "../results";
         std::cout << "[WARNING] path to output directory was invalid. Defaulting to ../results" << std::endl;
-        // and if the directory already exists it isn't created
-        if (!std::filesystem::exists(path))
+    }
+    path = output_dir_path;
+    // and if the directory already exists it isn't created
+
+    if (!std::filesystem::exists(path))
+    {
+        bool status;
+        if (!(status = std::filesystem::create_directory(path)))
         {
-            bool status;
-            if (!(status = std::filesystem::create_directory(path)))
-            {
-                std::cerr << "[!ERROR!]   could not create results directory" << std::endl;
-                assert(status == true);
-            }
-        } else
-        {
-            std::cout << "-> results directory already exists" << std::endl;
+            std::cerr << "[!ERROR!]   could not create results directory" << std::endl;
+            assert(status == true);
         }
+        std::cout << "  -> results directory built at path " << output_dir_path << std::endl;
+    } else
+    {
+        std::cout << "-> results directory already exists" << std::endl;
     }
 }
