@@ -101,7 +101,8 @@ def produce_rho(img: Image) -> tuple[int, int, int, list]:
     non_zero = len(non_zeroes)
     return (width, height, non_zero, non_zeroes)
 
-def produce_velocity(img: Image) -> tuple[int,int,int,list]:
+def produce_velocity(img: Image, open) -> tuple[int,int,int,list]:
+    
     width, height = img.size
     pixels = list(img.getdata())
 
@@ -111,14 +112,22 @@ def produce_velocity(img: Image) -> tuple[int,int,int,list]:
     non_zeroes = []
     
     const = (width/1.8)
-    print(f"{const}")
-    for idx, pixel in enumerate(pixels):
-        j = idx % (width)
-        i = int((idx - j) / width)
-        if is_fluid(pixel):
-            if i == 0 or j == 0 or i == height - 1 or j == height - 1:
+    if open:
+        for idx, pixel in enumerate(pixels):
+            j = idx % (width)
+            i = int((idx - j) / width)
+            if is_fluid(pixel):
+                if i == 0 or j == 0 or i == height - 1 or j == height - 1:
+                    non_zero += 1 
+                    non_zeroes.append((random.uniform((-1+(j/const)),(-0.8+(j/const))), i, j))
+    else:
+        for idx, pixel in enumerate(pixels):
+            j = idx % (width)
+            i = int((idx - j) / width)
+            if is_fluid(pixel):
                 non_zero += 1 
                 non_zeroes.append((random.uniform((-1+(j/const)),(-0.8+(j/const))), i, j))
+
     non_zero = len(non_zeroes)
     return (width, height, non_zero, non_zeroes)
 
@@ -144,7 +153,11 @@ def execute_translate():
     elif "rho" == args[2]:
         width, height, non_zero, non_zeroes = produce_rho(img)
     elif "ux" == args[2] or "uy" == args[2]:
-        width, height, non_zero, non_zeroes = produce_velocity(img)
+        if "open" == args[4]:
+            width, height, non_zero, non_zeroes = produce_velocity(img,True)
+        else:
+            width, height, non_zero, non_zeroes = produce_velocity(img,False)
+        
     else:
         print("Command not recognized. Aborting.")
     
