@@ -157,8 +157,49 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
     return true;
 }
 
-bool LatticeReader2D::read_lattice_input_rho()
+bool LatticeReader2D::read_lattice_input_rho(LatticeGrid2D& lattice)
 {
+    if (!(std::filesystem::exists(input_rho_path) && std::filesystem::is_regular_file(input_rho_path)))
+    {
+        std::cout << "density field was not found. Defaulting to 0.0 everywhere" << std::endl;
+        for (std::size_t i = 0; i < lattice.size(); ++i)
+        {
+            for (std::size_t j = 0; j < lattice[0].size(); ++j)
+            {
+                if (!lattice[i][j].is_boundary())
+                {
+                    lattice[i][j].set_rho() = 1.0;
+                } else 
+                {
+                    lattice[i][j].set_rho() = 0.0;
+                }
+            }
+        }
+    } else 
+    {
+        std::cout << "density field found" << std::endl;
+        Eigen::SparseMatrix<double> in;
+        if (!Eigen::loadMarket(in, input_rho_path))
+        {
+            std::cerr << "could not load density matrix file" << std::endl;
+            assert(false);
+        }
+
+        Eigen::MatrixXd data(in);
+        std::size_t rows = in.rows();
+        std::size_t cols = in.cols();
+
+        for (std::size_t i = 0; i < rows; ++i)
+        {
+            for (std::size_t j = 0; j < cols; ++j) 
+            {
+                lattice[i][j].set_rho() = data(i, j);
+            }
+        }
+    }
+
+
+
     return true;
 }
 
