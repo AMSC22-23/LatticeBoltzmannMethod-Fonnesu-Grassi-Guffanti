@@ -18,6 +18,7 @@
 
 import sys
 import os
+import random
 from PIL import Image
 
 OPEN_BOUNDARY_NODE = 1
@@ -70,6 +71,60 @@ def produce_lattice(img: Image) -> tuple[int, int, int, list]:
     non_zero = len(non_zeroes)
     return (width, height, non_zero, non_zeroes)
 
+def produce_rho(img: Image) -> tuple[int, int, int, list]:
+    """
+    Reads the image passed as input and returns the width, the height, the number of
+    non zero pixels as given by our encoding and the list of said pixels
+    """
+    width, height = img.size
+    pixels = list(img.getdata())
+
+    non_zero = 0
+    i = 0
+    j = 0
+    non_zeroes = []
+    # number of boundaries, either solid or open.
+    # the linearized index is idx = (i * width) + j
+    # which means that j = idx % width and i = (idx - j)/width
+    for idx, pixel in enumerate(pixels):
+        j = idx % (width)
+        i = int((idx - j) / width)
+        
+        if not is_boundary(pixel):
+            rho=((1 - ((pixel[1] + pixel[2])/ 510)))
+            if rho != 0:
+                non_zero += 1 
+                non_zeroes.append((rho, i, j))
+                    
+            
+
+    non_zero = len(non_zeroes)
+    return (width, height, non_zero, non_zeroes)
+
+def produce_velocity(img: Image) -> tuple[int,int,int,list]:
+    width, height = img.size
+    pixels = list(img.getdata())
+
+    non_zero = 0
+    i = 0
+    j = 0
+    non_zeroes = []
+    
+    const = (width/1.8)
+    print(f"{const}")
+    for idx, pixel in enumerate(pixels):
+        j = idx % (width)
+        i = int((idx - j) / width)
+        if is_fluid(pixel):
+            if i == 0 or j == 0 or i == height - 1 or j == height - 1:
+                non_zero += 1 
+                non_zeroes.append((random.uniform((-1+(j/const)),(-0.8+(j/const))), i, j))
+    non_zero = len(non_zeroes)
+    return (width, height, non_zero, non_zeroes)
+
+   
+
+
 
 def execute_translate():
     """
@@ -87,7 +142,9 @@ def execute_translate():
     if "lattice" == args[2]:
         width, height, non_zero, non_zeroes = produce_lattice(img)
     elif "rho" == args[2]:
-        print("RHO not yet implemented!")
+        width, height, non_zero, non_zeroes = produce_rho(img)
+    elif "ux" == args[2] or "uy" == args[2]:
+        width, height, non_zero, non_zeroes = produce_velocity(img)
     else:
         print("Command not recognized. Aborting.")
     
