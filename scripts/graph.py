@@ -14,6 +14,7 @@ for file in os.listdir("resources/lattices/lid_driven_cavity/results"):
     if file.endswith("rho.txt"):
         list.append(f"resources/lattices/lid_driven_cavity/results/{file}")
 
+list=sorted(list)
 
 for i , file in enumerate(list):
     matrice_input = np.loadtxt(file, usecols= range(100))
