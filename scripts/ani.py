@@ -10,6 +10,9 @@ for file in os.listdir("scripts/"):
     if file.endswith(".png"):
         images.append(f"scripts/{file}")
 
+images= sorted(images)
+images.sort(key=len)
+
 def update(frame):
     plt.clf()
     plt.axis("off")

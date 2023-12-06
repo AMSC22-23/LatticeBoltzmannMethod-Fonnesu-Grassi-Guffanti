@@ -188,7 +188,11 @@ public:
 
         // calculating the velocity by dividing the momentum by the density
         for (auto& momentum_density : u) {
-            momentum_density = momentum_density / rho;
+            if(rho==0)
+                momentum_density=0;
+            else{
+                momentum_density = momentum_density / rho;
+            }
         }
     }
 

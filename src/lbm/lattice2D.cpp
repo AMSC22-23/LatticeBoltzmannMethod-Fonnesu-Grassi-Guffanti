@@ -89,7 +89,7 @@ void Lattice2D::initialize_lattice()
         {
             if (lattice[i][j].is_fluid())
             {
-                lattice[i][j].initialize_fluid_node(weights, {0.0, 0.0}, 1.0);
+                lattice[i][j].initialize_fluid_node(weights, lattice[i][j].get_u(),lattice[i][j].get_rho());
             }
         }
     }
@@ -140,22 +140,6 @@ void Lattice2D::perform_simulation_step()
         else if (type == BOTTOM_LEFT_CORNER_2D ) boundary_model.calc_bottom_left_corner_bounce(lattice[i][j]); 
         else if (type == BOTTOM_RIGHT_CORNER_2D ) boundary_model.calc_bottom_right_corner_bounce(lattice[i][j]);
     }
-    
-
-    /* ERASABLE
-    for (std::size_t i = 0; i < lattice_height; i++)
-    {
-        for (std::size_t j = 0; j < lattice_width; j++)
-        {
-            if(lattice[i][j].is_boundary())
-            {
-                //TODO: we have to do a long sequence of if else to identify the type of boundary and do:
-                //lattice[i][j].set_collision_populations() = boundary_model->(method depends on the boundary)
-
-                //TODO: for streaming we can stream all nine population or select for every boundary what population we have to stream
-            }
-        }
-    }*/
 
     for (std::size_t i = 0; i < lattice_height; i++)
     {
