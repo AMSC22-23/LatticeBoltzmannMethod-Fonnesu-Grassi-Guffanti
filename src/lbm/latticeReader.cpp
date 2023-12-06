@@ -4,7 +4,7 @@ LatticeReader::LatticeReader(const std::string& input_dir_path_) :
 input_dir_path (input_dir_path_),
 input_lattice_path (input_dir_path_ + "/lattice.mtx"),
 input_rho_path (input_dir_path_ + "/rho.mtx"),
-input_u_path (input_dir_path_ + "/u.mtx")
+input_u_path (input_dir_path_ + "/u")
 {   
     if (!validate_path())
     {
@@ -85,7 +85,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
             if((lattice[i-1][j].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 !lattice[i-1][j-1].is_generic_boundary()){
                     std::get<2>(boundary) = BOTTOM_RIGHT_CORNER_2D;
-                    std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                    // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
         }
@@ -93,7 +93,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
             if((lattice[i+1][j].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                 !lattice[i+1][j-1].is_generic_boundary()){
                     std::get<2>(boundary) = UPPER_RIGHT_CORNER_2D;
-                    std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                    // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
         }
@@ -101,7 +101,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
             if((lattice[i-1][j].is_generic_boundary() && lattice[i][j+1].is_generic_boundary()) &&
                 !lattice[i-1][j+1].is_generic_boundary()){
                     std::get<2>(boundary) = BOTTOM_LEFT_CORNER_2D;
-                    std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                    // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
         }
@@ -109,7 +109,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
             if((lattice[i+1][j].is_generic_boundary() && lattice[i][j+1].is_generic_boundary()) &&
                 !lattice[i+1][j+1].is_generic_boundary()){
                     std::get<2>(boundary) = UPPER_LEFT_CORNER_2D;
-                    std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                    // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                     continue;
                 }
         }
@@ -121,7 +121,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
                 if( (lattice[i+1][j].is_generic_boundary() && lattice[i-1][j].is_generic_boundary()) &&
                     (!lattice[i][j-1].is_generic_boundary())){
                         std::get<2>(boundary) = RIGHT_WALL_2D;
-                        std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                        // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                         continue;
                 }
             }
@@ -129,7 +129,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
                 if( (lattice[i+1][j].is_generic_boundary() && lattice[i-1][j].is_generic_boundary()) &&
                     (!lattice[i][j+1].is_generic_boundary())){
                         std::get<2>(boundary) = LEFT_WALL_2D;
-                        std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                        // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                         continue;
                 }
             }
@@ -139,7 +139,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
                 if( (lattice[i][j+1].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                     (!lattice[i-1][j].is_generic_boundary())){
                         std::get<2>(boundary) = BOTTOM_WALL_2D;
-                        std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                        // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                         continue;
                 }
             }
@@ -147,7 +147,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
                 if( (lattice[i][j+1].is_generic_boundary() && lattice[i][j-1].is_generic_boundary()) &&
                     (!lattice[i+1][j].is_generic_boundary())){
                         std::get<2>(boundary) = UPPER_WALL_2D;
-                        std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
+                        // std::cout << i << " " << j << " " << std::get<2>(boundary) << std::endl;
                         continue;
                 }
             }
@@ -162,7 +162,79 @@ bool LatticeReader2D::read_lattice_input_rho()
     return true;
 }
 
-bool LatticeReader2D::read_lattice_input_velocities()
+bool LatticeReader2D::read_lattice_input_velocities(LatticeGrid2D& lattice)
 {
+    const std::string u_x_path = input_u_path + "x.mtx";
+    const std::string u_y_path = input_u_path + "y.mtx";
+
+
+    bool x_present, y_present;
+    // check existence of file
+    if (!(x_present = std::filesystem::exists(u_x_path) && std::filesystem::is_regular_file(u_x_path)))
+    {
+        std::cout << "x-velocity field was not found. Defaulted to 0 everywhere" << std::endl;
+    } else
+    {
+        std::cout << "x-velocity field found" << std::endl;
+    }
+    if (!(y_present = std::filesystem::exists(u_y_path) && std::filesystem::is_regular_file(u_y_path)))
+    {
+        std::cout << "y-velocity field was not found. Defaulted to 0 everywhere" << std::endl;
+    }
+    {
+        std::cout << "y-velocity field found" << std::endl;
+    }
+
+    if (!x_present && !y_present)
+    {
+        
+        std::cout << "no velocity field was found. Defaulting every velocity to 0" << std::endl;
+        for (std::size_t i = 0; i < lattice.size(); ++i)
+        {
+            for (std::size_t j = 0; j < lattice[0].size(); ++j)
+            {
+                lattice[i][j].set_u() = {0.0, 0.0};
+            }
+        }
+        return true;
+    }
+
+    if (x_present)
+    {
+        if (!load_2D_velocity_matrix(lattice, u_x_path, 0))
+        {
+            std::cerr << "x-velocity input matrix could not be read" << std::endl;
+            assert(false);
+        }
+    } 
+    if (y_present)
+    {
+        if (!load_2D_velocity_matrix(lattice, u_y_path, 1))
+        {
+            std::cerr << "y-velocity input matrix could not be read" << std::endl;
+            assert(false);
+        }
+    }
+    return true;
+}
+
+bool LatticeReader2D::load_2D_velocity_matrix(LatticeGrid2D& lattice, const std::string& path, const std::size_t& dir)
+{
+    Eigen::SparseMatrix<double> mat;
+    if (!Eigen::loadMarket(mat, path))
+    {
+        return false;
+    }
+    Eigen::MatrixX<double> mat_dense(mat);
+
+    std::size_t rows = mat.rows();
+    std::size_t cols = mat.cols();
+    for (std::size_t i = 0; i < rows; ++i)
+    {
+        for (std::size_t j = 0; j < cols; ++j)
+        {
+            lattice[i][j].set_u(dir) = mat_dense(i, j);
+        }
+    }
     return true;
 }

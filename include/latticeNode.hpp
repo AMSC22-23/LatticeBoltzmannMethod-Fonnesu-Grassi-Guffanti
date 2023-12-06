@@ -4,6 +4,7 @@
 #include <array>
 #include <tuple>
 #include <algorithm>
+#include <cassert>
 #include "velocitySet.hpp"
 #include "collisionModel.hpp"
 
@@ -140,6 +141,12 @@ public:
     std::array<double, dim>& set_u()
     {
         return u;
+    }
+
+    double& set_u(std::size_t i)
+    {
+        assert(i < dim && "TRYING TO PERFORM AN OUT OF BOUND ACCESS");
+        return u[i];
     }
 
     double& set_rho() 

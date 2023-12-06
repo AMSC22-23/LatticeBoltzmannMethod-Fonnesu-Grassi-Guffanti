@@ -57,6 +57,8 @@ public:
 */
 class LatticeReader2D : public LatticeReader
 {
+private:
+    bool load_2D_velocity_matrix(LatticeGrid2D& lattice, const std::string& path, const std::size_t& dir);
 public:
     /**
      * Constructs the object
@@ -67,8 +69,7 @@ public:
 
     bool read_lattice_structure(LatticeGrid2D& lattice, BoundaryList2D& boundary_list,std::size_t& width, std::size_t& height);
     bool read_lattice_input_rho();
-    bool read_lattice_input_velocities();
-
+    bool read_lattice_input_velocities(LatticeGrid2D& lattice);
 };
 
 

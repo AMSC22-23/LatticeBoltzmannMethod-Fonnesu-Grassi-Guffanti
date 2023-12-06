@@ -59,6 +59,12 @@ void Lattice2D::initialize_lattice()
 {
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
     std::cout << "              reading input data from file" << std::endl;
+    
+    if (!lattice_reader->read_lattice_input_velocities(lattice))
+    {
+        std::cout << "PROGRAM ONLY SUPPORTS INPUT VELOCITY FIELDS FOR NOW." << std::endl;
+        assert(false);
+    }
 
     const WeightedDirection set_elements = velocity_set.get_velocity_set();
 
