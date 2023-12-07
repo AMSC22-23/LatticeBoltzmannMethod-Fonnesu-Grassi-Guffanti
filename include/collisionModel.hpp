@@ -37,6 +37,10 @@ public:
 
 class TRT : public CollisionModel
 {
+private: 
+    std::vector<int> f_conj = {0, 2, 1, 4, 3, 6, 5, 8, 7}; //Vector containing the opposite index for each direction (Example: 1<->3, 5<->7)
+    const double om_p = 1; //1 / tau
+    const double om_m = 1; //1 / ((0.25 / 1 - 0.5) + 0.5)
 public:
     TRT() = default;
     virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
