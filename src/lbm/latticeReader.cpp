@@ -161,12 +161,12 @@ bool LatticeReader2D::read_lattice_input_rho(LatticeGrid2D& lattice)
 {
     if (!(std::filesystem::exists(input_rho_path) && std::filesystem::is_regular_file(input_rho_path)))
     {
-        std::cout << "density field was not found. Defaulting to 0.0 everywhere" << std::endl;
+        std::cout << "density field was not found. Defaulting to 0.0 for boundaries and 1.0 for fluid" << std::endl;
         for (std::size_t i = 0; i < lattice.size(); ++i)
         {
             for (std::size_t j = 0; j < lattice[0].size(); ++j)
             {
-                if (!lattice[i][j].is_boundary())
+                if (!lattice[i][j].is_generic_boundary())
                 {
                     lattice[i][j].set_rho() = 1.0;
                 } else 
