@@ -2,15 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import os
+import sys
 
 
+args = sys.argv
 images= []
 
-for file in os.listdir("scripts/"):
-    if file.endswith(".png"):
-        images.append(f"scripts/{file}")
+print(f"animating images in {args[1]}")
 
-images= sorted(images)
+for file in os.listdir(f"{args[1]}"):
+    if file.endswith(".png"):
+        images.append(f"{args[1]}{file}")
+
+images = sorted(images)
 images.sort(key=len)
 
 def update(frame):
@@ -22,6 +26,6 @@ fig = plt.figure()
 
 
 # Crea l'animazione utilizzando FuncAnimation di Matplotlib
-ani = FuncAnimation(fig, update, frames=len(images), interval=100)  # Intervallo in millisecondi tra le immagini
+ani = FuncAnimation(fig, update, frames=len(images), interval=50)  # Intervallo in millisecondi tra le immagini
 
-ani.save('scripts/animazione.mp4', writer='ffmpeg')
+ani.save(f'{args[2]}.mp4')
