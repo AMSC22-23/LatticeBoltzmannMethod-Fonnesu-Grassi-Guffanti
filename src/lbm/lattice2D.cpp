@@ -71,10 +71,10 @@ void Lattice2D::initialize_lattice()
     
     if (!lattice_reader->read_lattice_input_velocities(lattice))
     {
-        std::cout << "PROGRAM ONLY SUPPORTS INPUT VELOCITY FIELDS FOR NOW." << std::endl;
+        std::cout << "[!ERROR!] could not read input velocities" << std::endl;
         assert(false);
     }else if(!lattice_reader->read_lattice_input_rho(lattice)){
-        std::cout << "PROGRAM ONLY SUPPORTS INPUT RHO FIELDS FOR NOW." << std::endl;
+        std::cout << "[!ERROR!] could not read input densities" << std::endl;
         assert(false);
     }
 
@@ -111,7 +111,10 @@ void Lattice2D::perform_simulation_step()
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             // TODO: can it be done only for fluid?
-            lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
+            if (lattice[i][j].is_fluid())
+            {
+                lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
+            }
 
             // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
 
@@ -141,12 +144,68 @@ void Lattice2D::perform_simulation_step()
         else if (type == BOTTOM_RIGHT_CORNER_2D ) boundary_model.calc_bottom_right_corner_bounce(lattice[i][j]);
     }
 
+    for (std::size_t it = 0; it < size; it++)
+    {  
+        auto [i, j, type] = boundary_list[it];
+        if (type == BOTTOM_WALL_2D )
+        {
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
+        } 
+        else if (type == UPPER_WALL_2D )
+        {
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+
+        } 
+        else if (type == LEFT_WALL_2D )
+        {
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+
+        } 
+        else if (type == RIGHT_WALL_2D )
+        {
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7); 
+
+        } 
+        else if (type == UPPER_LEFT_CORNER_2D )
+        {
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+
+        } 
+        else if (type == UPPER_RIGHT_CORNER_2D )
+        {
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
+
+        } 
+        else if (type == BOTTOM_LEFT_CORNER_2D )
+        {
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
+
+        } 
+        else if (type == BOTTOM_RIGHT_CORNER_2D )
+        {
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+
+        } 
+    }
+
     for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             // 5. Update the macroscopic quantities
-            lattice[i][j].update_macroscopic_quantities(velocity_set);
+            if (lattice[i][j].is_fluid())
+            {
+                lattice[i][j].update_macroscopic_quantities(velocity_set);
+
+            }
         }
     }
 }
@@ -158,7 +217,8 @@ void Lattice2D::perform_streaming()
         for(std::size_t j = 0; j < lattice_width; j++)
         {
             // 3. Perform the streaming of fluid populations
-            if(lattice[i][j].is_fluid()){
+            if (lattice[i][j].is_fluid()) {
+                // streaming must be performed everywhere. In this way walls are able to perform bounces.
                 lattice[i][j].set_population(0) = lattice[i][j].get_collision_populations()[0];
                 lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];
                 lattice[i-1][j].set_population(2) = lattice[i][j].get_collision_populations()[2];
