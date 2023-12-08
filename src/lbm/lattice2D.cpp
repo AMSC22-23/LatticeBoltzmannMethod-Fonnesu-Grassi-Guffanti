@@ -89,7 +89,7 @@ void Lattice2D::initialize_lattice()
         {
             if (lattice[i][j].is_fluid())
             {
-                lattice[i][j].initialize_fluid_node(weights, lattice[i][j].get_u(),lattice[i][j].get_rho());
+                lattice[i][j].initialize_fluid_node(velocity_set, lattice[i][j].get_u(),lattice[i][j].get_rho());
             }
         }
     }

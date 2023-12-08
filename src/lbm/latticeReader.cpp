@@ -221,7 +221,7 @@ bool LatticeReader2D::read_lattice_input_velocities(LatticeGrid2D& lattice)
     if (!(y_present = std::filesystem::exists(u_y_path) && std::filesystem::is_regular_file(u_y_path)))
     {
         std::cout << "y-velocity field was not found. Defaulted to 0 everywhere" << std::endl;
-    }
+    } else
     {
         std::cout << "y-velocity field found" << std::endl;
     }

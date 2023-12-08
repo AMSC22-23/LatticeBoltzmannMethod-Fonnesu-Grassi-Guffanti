@@ -200,8 +200,9 @@ public:
      * Initializes a lattice node by setting macroscopic density, velocity, populations and equilibrium populations
      * @param set_of_weights the weighted directions composing the velocity set
     */
-    void initialize_fluid_node(const std::vector<double>& set_of_weights, const std::array<double, dim> node_u, const double node_rho = 1.0)
-    {
+    void initialize_fluid_node(const VelocitySet& set, const std::array<double, dim> node_u, const double node_rho = 1.0)
+    {   
+        std::vector<double> set_of_weights = set.get_velocity_set().weight;
         populations.resize(set_of_weights.size());
         eq_populations.resize(set_of_weights.size());
         collision_populations.resize(set_of_weights.size());
@@ -216,13 +217,8 @@ public:
         std::fill(populations.begin(), populations.end(), 0.0);
         std::fill(collision_populations.begin(), collision_populations.end(), 0.0);
         
-        // setting the equilibrium populations: since u = 0 and rho = 1, the equation describing the 
-        // equilibrium populations results only into the wi factor, which is the weight of a specific direction.
-        std::size_t size = set_of_weights.size();
-        for (std::size_t velocity_index = 0; velocity_index < size; ++velocity_index)
-        {
-            eq_populations[velocity_index] = set_of_weights[velocity_index];
-        }
+        // then equilibrium populations are computed
+        compute_equilibrium_populations(set.get_velocity_set());        
     }
 
     /**
@@ -296,7 +292,7 @@ public:
         auto directions = velocity_set.direction;
         auto weights = velocity_set.weight;
         auto size = directions.size();
-
+        // std::cout << size << std::endl;
         for (std::size_t i = 0; i < size; ++i)
         {
             // computing the dot products
@@ -312,6 +308,7 @@ public:
                 1.0 + one_over_speed_of_sound_squared * u_dot_ci + 
                 0.5 * one_over_speed_of_sound_squared * one_over_speed_of_sound_squared * u_dot_ci * u_dot_ci -
                 0.5 * one_over_speed_of_sound_squared * u_dot_u);
+            // std::cout << "eq: " << i <<" "<< eq_populations[i] << std::endl;
         }
     }
 };

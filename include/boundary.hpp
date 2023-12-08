@@ -55,7 +55,7 @@ public:
     */
     static constexpr double two_thirds = 2.0/3.0;
     static constexpr double one_sixth = 1.0/6.0;
-    static constexpr double one_half = 0.5;
+    static constexpr double one_half = 1.0/2.0;
 
     /**
      * Function that handles the collision with a top wall
