@@ -134,73 +134,69 @@ void Lattice2D::perform_simulation_step()
     for (std::size_t it = 0; it < size; it++)
     {  
         auto [i, j, type] = boundary_list[it];
-        if (type == BOTTOM_WALL_2D) boundary_model.calc_bottom_wall_bounce(lattice[i][j]);
-        else if (type == UPPER_WALL_2D ) boundary_model.calc_top_wall_bounce(lattice[i][j]);
-        else if (type == LEFT_WALL_2D ) boundary_model.calc_left_wall_bounce(lattice[i][j]);
-        else if (type == RIGHT_WALL_2D ) boundary_model.calc_right_wall_bounce(lattice[i][j]); 
-        else if (type == UPPER_LEFT_CORNER_2D ) boundary_model.calc_top_left_corner_bounce(lattice[i][j]);
-        else if (type == UPPER_RIGHT_CORNER_2D ) boundary_model.calc_top_right_corner_bounce(lattice[i][j]); 
-        else if (type == BOTTOM_LEFT_CORNER_2D ) boundary_model.calc_bottom_left_corner_bounce(lattice[i][j]); 
-        else if (type == BOTTOM_RIGHT_CORNER_2D ) boundary_model.calc_bottom_right_corner_bounce(lattice[i][j]);
-    }
-
-    for (std::size_t it = 0; it < size; it++)
-    {  
-        auto [i, j, type] = boundary_list[it];
-        if (type == BOTTOM_WALL_2D )
+        if (type == BOTTOM_WALL_2D) 
         {
+            boundary_model.calc_bottom_wall_bounce(lattice[i][j]);
             lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
             lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
             lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
-        } 
+        }
         else if (type == UPPER_WALL_2D )
         {
+            boundary_model.calc_top_wall_bounce(lattice[i][j]);
             lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
             lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
             lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-
-        } 
-        else if (type == LEFT_WALL_2D )
+        }
+        else if (type == LEFT_WALL_2D ) 
         {
+            boundary_model.calc_left_wall_bounce(lattice[i][j]);
             lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
             lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
             lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-
-        } 
-        else if (type == RIGHT_WALL_2D )
+        }
+        else if (type == RIGHT_WALL_2D ) 
         {
+            boundary_model.calc_right_wall_bounce(lattice[i][j]); 
             lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
             lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
             lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7); 
-
-        } 
-        else if (type == UPPER_LEFT_CORNER_2D )
+        }
+        else if (type == UPPER_LEFT_CORNER_2D ) 
         {
+            boundary_model.calc_top_left_corner_bounce(lattice[i][j]);
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
             lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-
-        } 
-        else if (type == UPPER_RIGHT_CORNER_2D )
+        }
+        else if (type == UPPER_RIGHT_CORNER_2D ) 
         {
+            boundary_model.calc_top_right_corner_bounce(lattice[i][j]); 
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
             lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
-
-        } 
-        else if (type == BOTTOM_LEFT_CORNER_2D )
+        }
+        else if (type == BOTTOM_LEFT_CORNER_2D ) 
         {
+            boundary_model.calc_bottom_left_corner_bounce(lattice[i][j]); 
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
             lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
-
-        } 
-        else if (type == BOTTOM_RIGHT_CORNER_2D )
+        }
+        else if (type == BOTTOM_RIGHT_CORNER_2D ) 
         {
+            boundary_model.calc_bottom_right_corner_bounce(lattice[i][j]);
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
             lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
-
-        } 
+        }
     }
 
+    // 5. Update the macroscopic quantities
     for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            // 5. Update the macroscopic quantities
             if (lattice[i][j].is_fluid())
             {
                 lattice[i][j].update_macroscopic_quantities(velocity_set);

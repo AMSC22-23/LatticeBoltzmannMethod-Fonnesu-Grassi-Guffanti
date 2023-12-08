@@ -74,7 +74,9 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
 
     // classifying the type of boundary
     std::cout << "classifying the type of boundary" << std::endl;
-    for(std::tuple<std::size_t, std::size_t, BoundaryType2DEnum> boundary : boundary_list)
+
+    // TODO: with the & operator the node is classified, but there are errors yet
+    for(std::tuple<std::size_t, std::size_t, BoundaryType2DEnum> &boundary : boundary_list)
     {
         size_t i = std::get<0>(boundary);
         size_t j = std::get<1>(boundary);

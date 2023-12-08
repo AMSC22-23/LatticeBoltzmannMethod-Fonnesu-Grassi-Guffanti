@@ -1,20 +1,20 @@
 #include "boundary.hpp"
 
 void NEBB::calc_top_wall_bounce(LatticeNode<2> &node) const
-{
+{ 
     std::vector<double> f = node.get_populations();
 
     const double rho = (f[0] + f[1] + f[3] + 2.0 * (f[2] + f[5] + f[7])) / (1.0 + node.get_u()[1]);
-    
-    node.set_population(4) = f[2] - two_thirds* rho *node.get_u()[1];
+
+    node.set_population(4) = f[2] - two_thirds*rho*node.get_u()[1];
 
     node.set_population(8) = f[6] - one_half*(f[1] - f[3]) +
-                 one_half*rho*node.get_u()[0] -
-                 one_sixth*rho*node.get_u()[1];
+                             one_half*rho*node.get_u()[0] -
+                             one_sixth*rho*node.get_u()[1];
 
     node.set_population(7) = f[5] + one_half*(f[1] - f[3]) -
-                 one_half*rho*node.get_u()[0] -
-                 one_sixth*rho*node.get_u()[1];
+                             one_half*rho*node.get_u()[0] -
+                             one_sixth*rho*node.get_u()[1];
 }
 
 void NEBB::calc_bottom_wall_bounce(LatticeNode<2> &node) const
@@ -26,8 +26,14 @@ void NEBB::calc_bottom_wall_bounce(LatticeNode<2> &node) const
     const double ru = rho * node.get_u()[1];
 
     node.set_population(2) = f[4] + two_thirds*rho*node.get_u()[1];
-    node.set_population(5) = f[7] - one_half*(f[1]-f[3]) + one_half*rho*node.get_u()[0]+one_sixth*rho*node.get_u()[1];
-    node.set_population(6) = f[8] + one_half*(f[1]-f[3]) - one_half*rho*node.get_u()[0]+one_sixth*rho*node.get_u()[1];
+
+    node.set_population(5) = f[7] - one_half*(f[1]-f[3]) + 
+                             one_half*rho*node.get_u()[0] + 
+                             one_sixth*rho*node.get_u()[1];
+
+    node.set_population(6) = f[8] + one_half*(f[1]-f[3]) - 
+                             one_half*rho*node.get_u()[0] + 
+                             one_sixth*rho*node.get_u()[1];
 }
 
 void NEBB::calc_left_wall_bounce(LatticeNode<2> &node) const
@@ -38,9 +44,15 @@ void NEBB::calc_left_wall_bounce(LatticeNode<2> &node) const
 
     const double ru = rho * node.get_u()[0];
 
-    node.set_population(1) = f[3]+two_thirds*rho*node.get_u()[0];
-    node.set_population(5) = f[7]-one_half*(f[2]-f[4])+one_sixth*rho*node.get_u()[0]+one_half*rho*node.get_u()[1];
-    node.set_population(8) = f[6]+one_half*(f[2]-f[4])+one_sixth*rho*node.get_u()[0]-one_half*rho*node.get_u()[1];
+    node.set_population(1) = f[3] + two_thirds*rho*node.get_u()[0];
+
+    node.set_population(5) = f[7] - one_half*(f[2]-f[4]) + 
+                             one_sixth*rho*node.get_u()[0] + 
+                             one_half*rho*node.get_u()[1];
+
+    node.set_population(8) = f[6] + one_half*(f[2]-f[4]) + 
+                             one_sixth*rho*node.get_u()[0] - 
+                             one_half*rho*node.get_u()[1];
 }
 
 void NEBB::calc_right_wall_bounce(LatticeNode<2> &node) const
@@ -51,9 +63,15 @@ void NEBB::calc_right_wall_bounce(LatticeNode<2> &node) const
 
     const double ru = rho * node.get_u()[0];
 
-    node.set_population(3) = f[1]-two_thirds*rho*node.get_u()[0];
-    node.set_population(6) = f[5]+one_half*(f[2]-f[4])-one_sixth*rho*node.get_u()[0]-one_half*rho*node.get_u()[1];
-    node.set_population(7) = f[8]-one_half*(f[2]-f[4])-one_sixth*rho*node.get_u()[0]+one_half*rho*node.get_u()[1];
+    node.set_population(3) = f[1] - two_thirds*rho*node.get_u()[0];
+
+    node.set_population(6) = f[5] + one_half*(f[2]-f[4]) - 
+                             one_sixth*rho*node.get_u()[0] - 
+                             one_half*rho*node.get_u()[1];
+
+    node.set_population(7) = f[8] - one_half*(f[2]-f[4]) - 
+                             one_sixth*rho*node.get_u()[0] + 
+                             one_half*rho*node.get_u()[1];
 }
 
 void NEBB::calc_top_left_corner_bounce(LatticeNode<2> &node) const
