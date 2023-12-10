@@ -24,28 +24,34 @@ void Lattice2D::save_output_data(std::size_t iteration_count) const
     std::ofstream output_file_rho(output_file_path_rho);
 
     // file where the norm of the velocity is saved
-    std::string output_file_path_u = output_dir_path + "/output-" + std::to_string(iteration_count) + "u.txt";
-    std::ofstream output_file_u(output_file_path_u);
+    std::string output_file_path_u_x = output_dir_path + "/output-" + std::to_string(iteration_count) + "u_x.txt";
+    std::ofstream output_file_u_x(output_file_path_u_x);
+
+    // file where the norm of the velocity is saved
+    std::string output_file_path_u_y = output_dir_path + "/output-" + std::to_string(iteration_count) + "u_y.txt";
+    std::ofstream output_file_u_y(output_file_path_u_y);
 
     for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             auto [rho, u] = lattice[i][j].get_macroscopic_quantities();
-            // computing the two 2-norm of the vector
-            auto two_norm = std::sqrt(
-                u[0]*u[0] + u[1]*u[1]
-            );
-
+                        
             output_file_rho << rho << " ";
-            output_file_u << two_norm << " ";
+            output_file_u_x << u[0] << " ";
+            output_file_u_y << u[1] << " ";
+
         }
         output_file_rho << std::endl;
-        output_file_u << std::endl;
+        output_file_u_x << std::endl;
+        output_file_u_y << std::endl;
+        
     }
-
+    
     output_file_rho.close();
-    output_file_u.close();
+    output_file_u_x.close();
+    output_file_u_y.close();
+
 }
 
 void Lattice2D::log_specific_data() const 

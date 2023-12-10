@@ -51,5 +51,17 @@ void Lattice::create_output_directory()
     } else
     {
         std::cout << "-> results directory already exists" << std::endl;
+        std::cout << "clearing the directory (only .txt files)" << std::endl;
+
+        for (const auto& entry : std::filesystem::directory_iterator(output_dir_path))
+        {
+            std::cout << entry.path();
+            if (entry.path().extension() == ".txt")
+            {
+                std::filesystem::remove(entry.path());
+                std::cout<< " removed" << std::endl;
+            }
+        }
+
     }
 }

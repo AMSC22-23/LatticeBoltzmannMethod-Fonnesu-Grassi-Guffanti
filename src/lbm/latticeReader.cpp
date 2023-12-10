@@ -228,18 +228,29 @@ bool LatticeReader2D::read_lattice_input_velocities(LatticeGrid2D& lattice)
         std::cout << "y-velocity field found" << std::endl;
     }
 
-    if (!x_present && !y_present)
+    if (!x_present)
     {
         
-        std::cout << "no velocity field was found. Defaulting every velocity to 0" << std::endl;
+        std::cout << "Defaulting x velocity to 0" << std::endl;
         for (std::size_t i = 0; i < lattice.size(); ++i)
         {
             for (std::size_t j = 0; j < lattice[0].size(); ++j)
             {
-                lattice[i][j].set_u() = {0.0, 0.0};
+                lattice[i][j].set_u(0) = 0.0;
             }
         }
-        return true;
+    }
+    if (!y_present)
+    {
+        
+        std::cout << "Defaulting y velocity to 0" << std::endl;
+        for (std::size_t i = 0; i < lattice.size(); ++i)
+        {
+            for (std::size_t j = 0; j < lattice[0].size(); ++j)
+            {
+                lattice[i][j].set_u(1) = 0.0;
+            }
+        }
     }
 
     if (x_present)

@@ -55,6 +55,7 @@ int lbm::compute(const std::size_t n_iter){
 
     for (std::size_t i = 0; i < n_iter; i++)
     {
+        std::cout << "Iteration: " << i << " out of " << n_iter << ". ( " << i/(double)n_iter * 100.0 <<"% )" << std::endl;
         lattice_ptr->perform_simulation_step();
         lattice_ptr->save_output_data(i);
     }
