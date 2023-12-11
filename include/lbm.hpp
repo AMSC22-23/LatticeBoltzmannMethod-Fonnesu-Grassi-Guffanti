@@ -11,6 +11,11 @@
 #include "velocitySet.hpp"
 #include "boundary.hpp"
 
+// TODO: ADD VISCOSITY V = Cs^2*(tau-dt/2)
+// TODO: ADD FUNCTION OBJECT TO MANAGE INLET FIELDS
+// TODO: ADD OUTPUT FREQUENCY
+// TODO: ADD REYNOLDS NUMBER
+
 class lbm
 {
 private:

@@ -66,6 +66,7 @@ void Lattice2D::initialize_lattice()
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
     std::cout << "              reading input data from file" << std::endl;
     
+    // TODO: PARALLELIZE
     for (size_t i = 0; i < lattice_height; i++)
     {
         for (size_t j = 0; j < lattice_width; j++)
@@ -74,7 +75,8 @@ void Lattice2D::initialize_lattice()
         }
 
     }
-    
+    // TODO: BARRIER
+
     if (!lattice_reader->read_lattice_input_velocities(lattice))
     {
         std::cout << "[!ERROR!] could not read input velocities" << std::endl;
@@ -89,6 +91,7 @@ void Lattice2D::initialize_lattice()
     const auto weights = set_elements.weight;
 
     // looping over all elements in the lattice
+    // TODO: PARALLELIZE
     for (std::size_t i = 0; i < lattice_height; ++i)
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
@@ -99,7 +102,8 @@ void Lattice2D::initialize_lattice()
             }
         }
     }
-
+    // TODO: BARRIER
+    
     std::cout << "LATTICE 2D:   lattice initialized" << std::endl;
 }
 
@@ -111,31 +115,25 @@ void Lattice2D::perform_simulation_step()
     const double t_conj = 1-t_const;
 
     // 1. The equilibrium populations are calculated for each node
-    // -> parallelizable!
+    // TODO: PARALLELIZE
     for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
-            // TODO: can it be done only for fluid?
-            if (lattice[i][j].is_fluid())
-            {
-                lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
-            }
-
-            // WHEN TO OUTPUT THE MACROSCOPIC QUANTITIES
-
             // 2. Perform the collisions
             if(lattice[i][j].is_fluid()){
+                lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
                 lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations(), t_const, t_conj);
             }
         }
     }
+    // TODO: BARRIER
 
     // 3. Perform streaming
     perform_streaming();
 
     // 4. Perform the collision at the boundaries
-
+    // TODO: PARALLELIZE
     std::size_t size = boundary_list.size();
     for (std::size_t it = 0; it < size; it++)
     {  
@@ -197,8 +195,10 @@ void Lattice2D::perform_simulation_step()
             lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
         }
     }
+    // TODO: BARRIER
 
     // 5. Update the macroscopic quantities
+    // TODO: PARALLELIZE
     for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
@@ -210,10 +210,12 @@ void Lattice2D::perform_simulation_step()
             }
         }
     }
+    // TODO: BARRIER
 }
 
 void Lattice2D::perform_streaming()
 {
+    // TODO: PARALLELIZE
     for(std::size_t i = 0; i< lattice_height; i++)
     {
         for(std::size_t j = 0; j < lattice_width; j++)
@@ -233,4 +235,5 @@ void Lattice2D::perform_streaming()
             }
         }
     }
+    // TODO: BARRIER
 }
