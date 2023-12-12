@@ -1,10 +1,13 @@
 #include "lbm.hpp"
 
-lbm::lbm(std::size_t D, int Q, const std::string& input_dir_path, const std::string &collision_model, const std::string& boundary_model):
-tau (1.0),
-delta_t (1.0)
-{
-    velocity_set.initialize(D,Q);
+lbm::lbm(const std::size_t& D,
+    const double reynolds_, 
+    const std::string& input_dir_path, 
+    const std::string& collision_model,
+    const std::size_t& frequency_ = 1):
+    frequency (frequency_),
+    re (reynolds_)
+    {
     std::string output_dir_path="../results";
     lattice_ptr=nullptr;
 
@@ -22,45 +25,45 @@ delta_t (1.0)
         std::cout << collision_model << " not yet implemented" << std::endl;
     }
 
-    if(boundary_model == "BB")
+    switch (D)
     {
-        boundary_ptr = std::make_shared<BounceBack>();
-    }else if(collision_model == "NEBB")
-    {
-        boundary_ptr = std::make_shared<NEBB>();
-    }else
-    {
-        std::cout << boundary_model << " not yet implemented" << std::endl;
-    }
-
-    switch (D){
-        case 1:
-            //TODO: to implement? punto di domanda?
-            lattice_ptr=nullptr;
-            break;
         case 2:
-            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, tau, delta_t);
+            velocity_set.initialize(2, 9);
+            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, re);
             break;
         case 3:
-            //TODO: to implement
             lattice_ptr=nullptr;
             break;
         default:
-            std::cout << "Errore" << std::endl;
+            std::cout << "[!ERROR!] only 2D and 3D are supported" << std::endl;
             break;
     }
 }
 
-int lbm::compute(const std::size_t n_iter){
+void lbm::compute(const double time)
+{
+    double dt = re * (0.2 * 100 /re)/(100.0 * 100.0);
+ 
+    const std::size_t n_iter = floor(time/dt);
 
-    for (std::size_t i = 0; i < n_iter; i++)
+    std::cout << "Time  : " << time << std::endl;
+    std::cout << "dt    : " << dt << std::endl;
+    std::cout << "iter  : " << n_iter << std::endl;
+
+    std::size_t output_counter = 0;
+    for (std::size_t i = 0; i <= n_iter; i++)
     {
-        std::cout << "Iteration: " << i << " out of " << n_iter << ". ( " << i/(double)n_iter * 100.0 <<"% )" << std::endl;
+        lattice_ptr->set_inlets(i);
+        // REINITIALIZATION OF INLET FIELDS
         lattice_ptr->perform_simulation_step();
-        lattice_ptr->save_output_data(i);
-    }
-    return 1;
-    
+        if(i % frequency == 0)
+        {
+            std::cout << "iteration " << i << " out of " << n_iter << std::endl; 
+            // print the output only if the iteration is a multiple of the frequency. 
+            lattice_ptr->save_output_data(output_counter);
+            output_counter++;
+        }
+    }    
 }
 
 

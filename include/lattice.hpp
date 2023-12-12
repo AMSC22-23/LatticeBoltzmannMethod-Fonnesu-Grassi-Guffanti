@@ -9,6 +9,7 @@
 
 #include "latticeNode.hpp"
 #include "boundary.hpp"
+#include "inletInitializer.hpp"
 
 /**
  * Abstract representation of the lattice of points, realized into two
@@ -52,12 +53,12 @@ protected:
     /**
      * Time constant
     */
-    const double tau;
+    double tau;
 
     /**
      * Time lapse
     */
-    const double delta_t;
+    double delta_t;
 
     /**
      * Logs specific data regarding the lattice
@@ -74,7 +75,6 @@ protected:
     * Creates the directory in which the results will be stored
     */
     void create_output_directory();
-
 public:
     
     /**
@@ -83,10 +83,14 @@ public:
      * @param dimensions_ number of dimensions of the lattice
      * @param velocity_set_ the velocity set used in the lattice
      * @param collision_model model used to calculate collisions
-     * @param tau time constant
-     * @param delta_t time lapse
+     * @param reynolds_ reynolds constant
     */
-    Lattice(const std::string& input_dir_path_, const std::string& output_dir_path_, const int dimensions_, const VelocitySet& velocity_set_, std::shared_ptr<CollisionModel> collision_model_, const double tau_, const double delta_t_);
+    Lattice(const std::string& input_dir_path_, 
+        const std::string& output_dir_path_, 
+        const int dimensions_, 
+        const VelocitySet& velocity_set_, 
+        std::shared_ptr<CollisionModel> collision_model_, 
+        const double reynolds_);
 
     virtual ~Lattice() = default;
 
@@ -106,6 +110,11 @@ public:
      * Performs the initialization of the lattice nodes.
     */
     virtual void initialize_lattice() = 0;
+
+    /**
+     * Sets the inlet fields of the lattice;
+    */
+    virtual void set_inlets(const std::size_t iterations) = 0;
 
     /**
      * Logs data regarding the lattice: dimensions, path to files and directories,  

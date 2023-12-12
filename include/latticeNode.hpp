@@ -257,12 +257,12 @@ public:
     }
 
     /**
-     * Initializes a generic boundary by setting all the parameters to 0.0
+     * Initializes a generic node 
     */
-    void initialize_generic_boundary(const VelocitySet& velocity_set)
+    void initialize_generic_node(const VelocitySet& velocity_set)
     {   
         
-        rho = 0.0;
+        rho = 1.0;
         u.fill(0.0);
         
         std::size_t size = velocity_set.get_set_size();

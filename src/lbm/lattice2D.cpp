@@ -4,16 +4,26 @@ Lattice2D::Lattice2D(const std::string& input_dir_path,
     const std::string& output_dir_path_, 
     const VelocitySet& velocity_set, 
     std::shared_ptr<CollisionModel> collision_model, 
-    const double tau, 
-    const double delta_t):
-Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, tau, delta_t)
+    const double reynolds_):
+Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, reynolds_)
 {
     lattice_reader = std::make_unique<LatticeReader2D>(input_dir_path);
+
     if (!lattice_reader->read_lattice_structure(lattice, boundary_list , lattice_width, lattice_height))
     {
         std::cerr << "[!ERROR!] lattice structure matrix could not be read" << std::endl;
         assert(false);
     }
+
+    inlet_initializer = std::make_unique<LidDrivenCavityUniformInitializer>(lattice_width, 0.2);
+
+    // calculating t and tau
+    delta_t = reynolds_ * (0.2 * 100.0 /reynolds_)/(100.0 * 100.0);
+    tau = 0.5 + (0.2 * 100.0 /reynolds_)/(0.3);
+
+    std::cout << "tau   : " << tau << std::endl;
+    std::cout << "t/tau : " << delta_t/tau << std::endl;
+
     initialize_lattice();
 };
 
@@ -56,7 +66,6 @@ void Lattice2D::save_output_data(std::size_t iteration_count) const
 
 void Lattice2D::log_specific_data() const 
 {
-    std::cout << "  Lattice Name   : " << lattice_name << std::endl;
     std::cout << "  Lattice width  : " << lattice_width << std::endl;
     std::cout << "  Lattice height : " << lattice_height << std::endl;
 }
@@ -71,20 +80,22 @@ void Lattice2D::initialize_lattice()
     {
         for (size_t j = 0; j < lattice_width; j++)
         {
-            lattice[i][j].initialize_generic_boundary(velocity_set);
+            lattice[i][j].initialize_generic_node(velocity_set);
         }
-
     }
+
     // TODO: BARRIER
 
-    if (!lattice_reader->read_lattice_input_velocities(lattice))
-    {
-        std::cout << "[!ERROR!] could not read input velocities" << std::endl;
-        assert(false);
-    }else if(!lattice_reader->read_lattice_input_rho(lattice)){
-        std::cout << "[!ERROR!] could not read input densities" << std::endl;
-        assert(false);
-    }
+    // if (!lattice_reader->read_lattice_input_velocities(lattice))
+    // {
+    //     std::cout << "[!ERROR!] could not read input velocities" << std::endl;
+    //     assert(false);
+    // }else if(!lattice_reader->read_lattice_input_rho(lattice)){
+    //     std::cout << "[!ERROR!] could not read input densities" << std::endl;
+    //     assert(false);
+    // }
+
+    // VELOCITY INITIALIZATION
 
     const WeightedDirection set_elements = velocity_set.get_velocity_set();
 
@@ -111,8 +122,11 @@ void Lattice2D::perform_simulation_step()
 {
     // The simulation step is composed of many substeps:
 
-    const double t_const = delta_t/tau;
-    const double t_conj = 1-t_const;
+    // const double t_const = delta_t/tau;
+    // const double t_conj = 1-t_const;
+
+    const double t_const = 0.6;
+    const double t_conj = 0.4;
 
     // 1. The equilibrium populations are calculated for each node
     // TODO: PARALLELIZE
@@ -236,4 +250,18 @@ void Lattice2D::perform_streaming()
         }
     }
     // TODO: BARRIER
+}
+
+void Lattice2D::set_inlets(std::size_t iterations)
+{
+    //std::cout << "setting inlets " << iterations << std::endl;
+    std::size_t size = boundary_list.size();
+    for (std::size_t it = 0; it < size; ++it)
+    {
+        auto [i, j, type] = boundary_list[it];
+        auto [vels, rho] = inlet_initializer->set_inlets({i, j}, iterations);
+        //std::cout << vels[0] << " " << vels[1] << " " << rho << std::endl;
+        lattice[i][j].set_u() = vels;
+        lattice[i][j].set_rho() = rho;
+    }
 }

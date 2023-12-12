@@ -15,6 +15,7 @@
 #include "collisionModel.hpp"
 #include "boundary.hpp"
 #include "latticeReader.hpp"
+#include "inletInitializer.hpp"
 
 /**
  * 2D implementation of the Lattice abstract class
@@ -53,6 +54,11 @@ private:
     std::unique_ptr<LatticeReader2D> lattice_reader;
 
     /**
+     * Object that initializes lattice inlet fields
+    */
+    std::unique_ptr<InletInitializer<2>> inlet_initializer;
+
+    /**
      * Vector of tuples of boundaries and open boundaries and their coordinates
     */
     BoundaryList2D boundary_list;
@@ -76,15 +82,13 @@ public:
      * @param velocity_set_ velocity set used to perform operations on the lattice
      * @param collision_model model used to calculate collisions
      * @param boundary_model model used to calculate collisions on boundaries
-     * @param tau time constant
-     * @param delta_t time lapse
+     * @param reynolds_ reynolds constant
     */ 
     Lattice2D(const std::string& input_file_path_,
         const std::string& output_dir_path_,
         const VelocitySet& velocity_set_,
         std::shared_ptr<CollisionModel> collision_model_, 
-        const double tau, 
-        const double delta_t);
+        const double reynolds_);
     virtual ~Lattice2D() = default;
 
     /**
@@ -103,6 +107,11 @@ public:
      * @note Implementation of Lattice class equivalent virtual method
     */
     virtual void save_output_data(std::size_t iteration_count) const override; 
+
+    /**
+     * Sets the inlets fields
+    */
+    virtual void set_inlets(const std::size_t iterations) override;
 };
 
 #endif // HH_LATTICE_2D
