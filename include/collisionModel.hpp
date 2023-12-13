@@ -38,7 +38,7 @@ public:
 class TRT : public CollisionModel
 {
 private: 
-    std::vector<int> f_conj = {0, 3, 4, 1, 2, 7, 8, 6, 5}; //Vector containing the opposite index for each direction (Example: 1<->3, 5<->7)
+    std::vector<int> f_conj = {0, 3, 4, 1, 2, 7, 8, 5, 6}; //Vector containing the opposite index for each direction (Example: 1<->3, 5<->7)
     const double om_p = 1; //1 / tau
     const double om_m = 1; //1 / ((0.25 / 1 - 0.5) + 0.5)
 public:
