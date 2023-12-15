@@ -76,23 +76,37 @@ void Lattice2D::initialize_lattice()
     std::cout << "              reading input data from file" << std::endl;
     
     // TODO: PARALLELIZE
-    /*
-    std::for_each(std::execution::par_unseq, lattice.begin(), lattice.end(), [this](auto& row)
-    {
-        std::for_each(std::execution::par_unseq, row.begin(), row.end(), [this](auto& node)
-        {
-            node.initialize_generic_node(velocity_set);
-        });
-    });
-    */
-
-    for (size_t i = 0; i < lattice_height; i++)
+    /*for (size_t i = 0; i < lattice_height; i++)
     {
         for (size_t j = 0; j < lattice_width; j++)
         {
             lattice[i][j].initialize_generic_node(velocity_set);
         }
-    }
+    }*/
+
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    auto initialize_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
+        auto initialize_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
+            nodes.initialize_generic_node(velocity_set);
+        };
+
+        std::for_each(std::execution::par,rows.begin(),rows.end(), [&](LatticeNode<2>& node){
+            initialize_nodes(node,velocity_set);
+        });
+
+    };
+    std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
+        initialize_rows(row , velocity_set);
+    });
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+
+    // Stampa il tempo trascorso per processare x righe
+    std::cout << "inizializzazione nodi "<< duration.count() << " millisecondi" << std::endl;//TODO: con la parallelizzazione passa da 2 millisecondi a 5, non buono direi :D
+
 
     // TODO: BARRIER
 
@@ -113,7 +127,7 @@ void Lattice2D::initialize_lattice()
 
     // looping over all elements in the lattice
     // TODO: PARALLELIZE
-    for (std::size_t i = 0; i < lattice_height; ++i)
+    /*for (std::size_t i = 0; i < lattice_height; ++i)
     {
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
@@ -122,7 +136,24 @@ void Lattice2D::initialize_lattice()
                 lattice[i][j].initialize_fluid_node(velocity_set, lattice[i][j].get_u(),lattice[i][j].get_rho());
             }
         }
-    }
+    }*/
+
+    auto vel_init_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
+        auto vel_init_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
+            if (nodes.is_fluid())
+            {
+                nodes.initialize_fluid_node(velocity_set, nodes.get_u(),nodes.get_rho());
+            }
+        };
+
+        std::for_each(std::execution::par ,rows.begin(),rows.end(), [&](LatticeNode<2>& node){
+            vel_init_nodes(node,velocity_set);
+        });
+
+    };
+    std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
+        vel_init_rows(row,velocity_set);
+    });
     // TODO: BARRIER
     
     std::cout << "LATTICE 2D:   lattice initialized" << std::endl;
@@ -140,7 +171,7 @@ void Lattice2D::perform_simulation_step()
 
     // 1. The equilibrium populations are calculated for each node
     // TODO: PARALLELIZE
-    for (std::size_t i = 0; i < lattice_height; i++)
+    /*for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
@@ -150,7 +181,24 @@ void Lattice2D::perform_simulation_step()
                 lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations(), t_const, t_conj);
             }
         }
-    }
+    }*/
+
+    auto calc_eq_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model){
+        auto calc_eq_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model){
+            if(nodes.is_fluid()){
+                nodes.compute_equilibrium_populations(velocity_set.get_velocity_set());
+                nodes.set_collision_populations() = collision_model->calc_collision(nodes.get_populations(), nodes.get_eq_populations(), 0.6, 0.4); //FIXME: non vede t_const e conj dentro la funzione a parte come si fa?
+            }
+        };
+
+        std::for_each(std::execution::par ,rows.begin(),rows.end(), [&](LatticeNode<2>& node){
+            calc_eq_nodes(node,velocity_set, collision_model);
+        });
+
+    };
+    std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
+        calc_eq_rows(row,velocity_set, collision_model);
+    });
     // TODO: BARRIER
 
     // 3. Perform streaming
@@ -223,7 +271,7 @@ void Lattice2D::perform_simulation_step()
 
     // 5. Update the macroscopic quantities
     // TODO: PARALLELIZE
-    for (std::size_t i = 0; i < lattice_height; i++)
+    /*for (std::size_t i = 0; i < lattice_height; i++)
     {
         for (std::size_t j = 0; j < lattice_width; j++)
         {
@@ -233,7 +281,24 @@ void Lattice2D::perform_simulation_step()
 
             }
         }
-    }
+    }*/
+
+    auto macroscopic_quantities_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
+        auto macroscopic_quantities_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
+            if (nodes.is_fluid())
+            {
+                nodes.update_macroscopic_quantities(velocity_set);
+            }
+        };
+
+        std::for_each(std::execution::par ,rows.begin(),rows.end(), [&](LatticeNode<2>& node){
+            macroscopic_quantities_nodes(node,velocity_set);
+        });
+
+    };
+    std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
+        macroscopic_quantities_rows(row,velocity_set);
+    });
     // TODO: BARRIER
 }
 
@@ -259,6 +324,32 @@ void Lattice2D::perform_streaming()
             }
         }
     }
+
+    /*auto streaming_rows =[](std::vector<LatticeNode<2>>& rows){
+        auto streaming_nodes = [](LatticeNode<2>& nodes){
+            if (nodes.is_fluid()) {
+                // streaming must be performed everywhere. In this way walls are able to perform bounces.
+                nodes.set_population(0) = lattice[i][j].get_collision_populations()[0];
+                lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];
+                lattice[i-1][j].set_population(2) = lattice[i][j].get_collision_populations()[2];
+                lattice[i][j-1].set_population(3) = lattice[i][j].get_collision_populations()[3];
+                lattice[i+1][j].set_population(4) = lattice[i][j].get_collision_populations()[4];
+                lattice[i-1][j+1].set_population(5) = lattice[i][j].get_collision_populations()[5];
+                lattice[i-1][j-1].set_population(6) = lattice[i][j].get_collision_populations()[6];
+                lattice[i+1][j-1].set_population(7) = lattice[i][j].get_collision_populations()[7];
+                lattice[i+1][j+1].set_population(8) = lattice[i][j].get_collision_populations()[8];
+            }
+        };
+
+        std::for_each(std::execution::par ,rows.begin(),rows.end(), [&](LatticeNode<2>& node){
+            streaming_nodes(node);
+        });
+
+    };
+    std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
+        streaming_rows(row); //FIXME: non avendo indici non so come prendere i nodi adiacenti con questo metodo
+    });*/
+
     // TODO: BARRIER
 }
 

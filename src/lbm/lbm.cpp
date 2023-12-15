@@ -51,6 +51,7 @@ void lbm::compute(const double time)
     std::cout << "iter  : " << n_iter << std::endl;
 
     std::size_t output_counter = 0;
+    auto start_time = std::chrono::high_resolution_clock::now();
     for (std::size_t i = 0; i <= n_iter; i++)
     {
         lattice_ptr->set_inlets(i);
@@ -58,10 +59,15 @@ void lbm::compute(const double time)
         lattice_ptr->perform_simulation_step();
         if(i % frequency == 0)
         {
+            
             std::cout << "iteration " << i << " out of " << n_iter << std::endl; 
+            auto end_time = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+            std::cout << duration.count() << " millisecondi" << std::endl;
             // print the output only if the iteration is a multiple of the frequency. 
             lattice_ptr->save_output_data(output_counter);
             output_counter++;
+            start_time = std::chrono::high_resolution_clock::now();
         }
     }    
 }
