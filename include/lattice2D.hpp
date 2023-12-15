@@ -10,6 +10,7 @@
 #include <string>
 #include <algorithm>
 #include <execution>
+//#include <omp.h>
 
 #include "aliases.hpp"
 #include "lattice.hpp"

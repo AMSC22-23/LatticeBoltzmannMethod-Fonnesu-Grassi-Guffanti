@@ -76,17 +76,20 @@ void Lattice2D::initialize_lattice()
     std::cout << "              reading input data from file" << std::endl;
     
     // TODO: PARALLELIZE
-    /*for (size_t i = 0; i < lattice_height; i++)
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    //#pragma omp parallel for
+    for (size_t i = 0; i < lattice_height; i++)
     {
+        //#pragma omp parallel for
         for (size_t j = 0; j < lattice_width; j++)
         {
             lattice[i][j].initialize_generic_node(velocity_set);
         }
-    }*/
+    }
 
-
-    auto start_time = std::chrono::high_resolution_clock::now();
-
+    /*
     auto initialize_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
         auto initialize_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
             nodes.initialize_generic_node(velocity_set);
@@ -100,6 +103,7 @@ void Lattice2D::initialize_lattice()
     std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
         initialize_rows(row , velocity_set);
     });
+    */
 
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
@@ -127,8 +131,11 @@ void Lattice2D::initialize_lattice()
 
     // looping over all elements in the lattice
     // TODO: PARALLELIZE
-    /*for (std::size_t i = 0; i < lattice_height; ++i)
+
+    //#pragma omp parallel for
+    for (std::size_t i = 0; i < lattice_height; ++i)
     {
+        //#pragma omp parallel for
         for (std::size_t j = 0; j < lattice_width; ++j)
         {
             if (lattice[i][j].is_fluid())
@@ -136,8 +143,9 @@ void Lattice2D::initialize_lattice()
                 lattice[i][j].initialize_fluid_node(velocity_set, lattice[i][j].get_u(),lattice[i][j].get_rho());
             }
         }
-    }*/
+    }
 
+    /*
     auto vel_init_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
         auto vel_init_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
             if (nodes.is_fluid())
@@ -154,6 +162,8 @@ void Lattice2D::initialize_lattice()
     std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
         vel_init_rows(row,velocity_set);
     });
+    */
+
     // TODO: BARRIER
     
     std::cout << "LATTICE 2D:   lattice initialized" << std::endl;
@@ -171,8 +181,10 @@ void Lattice2D::perform_simulation_step()
 
     // 1. The equilibrium populations are calculated for each node
     // TODO: PARALLELIZE
-    /*for (std::size_t i = 0; i < lattice_height; i++)
+    //#pragma omp parallel for
+    for (std::size_t i = 0; i < lattice_height; i++)
     {
+        //#pragma omp parallel for
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             // 2. Perform the collisions
@@ -181,8 +193,9 @@ void Lattice2D::perform_simulation_step()
                 lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations(), t_const, t_conj);
             }
         }
-    }*/
+    }
 
+    /*
     auto calc_eq_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model){
         auto calc_eq_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set, std::shared_ptr<CollisionModel> collision_model){
             if(nodes.is_fluid()){
@@ -199,13 +212,15 @@ void Lattice2D::perform_simulation_step()
     std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
         calc_eq_rows(row,velocity_set, collision_model);
     });
+    */
+
     // TODO: BARRIER
 
     // 3. Perform streaming
     perform_streaming();
 
     // 4. Perform the collision at the boundaries
-    // TODO: PARALLELIZE
+    // TODO: PARALLELIZE (? -> Corners update other boundaries populations)
     std::size_t size = boundary_list.size();
     for (std::size_t it = 0; it < size; it++)
     {  
@@ -271,8 +286,10 @@ void Lattice2D::perform_simulation_step()
 
     // 5. Update the macroscopic quantities
     // TODO: PARALLELIZE
-    /*for (std::size_t i = 0; i < lattice_height; i++)
+    //#pragma omp parallel for
+    for (std::size_t i = 0; i < lattice_height; i++)
     {
+        //#pragma omp parallel for
         for (std::size_t j = 0; j < lattice_width; j++)
         {
             if (lattice[i][j].is_fluid())
@@ -281,8 +298,9 @@ void Lattice2D::perform_simulation_step()
 
             }
         }
-    }*/
+    }
 
+    /*
     auto macroscopic_quantities_rows =[](std::vector<LatticeNode<2>>& rows, const VelocitySet& velocity_set){
         auto macroscopic_quantities_nodes = [](LatticeNode<2>& nodes, const VelocitySet& velocity_set){
             if (nodes.is_fluid())
@@ -299,14 +317,18 @@ void Lattice2D::perform_simulation_step()
     std::for_each(std::execution::par, lattice.begin(),lattice.end(), [&](std::vector<LatticeNode<2>>& row){
         macroscopic_quantities_rows(row,velocity_set);
     });
+    */
+   
     // TODO: BARRIER
 }
 
 void Lattice2D::perform_streaming()
 {
     // TODO: PARALLELIZE
+    //#pragma omp parallel for
     for(std::size_t i = 0; i< lattice_height; i++)
     {
+        //#pragma omp parallel for
         for(std::size_t j = 0; j < lattice_width; j++)
         {
             // 3. Perform the streaming of fluid populations
