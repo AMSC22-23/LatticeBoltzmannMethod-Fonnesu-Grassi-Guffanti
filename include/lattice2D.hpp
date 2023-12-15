@@ -8,6 +8,8 @@
 #include <numeric>
 #include <cmath>
 #include <string>
+#include <algorithm>
+#include <execution>
 
 #include "aliases.hpp"
 #include "lattice.hpp"

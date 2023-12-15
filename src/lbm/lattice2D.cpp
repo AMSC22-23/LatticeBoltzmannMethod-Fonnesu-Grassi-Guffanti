@@ -76,6 +76,16 @@ void Lattice2D::initialize_lattice()
     std::cout << "              reading input data from file" << std::endl;
     
     // TODO: PARALLELIZE
+    /*
+    std::for_each(std::execution::par_unseq, lattice.begin(), lattice.end(), [this](auto& row)
+    {
+        std::for_each(std::execution::par_unseq, row.begin(), row.end(), [this](auto& node)
+        {
+            node.initialize_generic_node(velocity_set);
+        });
+    });
+    */
+
     for (size_t i = 0; i < lattice_height; i++)
     {
         for (size_t j = 0; j < lattice_width; j++)
