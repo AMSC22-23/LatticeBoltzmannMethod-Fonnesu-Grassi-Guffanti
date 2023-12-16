@@ -60,6 +60,10 @@ protected:
     */
     double delta_t;
 
+    const double reynolds;
+    double t_const;
+    double t_conj;
+
     /**
      * Logs specific data regarding the lattice
      * - Number of elements

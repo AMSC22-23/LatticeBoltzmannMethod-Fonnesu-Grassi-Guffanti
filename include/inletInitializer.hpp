@@ -54,9 +54,9 @@ public:
         const std::size_t width_,
         const double u_y_scaling_
     ) :
-    width (width_),
     sigma (10 * width_),
-    u_y_scaling (u_y_scaling_)
+    u_y_scaling (u_y_scaling_),
+    width (width_)
     {};
     
     virtual ~LidDrivenCavityUniformInitializer() override = default;

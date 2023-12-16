@@ -6,7 +6,8 @@ input_dir_path (input_dir_path_),
 output_dir_path (output_dir_path_),
 dimensions (dimensions_),
 velocity_set (velocity_set_), 
-collision_model (collision_model_)
+collision_model (collision_model_),
+reynolds (reynolds_)
 {
     create_output_directory();
 };

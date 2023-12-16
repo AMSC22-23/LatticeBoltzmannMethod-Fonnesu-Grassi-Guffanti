@@ -11,12 +11,14 @@ lbm::lbm(const std::size_t& D,
     std::string output_dir_path="../results";
     lattice_ptr=nullptr;
 
+    const double tau = 0.5 + (0.2 * 100.0 /reynolds_)/(0.3);
+
     if(collision_model == "BGK")
     {
         collision_ptr = std::make_shared<BGK>();
     }else if(collision_model == "TRT")
     {
-        collision_ptr = std::make_shared<TRT>();
+        collision_ptr = std::make_shared<TRT>(tau);
     }else if(collision_model == "MRT")
     {
         collision_ptr = std::make_shared<MRT>();
@@ -60,10 +62,9 @@ void lbm::compute(const double time)
         if(i % frequency == 0)
         {
             
-            std::cout << "iteration " << i << " out of " << n_iter << std::endl; 
             auto end_time = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-            std::cout << duration.count() << " millisecondi" << std::endl;
+            std::cout << duration.count() << " ms" << std::endl;
             // print the output only if the iteration is a multiple of the frequency. 
             lattice_ptr->save_output_data(output_counter);
             output_counter++;
