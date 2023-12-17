@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <ostream>
 
 #include "lattice.hpp"
 #include "lattice2D.hpp"
@@ -96,7 +97,7 @@ public:
         return velocity_set;
     }
 
-    void perform_weak_scaling_test();
+    void perform_strong_scaling_test();
 };
 
 #endif
