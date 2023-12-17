@@ -64,3 +64,8 @@ void Lattice::create_output_directory()
 
     }
 }
+
+std::size_t& Lattice::set_omp_num_threads()
+{
+    return omp_num_threads;
+}

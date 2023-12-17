@@ -65,6 +65,11 @@ protected:
     double t_conj;
 
     /**
+     * Number of OpenMP threads used to run the simulation
+    */
+    std::size_t omp_num_threads = 1;
+
+    /**
      * Logs specific data regarding the lattice
      * - Number of elements
     */
@@ -124,6 +129,8 @@ public:
      * Logs data regarding the lattice: dimensions, path to files and directories,  
     */
     void log_data() const;
+
+    std::size_t& set_omp_num_threads();
 };
 
 #endif

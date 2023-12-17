@@ -10,7 +10,7 @@
 class CollisionModel
 {
 public:
-    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const = 0;
+    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const = 0;
 
     virtual ~CollisionModel() = default;
 };
@@ -21,16 +21,24 @@ public:
 */
 class BGK : public CollisionModel
 {
+
+private:
+    const double t_conj;
+    const double t_const;
+
 public:
-    BGK() = default;
+    /** 
+    * @param tConst deltaT/tau
+    * @param tConj 1-tConst
+    */
+    BGK(const double t_const_, const double t_conj_);
+
     /**
     * @param f vector containing distribution functions of a node
     * @param fEq vector containing equilibrium distribution functions of a node
-    * @param tConst deltaT/tau
-    * @param tConj 1-tConst
     * @return the post-collision distribution functions
     */
-    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
+    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const override;
 
     virtual ~BGK() = default; 
 };
@@ -48,7 +56,7 @@ private:
     public:
     TRT(const double tau);
 
-    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
+    virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const override;
 
     virtual ~TRT() = default;
 };
@@ -57,7 +65,7 @@ class MRT : public CollisionModel
 {
 public:
     MRT() = default;
-    std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq, double tConst, double tConj) const override;
+    std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const override;
 
     virtual ~MRT() = default;
 };

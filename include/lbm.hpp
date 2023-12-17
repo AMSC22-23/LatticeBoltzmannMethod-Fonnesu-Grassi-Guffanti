@@ -11,6 +11,7 @@
 #include "collisionModel.hpp"
 #include "velocitySet.hpp"
 #include "boundary.hpp"
+#include "omp.h"
 
 class lbm
 {
@@ -94,6 +95,8 @@ public:
     {
         return velocity_set;
     }
+
+    void perform_weak_scaling_test();
 };
 
 #endif

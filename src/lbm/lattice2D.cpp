@@ -17,16 +17,7 @@ Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, re
 
     inlet_initializer = std::make_unique<LidDrivenCavityUniformInitializer>(lattice_width, 0.2);
 
-    // calculating t and tau
-    // delta_t = reynolds_ * (0.2 * 100.0 /reynolds_)/(100.0 * 100.0);
-    tau = 0.5 + (0.2 * 100.0 /reynolds_)/(0.3);
-    t_const = 1.0 / tau;
-    t_conj = 1.0 - t_const;
 
-    std::cout << "tau   : " << tau << std::endl;
-    std::cout << "t/tau : " << delta_t/tau << std::endl;
-    std::cout << "t_const : " << t_const << std::endl;
-    std::cout << "t_conj : " << t_conj << std::endl;
 
 
     initialize_lattice();
@@ -97,7 +88,7 @@ void Lattice2D::initialize_lattice()
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // Stampa il tempo trascorso per processare x righe
-    std::cout << "inizializzazione nodi "<< duration.count() << " millisecondi" << std::endl;//TODO: con la parallelizzazione passa da 2 millisecondi a 5, non buono direi :D
+    std::cout << "inizializzazione nodi "<< duration.count() << " millisecondi" << std::endl;
 
     // VELOCITY INITIALIZATION
 
@@ -127,12 +118,8 @@ void Lattice2D::perform_simulation_step()
 {
     // The simulation step is composed of many substeps:
 
-    // const double t_const = delta_t/tau;
-    // const double t_conj = 1-t_const;
-
-
     // 1. The equilibrium populations are calculated for each node
-    #pragma omp parallel
+    #pragma omp parallel num_threads(omp_num_threads)
     {
         #pragma omp for collapse(2)
         for (std::size_t i = 0; i < lattice_height; i++)
@@ -142,7 +129,7 @@ void Lattice2D::perform_simulation_step()
                 // 2. Perform the collisions
                 if(lattice[i][j].is_fluid()){
                     lattice[i][j].compute_equilibrium_populations(velocity_set.get_velocity_set());
-                    lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations(), t_const, t_conj);
+                    lattice[i][j].set_collision_populations() = collision_model->calc_collision(lattice[i][j].get_populations(), lattice[i][j].get_eq_populations());
                 }
             }
         }

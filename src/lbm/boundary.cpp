@@ -99,7 +99,7 @@ void NEBB::calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho, 
     node.set_rho() = rho;
 
     node.set_population(3) = node.get_populations()[1] - two_thirds * node.get_rho() * node.get_u()[0];
-    node.set_population(4) = node.get_populations()[3] - two_thirds * node.get_rho() * node.get_u()[1];
+    node.set_population(4) = node.get_populations()[2] - two_thirds * node.get_rho() * node.get_u()[1];
     node.set_population(7) = node.get_populations()[5] - one_sixth * node.get_rho() * (node.get_u()[0] + node.get_u()[1]);
 
     node.set_population(6) = 0.0;

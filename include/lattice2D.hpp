@@ -32,7 +32,10 @@ private:
      * Dimensions of the lattice
     */
     static constexpr std::size_t dim = 2;
+
+    static constexpr double one_third = 1.0/3.0;
     
+    std::size_t num_of_threads = 1;
     /**
      * Boundary model
     */
@@ -115,6 +118,11 @@ public:
      * Sets the inlets fields
     */
     virtual void set_inlets(const std::size_t iterations) override;
+
+    /**
+     * Sets the number of threads
+    */
+    std::size_t& set_omp_num_threads();
 };
 
 #endif // HH_LATTICE_2D
