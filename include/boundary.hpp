@@ -85,25 +85,25 @@ public:
      * Function that handles the collision with a top left corner
      * @param node whose data has to be updated
     */
-    void calc_top_left_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const;
+    void calc_top_left_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const;
 
     /**
      * Function that handles the collision with a top right corner
      * @param node whose data has to be updated
     */
-    void calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const;
+    void calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const;
 
     /**
      * Function that handles the collision with a bottom left corner
      * @param node whose data has to be updated
     */
-    void calc_bottom_left_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const;
+    void calc_bottom_left_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const;
      
     /**
      * Function that handles the collision with a right corner
      * @param node whose data has to be updated
     */
-    void calc_bottom_right_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const;
+    void calc_bottom_right_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const;
 
     virtual ~NEBB() = default;
 };

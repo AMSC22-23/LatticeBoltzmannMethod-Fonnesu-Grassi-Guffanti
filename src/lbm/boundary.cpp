@@ -74,9 +74,9 @@ void NEBB::calc_right_wall_bounce(LatticeNode<2> &node) const
                              one_half * node.get_rho() * node.get_u()[1];
 }
 
-void NEBB::calc_top_left_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const
+void NEBB::calc_top_left_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const
 {
-    //node.set_u() = u;
+    node.set_u() = u;
 
     node.set_rho() = rho;
 
@@ -92,9 +92,9 @@ void NEBB::calc_top_left_corner_bounce(LatticeNode<2> &node, const double rho/*,
                             - node.get_populations()[5] - node.get_populations()[7] - node.get_populations()[6] - node.get_populations()[8]; 
 }
 
-void NEBB::calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const
+void NEBB::calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const
 {
-    //node.set_u() = u;
+    node.set_u() = u;
 
     node.set_rho() = rho;
 
@@ -110,9 +110,9 @@ void NEBB::calc_top_right_corner_bounce(LatticeNode<2> &node, const double rho/*
                             - node.get_populations()[5] - node.get_populations()[7] - node.get_populations()[6] - node.get_populations()[8];
 }
 
-void NEBB::calc_bottom_left_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const
+void NEBB::calc_bottom_left_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const
 {
-    //node.set_u() = u;
+    node.set_u() = u;
 
     node.set_rho() = rho;
 
@@ -128,9 +128,9 @@ void NEBB::calc_bottom_left_corner_bounce(LatticeNode<2> &node, const double rho
                             - node.get_populations()[5] - node.get_populations()[6] - node.get_populations()[7] - node.get_populations()[8];
 }
 
-void NEBB::calc_bottom_right_corner_bounce(LatticeNode<2> &node, const double rho/*, const std::array<double, 2> u*/) const
+void NEBB::calc_bottom_right_corner_bounce(LatticeNode<2> &node, const double rho, const std::array<double, 2> u) const
 {
-    //node.set_u() = u;
+    node.set_u() = u;
 
     node.set_rho() = rho;
 
