@@ -90,7 +90,7 @@ void lbm::perform_strong_scaling_test()
     std::cout << "=====STRONG SCALING TEST=====" << std::endl;
     std::cout << "Available OMP threads: " << max_num_threads << std::endl;
 
-    for (std::size_t num_threads = 1; num_threads <= max_num_threads; num_threads = num_threads*2)
+    for (std::size_t num_threads = 1; num_threads <= max_num_threads; num_threads++)
     {
         std::cout << "Testing with " << num_threads << " thread(s): ";
         lattice_ptr->set_omp_num_threads() = num_threads;
