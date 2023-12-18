@@ -75,10 +75,15 @@ protected:
     */
     virtual void log_specific_data() const = 0;
 
+    virtual void calculate_equilibrium() = 0;
     /**
      * Executes streaming of the populations
     */
     virtual void perform_streaming() = 0;
+
+    virtual void perform_boundary_collisions() = 0;
+
+    virtual void calculate_macroscopic_quantities() = 0;
 
     /**
     * Creates the directory in which the results will be stored

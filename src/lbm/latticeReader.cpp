@@ -54,7 +54,7 @@ bool LatticeReader2D::read_lattice_structure(LatticeGrid2D& lattice,
     Node_type type; 
     int type_i;
 
-    Eigen::MatrixX<int> mat(in);
+    Eigen::MatrixXi mat(in);
     std::size_t k = 0;
     for (std::size_t i = 0; i < height; ++i)
     {
@@ -279,7 +279,7 @@ bool LatticeReader2D::load_2D_velocity_matrix(LatticeGrid2D& lattice, const std:
     {
         return false;
     }
-    Eigen::MatrixX<double> mat_dense(mat);
+    Eigen::MatrixXd mat_dense(mat);
 
     std::size_t rows = mat.rows();
     std::size_t cols = mat.cols();

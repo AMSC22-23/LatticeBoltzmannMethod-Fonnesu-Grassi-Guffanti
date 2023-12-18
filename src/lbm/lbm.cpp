@@ -52,7 +52,8 @@ lbm::lbm(const std::size_t& D,
 
 void lbm::compute(const double time)
 {
-    double dt = re * (0.2 * 100 /re)/(100.0 * 100.0);
+    double size = 500.0;
+    double dt = re * (0.2 * size /re)/(size * size);
     const std::size_t n_iter = floor(time/dt);
 
     std::cout << "Time  : " << time << std::endl;
@@ -123,10 +124,8 @@ void lbm::perform_strong_scaling_test()
 }
 
 
-void lbm::perform_weak_scaling_test(){
+void lbm::perform_weak_scaling_test(size){
     #ifdef _OPENMP
-        int sizes[] = {100,200,500};
-        int i_sizes=0;
 
         std::vector<std::tuple<int,std::size_t, double>> results_table;
         std::size_t max_num_threads = omp_get_max_threads();
@@ -135,10 +134,10 @@ void lbm::perform_weak_scaling_test(){
         std::cout << "Available OMP threads: " << max_num_threads << std::endl;
     
         for (std::size_t num_threads = 1; num_threads <= max_num_threads; num_threads++)
-        {
-            double dt = re * (0.2 * 100 /re)/(100.0 * 100.0);
+        {   
+            double dt = re * (0.2 * size /re)/(size * size);
             const std::size_t n_iter = floor(5.0/dt);
-            std::cout << "Testing size " << sizes[i_sizes] << "x" << sizes[i_sizes] <<" with " << num_threads << " thread(s): ";
+            std::cout << "Testing with " << num_threads << " thread(s): ";
 
             
             lattice_ptr->set_omp_num_threads() = num_threads;
@@ -156,12 +155,11 @@ void lbm::perform_weak_scaling_test(){
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
             std::cout << duration.count()/1000.0 << " ms" << std::endl;
             
-            results_table.push_back({sizes[i_sizes] ,num_threads, duration.count()/1000.0});
+            results_table.push_back({size ,num_threads, duration.count()/1000.0});
         }
-        i_sizes++;
     
 
-        std::ofstream out_file("weak_scalability500.txt");
+        std::ofstream out_file("weak_scalability" +size+".txt");
         for (const auto& el : results_table)
         {
             out_file << std::get<0>(el) << " " << std::get<1>(el) << " " << std::get<2>(el) << std::endl;

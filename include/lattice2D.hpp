@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 #include <execution>
-//#include <omp.h>
+#include <omp.h>
 
 #include "aliases.hpp"
 #include "lattice.hpp"
@@ -69,10 +69,16 @@ private:
     */
     BoundaryList2D boundary_list;
 
+    virtual void calculate_equilibrium() override;
+
     /**
      * Executes streaming of the populations
     */
     virtual void perform_streaming() override;
+
+    virtual void perform_boundary_collisions() override;
+
+    virtual void calculate_macroscopic_quantities() override;
    
     /**
      * Logs specific data regarding the lattice

@@ -118,10 +118,26 @@ void Lattice2D::perform_simulation_step()
 {
     // The simulation step is composed of many substeps:
 
-    // 1. The equilibrium populations are calculated for each node
+    
     #pragma omp parallel num_threads(omp_num_threads)
     {
-        #pragma omp for collapse(2)
+        // 1-2. The equilibrium populations are calculated for each node   
+        calculate_equilibrium();
+
+        // 3. Perform streaming
+        perform_streaming();
+
+        
+        // 4. Perform the collision at the boundaries
+        perform_boundary_collisions();
+
+        // 5. Update the macroscopic quantities
+        calculate_macroscopic_quantities();
+    }
+}
+
+void Lattice2D::calculate_equilibrium(){
+    #pragma omp for collapse(2)
         for (std::size_t i = 0; i < lattice_height; i++)
         {
             for (std::size_t j = 0; j < lattice_width; j++)
@@ -133,12 +149,35 @@ void Lattice2D::perform_simulation_step()
                 }
             }
         }
+}
 
-        // 3. Perform streaming
-        perform_streaming();
+void Lattice2D::perform_streaming()
+{
+    #pragma omp for collapse(2)
+    for(std::size_t i = 0; i< lattice_height; i++)
+    {
+        for(std::size_t j = 0; j < lattice_width; j++)
+        {
+            // 3. Perform the streaming of fluid populations
+            if (lattice[i][j].is_fluid()) {
+                // streaming must be performed everywhere. In this way walls are able to perform bounces.
+                lattice[i][j].set_population(0) = lattice[i][j].get_collision_populations()[0];
+                lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];
+                lattice[i-1][j].set_population(2) = lattice[i][j].get_collision_populations()[2];
+                lattice[i][j-1].set_population(3) = lattice[i][j].get_collision_populations()[3];
+                lattice[i+1][j].set_population(4) = lattice[i][j].get_collision_populations()[4];
+                lattice[i-1][j+1].set_population(5) = lattice[i][j].get_collision_populations()[5];
+                lattice[i-1][j-1].set_population(6) = lattice[i][j].get_collision_populations()[6];
+                lattice[i+1][j-1].set_population(7) = lattice[i][j].get_collision_populations()[7];
+                lattice[i+1][j+1].set_population(8) = lattice[i][j].get_collision_populations()[8];
+            }
+        }
+    }
 
-        // 4. Perform the collision at the boundaries
-        std::size_t size = boundary_list.size();
+}
+
+void Lattice2D::perform_boundary_collisions(){
+    std::size_t size = boundary_list.size();
 
         #pragma omp for 
         for (std::size_t it = 0; it < size; it++)
@@ -201,9 +240,10 @@ void Lattice2D::perform_simulation_step()
                 lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
             }
         }
+}
 
-        // 5. Update the macroscopic quantities
-        #pragma omp for collapse(2)
+void Lattice2D::calculate_macroscopic_quantities(){
+    #pragma omp for collapse(2)
         for (std::size_t i = 0; i < lattice_height; i++)
         {
             for (std::size_t j = 0; j < lattice_width; j++)
@@ -215,32 +255,6 @@ void Lattice2D::perform_simulation_step()
                 }
             }
         }
-    }
-}
-
-void Lattice2D::perform_streaming()
-{
-    #pragma omp for collapse(2)
-    for(std::size_t i = 0; i< lattice_height; i++)
-    {
-        for(std::size_t j = 0; j < lattice_width; j++)
-        {
-            // 3. Perform the streaming of fluid populations
-            if (lattice[i][j].is_fluid()) {
-                // streaming must be performed everywhere. In this way walls are able to perform bounces.
-                lattice[i][j].set_population(0) = lattice[i][j].get_collision_populations()[0];
-                lattice[i][j+1].set_population(1) = lattice[i][j].get_collision_populations()[1];
-                lattice[i-1][j].set_population(2) = lattice[i][j].get_collision_populations()[2];
-                lattice[i][j-1].set_population(3) = lattice[i][j].get_collision_populations()[3];
-                lattice[i+1][j].set_population(4) = lattice[i][j].get_collision_populations()[4];
-                lattice[i-1][j+1].set_population(5) = lattice[i][j].get_collision_populations()[5];
-                lattice[i-1][j-1].set_population(6) = lattice[i][j].get_collision_populations()[6];
-                lattice[i+1][j-1].set_population(7) = lattice[i][j].get_collision_populations()[7];
-                lattice[i+1][j+1].set_population(8) = lattice[i][j].get_collision_populations()[8];
-            }
-        }
-    }
-
 }
 
 void Lattice2D::set_inlets(std::size_t iterations)

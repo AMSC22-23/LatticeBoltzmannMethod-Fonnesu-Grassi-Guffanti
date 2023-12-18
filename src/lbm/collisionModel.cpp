@@ -2,8 +2,8 @@
 
 // ===================BGK===================
 BGK::BGK(const double t_conj_, const double t_const_):
-t_conj (t_conj),
-t_const (t_const)
+t_conj (t_conj_),
+t_const (t_const_)
 {}
 
 std::vector<double> BGK::calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const
