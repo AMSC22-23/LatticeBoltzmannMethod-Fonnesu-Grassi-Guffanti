@@ -122,3 +122,53 @@ void lbm::perform_strong_scaling_test()
     #endif
 }
 
+
+void lbm::perform_weak_scaling_test(){
+    #ifdef _OPENMP
+        int sizes[] = {100,200,500};
+        int i_sizes=0;
+
+        std::vector<std::tuple<int,std::size_t, double>> results_table;
+        std::size_t max_num_threads = omp_get_max_threads();
+        
+        std::cout << "=====WEAK SCALING TEST=====" << std::endl;
+        std::cout << "Available OMP threads: " << max_num_threads << std::endl;
+    
+        for (std::size_t num_threads = 1; num_threads <= max_num_threads; num_threads++)
+        {
+            double dt = re * (0.2 * 100 /re)/(100.0 * 100.0);
+            const std::size_t n_iter = floor(5.0/dt);
+            std::cout << "Testing size " << sizes[i_sizes] << "x" << sizes[i_sizes] <<" with " << num_threads << " thread(s): ";
+
+            
+            lattice_ptr->set_omp_num_threads() = num_threads;
+            auto start_time = std::chrono::high_resolution_clock::now();
+            for (std::size_t i = 0; i <= n_iter; i++)
+            {
+                {
+                    // REINITIALIZATION OF INLET FIELDS
+                    lattice_ptr->set_inlets(i);
+
+                    lattice_ptr->perform_simulation_step();                    
+                }    
+            }
+            auto end_time = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+            std::cout << duration.count()/1000.0 << " ms" << std::endl;
+            
+            results_table.push_back({sizes[i_sizes] ,num_threads, duration.count()/1000.0});
+        }
+        i_sizes++;
+    
+
+        std::ofstream out_file("weak_scalability500.txt");
+        for (const auto& el : results_table)
+        {
+            out_file << std::get<0>(el) << " " << std::get<1>(el) << " " << std::get<2>(el) << std::endl;
+        }
+        out_file.close();
+        
+    #else
+       std::cout << "[!ERROR!] Weak scalability test is unavailable: compile with -fopenmp" << std::endl;
+    #endif
+}

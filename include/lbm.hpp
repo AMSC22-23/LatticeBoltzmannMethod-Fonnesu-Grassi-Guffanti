@@ -98,6 +98,7 @@ public:
     }
 
     void perform_strong_scaling_test();
+    void perform_weak_scaling_test();
 };
 
 #endif

@@ -32,7 +32,7 @@ protected:
     */
     const std::string input_lattice_path;
     /**
-    *  Path to the input matrix describing the lattice density field 
+    *  Path to the input matrix describing the lattice density field  //TODO: ormai inutili?
     */
     const std::string input_rho_path;
     /**
