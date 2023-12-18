@@ -30,15 +30,15 @@ set(HEADERS
 )
 
 
+add_executable("${PROJECT_NAME}-seq" ${SOURCES} ${HEADERS})
 
 find_package(OpenMP REQUIRED)
 if(OpenMP_CXX_FOUND)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(OPENMP_FLAGS "-fopenmp")
 endif()
 
-add_executable("${PROJECT_NAME}-seq" ${SOURCES} ${HEADERS})
 add_executable("${PROJECT_NAME}-omp" ${SOURCES} ${HEADERS})
-
+target_compile_options("${PROJECT_NAME}-omp" PRIVATE ${OPENMP_FLAGS})
 
 target_include_directories("${PROJECT_NAME}-seq" PRIVATE 
 ${EIGEN3_INCLUDE_DIRS}
