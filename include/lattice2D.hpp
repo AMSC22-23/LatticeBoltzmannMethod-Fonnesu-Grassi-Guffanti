@@ -92,14 +92,12 @@ public:
      * @param input_file_path path to the input file
      * @param output_dir_path path to the output directory
      * @param velocity_set_ velocity set used to perform operations on the lattice
-     * @param collision_model model used to calculate collisions
      * @param boundary_model model used to calculate collisions on boundaries
      * @param reynolds_ reynolds constant
     */ 
     Lattice2D(const std::string& input_file_path_,
         const std::string& output_dir_path_,
         const VelocitySet& velocity_set_,
-        std::shared_ptr<CollisionModel> collision_model_, 
         const double reynolds_);
     virtual ~Lattice2D() = default;
 
@@ -129,6 +127,16 @@ public:
      * Sets the number of threads
     */
     std::size_t& set_omp_num_threads();
+
+    /**
+     * returns the dimension of the lattice as [width, height]
+    */
+    virtual const std::vector<std::size_t> get_lattice_dimension() const override;
+
+    /**
+      * Attaches a collision model to be used in the lattice
+    */
+    virtual void attach_collision_model(const std::shared_ptr<CollisionModel>& model) override;
 };
 
 #endif // HH_LATTICE_2D

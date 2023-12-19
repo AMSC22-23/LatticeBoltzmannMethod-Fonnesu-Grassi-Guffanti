@@ -3,9 +3,8 @@
 Lattice2D::Lattice2D(const std::string& input_dir_path, 
     const std::string& output_dir_path_, 
     const VelocitySet& velocity_set, 
-    std::shared_ptr<CollisionModel> collision_model, 
     const double reynolds_):
-Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, reynolds_)
+Lattice(input_dir_path, output_dir_path_, dim, velocity_set, reynolds_)
 {
     lattice_reader = std::make_unique<LatticeReader2D>(input_dir_path);
 
@@ -16,9 +15,6 @@ Lattice(input_dir_path, output_dir_path_, dim, velocity_set, collision_model, re
     }
 
     inlet_initializer = std::make_unique<LidDrivenCavityUniformInitializer>(lattice_width, 0.2);
-
-
-
 
     initialize_lattice();
 };
@@ -71,8 +67,6 @@ void Lattice2D::initialize_lattice()
     std::cout << "LATTICE 2D:   initializing lattice" << std::endl;
     std::cout << "              reading input data from file" << std::endl;
     
-    // TODO: PARALLELIZE
-
     auto start_time = std::chrono::high_resolution_clock::now();
 
     #pragma omp parallel for collapse(2)
@@ -83,12 +77,11 @@ void Lattice2D::initialize_lattice()
             lattice[i][j].initialize_generic_node(velocity_set);
         }
     }
-
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
     // Stampa il tempo trascorso per processare x righe
-    std::cout << "inizializzazione nodi "<< duration.count() << " millisecondi" << std::endl;
+    std::cout << "initialization of lattice nodes took "<< duration.count() << " ms" << std::endl;
 
     // VELOCITY INITIALIZATION
 
@@ -97,7 +90,6 @@ void Lattice2D::initialize_lattice()
     const auto weights = set_elements.weight;
 
     // looping over all elements in the lattice
-    // TODO: PARALLELIZE
 
     #pragma omp parallel for collapse(2)
     for (std::size_t i = 0; i < lattice_height; ++i)
@@ -176,85 +168,86 @@ void Lattice2D::perform_streaming()
 
 }
 
-void Lattice2D::perform_boundary_collisions(){
+void Lattice2D::perform_boundary_collisions()
+{
     std::size_t size = boundary_list.size();
 
-        #pragma omp for 
-        for (std::size_t it = 0; it < size; it++)
-        {  
-            auto [i, j, type] = boundary_list[it];
-            if (type == BOTTOM_WALL_2D) 
-            {
-                boundary_model.calc_bottom_wall_bounce(lattice[i][j]);
-                lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
-                lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
-                lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
-            }
-            else if (type == UPPER_WALL_2D )
-            {
-                boundary_model.calc_top_wall_bounce(lattice[i][j]);
-                lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
-                lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
-                lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-            }
-            else if (type == LEFT_WALL_2D ) 
-            {
-                boundary_model.calc_left_wall_bounce(lattice[i][j]);
-                lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
-                lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
-                lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-            }
-            else if (type == RIGHT_WALL_2D ) 
-            {
-                boundary_model.calc_right_wall_bounce(lattice[i][j]); 
-                lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
-                lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
-                lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7); 
-            }
-            else if (type == UPPER_LEFT_CORNER_2D ) 
-            {
-                boundary_model.calc_top_left_corner_bounce(lattice[i][j], lattice[i][j+1].get_rho(), lattice[i][j+1].get_u());
-                lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
-                lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
-                lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
-            }
-            else if (type == UPPER_RIGHT_CORNER_2D ) 
-            {
-                boundary_model.calc_top_right_corner_bounce(lattice[i][j], lattice[i][j-1].get_rho(), lattice[i][j-1].get_u()); 
-                lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
-                lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
-                lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
-            }
-            else if (type == BOTTOM_LEFT_CORNER_2D ) 
-            {
-                boundary_model.calc_bottom_left_corner_bounce(lattice[i][j], lattice[i][j+1].get_rho(), lattice[i][j+1].get_u()); 
-                lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
-                lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
-                lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
-            }
-            else if (type == BOTTOM_RIGHT_CORNER_2D ) 
-            {
-                boundary_model.calc_bottom_right_corner_bounce(lattice[i][j], lattice[i][j-1].get_rho(), lattice[i][j-1].get_u());
-                lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
-                lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
-                lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
-            }
+    #pragma omp for 
+    for (std::size_t it = 0; it < size; it++)
+    {  
+        auto [i, j, type] = boundary_list[it];
+        if (type == BOTTOM_WALL_2D) 
+        {
+            boundary_model.calc_bottom_wall_bounce(lattice[i][j]);
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
         }
+        else if (type == UPPER_WALL_2D )
+        {
+            boundary_model.calc_top_wall_bounce(lattice[i][j]);
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+        }
+        else if (type == LEFT_WALL_2D ) 
+        {
+            boundary_model.calc_left_wall_bounce(lattice[i][j]);
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+        }
+        else if (type == RIGHT_WALL_2D ) 
+        {
+            boundary_model.calc_right_wall_bounce(lattice[i][j]); 
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7); 
+        }
+        else if (type == UPPER_LEFT_CORNER_2D ) 
+        {
+            boundary_model.calc_top_left_corner_bounce(lattice[i][j], lattice[i][j+1].get_rho(), lattice[i][j+1].get_u());
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
+            lattice[i+1][j+1].set_population(8) = lattice[i][j].set_population(8);
+        }
+        else if (type == UPPER_RIGHT_CORNER_2D ) 
+        {
+            boundary_model.calc_top_right_corner_bounce(lattice[i][j], lattice[i][j-1].get_rho(), lattice[i][j-1].get_u()); 
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
+            lattice[i+1][j].set_population(4) = lattice[i][j].set_population(4);
+            lattice[i+1][j-1].set_population(7) = lattice[i][j].set_population(7);
+        }
+        else if (type == BOTTOM_LEFT_CORNER_2D ) 
+        {
+            boundary_model.calc_bottom_left_corner_bounce(lattice[i][j], lattice[i][j+1].get_rho(), lattice[i][j+1].get_u()); 
+            lattice[i][j+1].set_population(1) = lattice[i][j].set_population(1);
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
+            lattice[i-1][j+1].set_population(5) = lattice[i][j].set_population(5);
+        }
+        else if (type == BOTTOM_RIGHT_CORNER_2D ) 
+        {
+            boundary_model.calc_bottom_right_corner_bounce(lattice[i][j], lattice[i][j-1].get_rho(), lattice[i][j-1].get_u());
+            lattice[i-1][j].set_population(2) = lattice[i][j].set_population(2);
+            lattice[i][j-1].set_population(3) = lattice[i][j].set_population(3);
+            lattice[i-1][j-1].set_population(6) = lattice[i][j].set_population(6);
+        }
+    }
 }
 
-void Lattice2D::calculate_macroscopic_quantities(){
+void Lattice2D::calculate_macroscopic_quantities()
+{
     #pragma omp for collapse(2)
-        for (std::size_t i = 0; i < lattice_height; i++)
+    for (std::size_t i = 0; i < lattice_height; i++)
+    {
+        for (std::size_t j = 0; j < lattice_width; j++)
         {
-            for (std::size_t j = 0; j < lattice_width; j++)
+            if (lattice[i][j].is_fluid())
             {
-                if (lattice[i][j].is_fluid())
-                {
-                    lattice[i][j].update_macroscopic_quantities(velocity_set);
-
-                }
+                lattice[i][j].update_macroscopic_quantities(velocity_set);
             }
         }
+    }
 }
 
 void Lattice2D::set_inlets(std::size_t iterations)
@@ -270,4 +263,14 @@ void Lattice2D::set_inlets(std::size_t iterations)
         lattice[i][j].set_u() = vels;
         lattice[i][j].set_rho() = rho;
     }
+}
+
+const std::vector<std::size_t> Lattice2D::get_lattice_dimension() const
+{
+    return {lattice_width, lattice_height};
+}
+
+void Lattice2D::attach_collision_model(const std::shared_ptr<CollisionModel>& model)
+{
+    collision_model = model;
 }

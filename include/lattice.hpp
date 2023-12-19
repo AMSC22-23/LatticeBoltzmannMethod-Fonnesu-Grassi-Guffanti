@@ -60,9 +60,10 @@ protected:
     */
     double delta_t;
 
+    /**
+     * Reynolds number of the simulation
+    */
     const double reynolds;
-    double t_const;
-    double t_conj;
 
     /**
      * Number of OpenMP threads used to run the simulation
@@ -96,14 +97,12 @@ public:
      * @param output_file_path_ path to where the output files will be stored
      * @param dimensions_ number of dimensions of the lattice
      * @param velocity_set_ the velocity set used in the lattice
-     * @param collision_model model used to calculate collisions
      * @param reynolds_ reynolds constant
     */
     Lattice(const std::string& input_dir_path_, 
         const std::string& output_dir_path_, 
         const int dimensions_, 
         const VelocitySet& velocity_set_, 
-        std::shared_ptr<CollisionModel> collision_model_, 
         const double reynolds_);
 
     virtual ~Lattice() = default;
@@ -136,6 +135,16 @@ public:
     void log_data() const;
 
     std::size_t& set_omp_num_threads();
+
+    /**
+     * Returns the dimension of the lattice
+    */
+    virtual const std::vector<std::size_t> get_lattice_dimension() const = 0;
+
+    /**
+     * Attaches a collision model to be used in the lattice
+    */
+    virtual void attach_collision_model(const std::shared_ptr<CollisionModel>& model) = 0;
 };
 
 #endif

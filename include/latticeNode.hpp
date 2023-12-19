@@ -138,6 +138,11 @@ public:
         return collision_populations;
     }
 
+    double& set_collision_populations(std::size_t pos)
+    {
+        return collision_populations[pos];
+    }
+
     std::array<double, dim>& set_u()
     {
         return u;

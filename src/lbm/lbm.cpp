@@ -10,19 +10,34 @@ lbm::lbm(const std::size_t& D,
     {
     std::string output_dir_path="../results";
     lattice_ptr=nullptr;
+    
+    switch (D)
+    {
+        case 2:
+            velocity_set.initialize(2, 9);
+            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, re);
+            break;
+        case 3:
+            lattice_ptr=nullptr;
+            break;
+        default:
+            std::cout << "[!ERROR!] only 2D and 3D are supported" << std::endl;
+            break;
+    }
+
+    double size = lattice_ptr->get_lattice_dimension()[0] * 1.0;
 
     constexpr double one_third = 1.0/3.0;
-    const double tau = 0.5 + (0.2 * 100.0 /reynolds_)/(one_third);
-    const double t_const = 1.0 / tau;
-    const double t_conj = 1.0 - t_const;
+    const double tau = 0.5 + (0.2 * size /reynolds_)/(one_third);
 
     std::cout << "tau   : " << tau << std::endl;
-    std::cout << "t/tau : " << delta_t/tau << std::endl;
-    std::cout << "t_const : " << t_const << std::endl;
-    std::cout << "t_conj : " << t_conj << std::endl;
-
     if(collision_model == "BGK")
     {
+        const double t_const = 1.0 / tau;
+        const double t_conj = 1.0 - t_const;
+        std::cout << "t_const : " << t_const << std::endl;
+        std::cout << "t_conj : " << t_conj << std::endl;
+        
         collision_ptr = std::make_shared<BGK>(t_conj, t_const);
     }else if(collision_model == "TRT")
     {
@@ -35,24 +50,14 @@ lbm::lbm(const std::size_t& D,
         std::cout << collision_model << " not yet implemented" << std::endl;
     }
 
-    switch (D)
-    {
-        case 2:
-            velocity_set.initialize(2, 9);
-            lattice_ptr = std::make_unique<Lattice2D>(input_dir_path, output_dir_path, velocity_set, collision_ptr, re);
-            break;
-        case 3:
-            lattice_ptr=nullptr;
-            break;
-        default:
-            std::cout << "[!ERROR!] only 2D and 3D are supported" << std::endl;
-            break;
-    }
+    lattice_ptr->attach_collision_model(collision_ptr);
+
+
 }
 
 void lbm::compute(const double time)
 {
-    double size = 500.0;
+    double size = lattice_ptr->get_lattice_dimension()[0] * 1.0;
     double dt = re * (0.2 * size /re)/(size * size);
     const std::size_t n_iter = floor(time/dt);
 
@@ -62,11 +67,19 @@ void lbm::compute(const double time)
 
     std::size_t output_counter = 0;
     auto start_time = std::chrono::high_resolution_clock::now();
+
+    #ifdef _OPENMP
+        std::size_t n_threads = omp_get_max_threads() - 1;
+        lattice_ptr->set_omp_num_threads() = n_threads;
+    #endif
+
     for (std::size_t i = 0; i <= n_iter; i++)
     {
         lattice_ptr->set_inlets(i);
         // REINITIALIZATION OF INLET FIELDS
+
         lattice_ptr->perform_simulation_step();
+        
         if(i % frequency == 0)
         {
             
@@ -84,7 +97,8 @@ void lbm::compute(const double time)
 void lbm::perform_strong_scaling_test()
 {
     #ifdef _OPENMP
-        double dt = re * (0.2 * 100 /re)/(100.0 * 100.0);
+        double size = lattice_ptr->get_lattice_dimension()[0] * 1.0;
+        double dt = re * (0.2 * size /re)/(size * size);
         const std::size_t n_iter = floor(5.0/dt);
         std::vector<std::tuple<std::size_t, double>> results_table;
 
@@ -124,9 +138,9 @@ void lbm::perform_strong_scaling_test()
 }
 
 
-void lbm::perform_weak_scaling_test(size){
+void lbm::perform_weak_scaling_test(){
     #ifdef _OPENMP
-
+        double size = lattice_ptr->get_lattice_dimension()[0] * 1.0;
         std::vector<std::tuple<int,std::size_t, double>> results_table;
         std::size_t max_num_threads = omp_get_max_threads();
         
@@ -159,7 +173,7 @@ void lbm::perform_weak_scaling_test(size){
         }
     
 
-        std::ofstream out_file("weak_scalability" +size+".txt");
+        std::ofstream out_file("weak_scalability" +std::to_string(size)+".txt");
         for (const auto& el : results_table)
         {
             out_file << std::get<0>(el) << " " << std::get<1>(el) << " " << std::get<2>(el) << std::endl;
