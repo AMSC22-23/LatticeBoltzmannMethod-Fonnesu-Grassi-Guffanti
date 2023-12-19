@@ -10,7 +10,7 @@
 #   3. save the final animation
 #
 # Usage (from root directory of the project):
-#   python ./scripts/render.py path_to_input_dir (rho|u) [save] [path_to_output_dir]
+#   python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
 #   
 #   path_to_input_dir -> input directory. if the directory contains images then they are used to build the animation.
 #   rho               -> produces an animation regarding the density
@@ -79,10 +79,10 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
         self.dpi            :int            = 200
 
         self.vmin           :float          = 0.0
-        self.vmax           :float          = 0.18
+        self.vmax           :float          = 0.2
         self.interpolation  :str            = "spline16"
         self.frame_index    :int            = 0
-        self.frame_number   :int            = 600
+        self.frame_number   :int            = 0
 
     def check_input_data(self) -> bool:
         """
@@ -152,7 +152,8 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
 
         if self.save_imgs:
             plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
-        self.frame_index += 1
+        if self.frame_index < self.frame_number:
+            self.frame_index += 1
         
         self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
         self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
@@ -170,28 +171,40 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
         self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
 
 
-        self.ax_x.set_title("x velocity")
-        self.ax_y.set_title("y velocity")
-        self.ax_n.set_title("velocity norm")        
+        self.ax_x.set_title("x velocity", fontsize=10)
+        self.ax_y.set_title("y velocity", fontsize=10)
+        self.ax_n.set_title("velocity norm", fontsize=10)        
 
         self.im_x = self.ax_x.imshow(self.matrix_x,
             cmap='RdBu_r',
             vmin=-self.vmax,
             vmax=self.vmax,
-            interpolation=self.interpolation)        
+            interpolation=self.interpolation)  
+        
+        self.c_x = plt.colorbar(self.im_x, ax=self.ax_x, shrink=0.3)
+        self.c_x.ax.tick_params(labelsize=8)
+
         self.im_y = self.ax_y.imshow(self.matrix_y,
             cmap='RdBu_r',
             vmin=-self.vmax,
             vmax=self.vmax,
             interpolation=self.interpolation)
+        
+        self.c_y = plt.colorbar(self.im_y, ax=self.ax_y, shrink=0.3)
+        self.c_y.ax.tick_params(labelsize=8)
+
         self.im_n = self.ax_n.imshow(self.matrix_norm,
             cmap='RdBu_r',
             vmin=self.vmin,
             vmax=self.vmax,
-            interpolation=self.interpolation,)
+            interpolation=self.interpolation)
         
+        self.c_n = plt.colorbar(self.im_n, ax=self.ax_n, shrink=0.3)
+        self.c_n.ax.tick_params(labelsize=8)
+        plt.tight_layout()
+
         self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D, frames=self.frame_number, interval=self.interval_ms)
-        self.animator.save(self.animation_name, dpi=self.dpi, fps=30)
+        self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
         print("Finished")
 
     def update_u_frame_3D(self, frame):
@@ -224,7 +237,8 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
             elif self.quantity == self.quantity_u:
                 self.dimensions = 2
                 print("Velocity field is two dimensional")
-
+            self.frame_number = len([file.endswith(".txt") for file in self.all_files])//3 - 1
+            print(f"Animation will have {self.frame_number + 1} frames")
             # now onto the rendering and animating of inputs
             if self.quantity == self.quantity_rho:
                 self.render_and_animate_rho()
@@ -233,44 +247,7 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
             elif self.dimensions == 3:
                 self.render_and_animate_u_3D()
 
-
-#   MINIMUM_VALUE = 0.0
-#   MAXIMUM_VALUE = 0.01
-#   INTERPOLATION = 'gaussian'
-
-#   def load_directory():
-#     list = []
-#     print(f"    loading matrices in: {args[1]}")
-#     for file in os.listdir(f"{args[1]}"):
-#         if file.endswith(f"{args[2]}.txt"):
-#             list.append(f"{args[1]}{file}")
-#     list = sorted(list)
-#     list.sort(key=extract_number)
-#     return list
-
-
-# def render_image(matrix,i): 
-#     if not os.path.exists(f"{args[3]}"):
-#         os.mkdir(f"{args[3]}")
-
-#     plt.imshow(matrix, cmap ='coolwarm', 
-#                vmin=MINIMUM_VALUE, 
-#                vmax=MAXIMUM_VALUE, 
-#                interpolation=INTERPOLATION
-#                ) 
-#     plt.title(f'{args[4]}')
-#     plt.savefig(f"{args[3]}image{i+1}.png")
-
-
-# def render_images():
-#     print(f"rendering: {args[2]}")
-#     file_paths = load_directory()
-#     print("     matrices loaded")
-#     for i, file in enumerate(file_paths):
-#         print(f"rendering {file}: {i}/{len(file_paths)}")
-#         matrix = np.loadtxt(file)
-#         render_image(matrix, i)
-
 if __name__ == "__main__":
     renderer = Renderer()
     renderer.run()
+    print("Done!")
