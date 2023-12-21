@@ -11,6 +11,7 @@
 #
 # Usage (from root directory of the project):
 #   python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
+#   python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
 #   
 #   path_to_input_dir -> input directory. if the directory contains images then they are used to build the animation.
 #   rho               -> produces an animation regarding the density
@@ -42,7 +43,7 @@ class Renderer:
         # directory related stuff
         self.arg_num        :int            = len(sys.argv)
         self.usage_message  :str            = """
-USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [save]
+USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
     path_to_input_dir -> input directory. if the directory contains images then they are used to build the animation. If directory contains 
                          both images and result txt files, images are preferred.
     rho               -> produces an animation regarding the density
@@ -71,7 +72,7 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) path_to_output_dir [
         self.img_extension  :str            = ".png"
         self.load_images    :bool           = False
         self.images         :list           = []
-        self.interval_ms    :int            = 50
+        self.interval_ms    :int            = 200
         self.animator       :FuncAnimation  = None
         self.quantity_rho   :str            = "rho"
         self.quantity_u     :str            = "u"
