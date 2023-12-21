@@ -60,7 +60,6 @@ void VelocitySet::set_velocity_set()
                     }
                     
                     
-                    // STAMPA VETTORE DIREZIONE E PESI  
                     // std::cout << "DATI" << std::endl; 
                     // for (auto i=0; i<Q; i++){   
                     //     for (auto &&j : this->Set.direction[i]){

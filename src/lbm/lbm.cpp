@@ -72,14 +72,12 @@ void lbm::compute(const double time)
         std::size_t n_threads = omp_get_max_threads() - 1;
         lattice_ptr->set_omp_num_threads() = n_threads;
     #endif
-
     for (std::size_t i = 0; i <= n_iter; i++)
     {
         lattice_ptr->set_inlets(i);
         // REINITIALIZATION OF INLET FIELDS
 
         lattice_ptr->perform_simulation_step();
-        
         if(i % frequency == 0)
         {
             
@@ -91,7 +89,10 @@ void lbm::compute(const double time)
             output_counter++;
             start_time = std::chrono::high_resolution_clock::now();
         }
-    }    
+    }  
+    auto end_time = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+            std::cout << duration.count() << " ms" << std::endl;  
 }
 
 void lbm::perform_strong_scaling_test()

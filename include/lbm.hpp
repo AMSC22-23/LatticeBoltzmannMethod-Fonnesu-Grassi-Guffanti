@@ -97,6 +97,10 @@ public:
         return velocity_set;
     }
 
+    /**
+     * Executes a strong scaling test by registering the time taken by various reiterations of the 
+     * algorithm that maintain the lattice fixed and change the number of active threads.
+    */
     void perform_strong_scaling_test();
 };
 

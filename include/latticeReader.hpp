@@ -32,7 +32,7 @@ protected:
     */
     const std::string input_lattice_path;
     /**
-    *  Path to the input matrix describing the lattice density field  //TODO: ormai inutili?
+    *  Path to the input matrix describing the lattice density field
     */
     const std::string input_rho_path;
     /**
@@ -67,8 +67,23 @@ public:
     LatticeReader2D(const std::string& input_dir_path_);
     ~LatticeReader2D() = default;
 
+    /**
+     * Reads the lattice node structure and populates
+     * @param lattice the lattice to be constructed
+     * @param boundary_list the list of boundary nodes that will be populated and used to manage boundary collisions.
+     * @param width of the lattice
+     * @param height of the lattice
+    */
     bool read_lattice_structure(LatticeGrid2D& lattice, BoundaryList2D& boundary_list,std::size_t& width, std::size_t& height);
+    /**
+     * Reads the input density field from file and coherently updates lattice nodes.
+     * @param lattice lattice containing the nodes whose density is to be updated
+    */
     bool read_lattice_input_rho(LatticeGrid2D& lattice);
+    /**
+     * Reads the input velocity field from file and coherently updates lattice nodes.
+     * @param lattice lattice containing the nodes whose velocities are to be updated
+    */
     bool read_lattice_input_velocities(LatticeGrid2D& lattice);
 };
 
