@@ -10,6 +10,11 @@
 class CollisionModel
 {
 public:
+    /**
+    * @param f vector containing distribution functions of a node
+    * @param fEq vector containing equilibrium distribution functions of a node
+    * @return the post-collision distribution functions
+    */
     virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const = 0;
 
     virtual ~CollisionModel() = default;
@@ -33,27 +38,29 @@ public:
     */
     BGK(const double t_const_, const double t_conj_);
 
-    /**
-    * @param f vector containing distribution functions of a node
-    * @param fEq vector containing equilibrium distribution functions of a node
-    * @return the post-collision distribution functions
-    */
     virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const override;
 
     virtual ~BGK() = default; 
 };
 
+/**
+ * Implementation of the TRT method for collision model
+*/
 class TRT : public CollisionModel
 {
 private: 
-    std::vector<int> f_conj = {0, 3, 4, 1, 2, 7, 8, 5, 6}; //Vector containing the opposite index for each direction (Example: 1<->3, 5<->7)
     double om_p; 
     double om_m;
     const double lambda = 1.0/4.0;
     const double tau_p;
     const double tau_m;
+    //Vector containing the opposite index for each direction (Example: 1<->3, 5<->7)
+    std::vector<int> f_conj = {0, 3, 4, 1, 2, 7, 8, 5, 6}; 
 
     public:
+    /**
+     * @param tau time constant
+    */
     TRT(const double tau);
 
     virtual std::vector<double> calc_collision(const std::vector<double> &f, const std::vector<double> &fEq) const override;

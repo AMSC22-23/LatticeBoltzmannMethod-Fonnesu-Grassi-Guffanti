@@ -22,6 +22,9 @@ public:
     /**
      * Calculates the velocity field and density field of a boundary node 
      * knowing its position in the lattice and the iteration of the simulation
+     * @param point coordinates of a point in the grid
+     * @param it number of the iteration
+     * @return a tuple containing the new velocity of the point
     */
     virtual std::tuple<std::array<double, dim>, double> set_inlets(
         const std::array<std::size_t, dim>& point,
