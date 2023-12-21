@@ -10,8 +10,7 @@
 #   3. save the final animation
 #
 # Usage (from root directory of the project):
-#   python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
-#   python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output_dir]
+#   python ./scripts/produce_video.py path_to_input_dir (rho|u) [save path_to_output_dir]
 #   
 #   path_to_input_dir -> input directory. if the directory contains images then they are used to build the animation.
 #   rho               -> produces an animation regarding the density
