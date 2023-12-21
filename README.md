@@ -23,15 +23,29 @@ cmake ..
 make
 ```
 You'll see all the compilation log, and two executables will be created: `lattice_boltzmann-seq` and `lattice_boltzmann-omp`. The code is basically the same, with `lattice_boltzmann-omp` that supports multithreading with OpenMP and allows execution of the weak scaling test. 
+### Computing the lattice
+Lattices describe computational domains and are stored in `.mtx` files. We provide a few example lattices that can be used as well as a few `.png` files from which lattices can be generated. To generate a lattice you'll need to call the `translate.py` python script in the following way.
+```shell
+python ./scripts/translate.py path_to_image lattice path_to_output_dir
+```
 ### Executing the code
-To run the code you'll simply need to call, within `build`, `./lattice_boltzmann-seq` or `./lattice_boltzmann-omp`. 
+To run the code you'll simply need to call, within `build`, `./lattice_boltzmann-seq` or `./lattice_boltzmann-omp` with the adeguate set of parameters. Both executables accept the same parameters.
+```shell
+./lattice_boltzmann-(seq|omp) dimensions input_dir collision_model [-r reynolds] [-f output freq]
+```
+- `dimensions` 2 or 3, describes the dimensions of the simulation. Until now we only support 2D simulations.
+- `input_dir` path to the input directory containing the lattice.mtx file.
+- `collision model` only **BGK** or **TRT** are available: this describes the model used to execute collision between fluid nodes.
+- `reynolds` the Reynolds number of the simulation. Beware that high Reynolds number may cause numerical instability.
+- `output freq` frequency of the output file creation in the case of a simulation (strong scaling does not produce files).
 ### Visualizing the results
+You have two python scripts at your disposal to visualize the results, they are in the `scripts/` directory.
 
 # Credits
 Implemented by
-- Lorenzo Fonnesu
-- Andrea Grassi
-- Luca Guffanti
+- [Lorenzo Fonnesu](mailto:lorenzo.fonnesu@mail.polimi.it)
+- [Andrea Grassi](mailto:andrea10.grassi@mail.polimi.it)
+- [Luca Guffanti](mailto:luca2.guffanti@mail.polimi.it)
 
 as a project for the Advanced Methods for Scientific Computing course at Politecnico di Milano
 # Bibliography and Used Resources
