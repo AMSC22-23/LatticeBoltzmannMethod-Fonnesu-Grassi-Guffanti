@@ -1,7 +1,11 @@
-src/*.o
-src/main
+# ============ ENVIRONMENTAL DIRECTORIES ============ 
+
+# Directory introduced by vs code
 .vscode/*
+# Directory introduced by mac os
 .DS_Store
+
+# ============ DIRECTORIES OF THE PROJECT ============
+
+# Build directory at the top of the hierarchy
 build/
-results/
-resources/patterns
