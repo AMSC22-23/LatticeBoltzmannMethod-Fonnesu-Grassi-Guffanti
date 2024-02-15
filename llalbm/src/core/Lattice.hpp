@@ -1,4 +1,0 @@
-#ifndef LLALBM_LATTICE_HPP
-#define LLALBM_LATTICE_HPP
-
-#endif // LLALBM_LATTICE_HPP
