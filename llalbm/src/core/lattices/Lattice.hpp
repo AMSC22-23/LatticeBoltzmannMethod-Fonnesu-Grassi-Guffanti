@@ -3,7 +3,6 @@
 
 // =========== STL INCLUDES ===========
 #include <vector>
-#include <map>
 #include <array>
 #include <cassert>
 // ======================================
@@ -37,25 +36,40 @@ namespace llalbm::core
      * 
     */
     template<
-        typename ParallelizationPolicy  ,   // Policy managing the parallelization of the lattice and of the algorithm
         std::size_t dim                 ,   // Spacial dimensions of the simulation.
         typename CollisionPolicy        ,   // Policy managing the interaction between two fluid nodes.
-        typename BoundaryPolicy         ,   // Policy managing the interaction between a fluid node and a boundary node
+        typename WallPolicy             ,   // Policy managing the interaction between a fluid node and a wall node.
+        typename ObstaclePolicy         ,   // Policy managing the interaction between a fluid node and an internal obstacle.
+        typename InletPolicy            ,   // Policy managing the interaction between an internal fluid node and an inlet node.
+        typename OutletPolicy           ,   // Policy managing the interaction between an internal fluid node and an outlet policy.s
         typename InitializationPolicy       // Policy managing the initialization of the lattice.
     >
     class Lattice
     {
     private:
 
+        // ========= POLICIES =========
+
         /// @brief Policy used to manage the interaction between two fluid nodes.
         CollisionPolicy collision_policy;
 
         /// @brief Policy used to manage the interaction between a fluid node and a boundary node.
-        BoundaryPolicy boundary_policy;
+        WallPolicy boundary_policy;
+
+        /// @brief Policy used to manage the interaction between a fluid node and an internal obstacle.
+        ObstaclePolicy obstacle_policy;
+
+        /// @brief Policy used to manage the interaction between a fluid node and an inlet node.
+        InletPolicy inlet_policy;
+
+        /// @brief Policy used to manage the interaction between a fluid node and an outlet node
+        OutletPolicy outlet_policy;
 
         /// @brief Policy used to manage the initialization of the lattice nodes (both when the lattice is being created)
         /// and at the beginning of each iteration to set the values of boundary nodes.
         InitializationPolicy initialization_policy;
+
+        // ========= TENSORS OF THE LATTICE =========
 
         /// @brief Population tensor: at coordinates x (with x being an n-dimensional vector), we store
         /// the total vector of populations (hence the dim + 1)
@@ -77,14 +91,21 @@ namespace llalbm::core
         /// @brief Number of elements per lattice dimension.
         const std::array<Eigen::Index, dim> lattice_dimensions; 
 
-        /// @brief List of coordinates of boundary_nodes.
-        std::vector<Point<dim>> boundary_nodes;
+        // ========= COORDINATES OF IMPORTANT NODES =========
+
+        /// @brief List of coordinates of inlet nodes.
+        std::vector<Point<dim>> inlet_nodes_coord;
+
+        /// @brief List of coordinates of outlet nodes.
+        std::vector<Point<dim>> outlet_nodes_coord;
 
         /// @brief List of coordinates of the edges of obstacle nodes.
         std::vector<Point<dim>> obstacle_nodes;
 
         /// @brief Number of velocities in the velocity set
         const std::size_t q;
+
+        // ========= MISCELLANEOUS =========
 
         /// @brief Logger.
         Logger logger;
