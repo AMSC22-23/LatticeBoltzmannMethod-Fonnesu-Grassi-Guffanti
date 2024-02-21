@@ -20,7 +20,7 @@ set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
 set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-# Include ffft library
+# Include llalbm library
 add_subdirectory(llalbm)
 
 # TODO: add test cases
