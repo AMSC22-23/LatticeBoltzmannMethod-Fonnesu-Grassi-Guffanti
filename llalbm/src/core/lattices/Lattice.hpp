@@ -92,6 +92,9 @@ namespace llalbm::core
         const std::array<Eigen::Index, dim> lattice_dimensions; 
 
         // ========= COORDINATES OF IMPORTANT NODES =========
+        
+        /// @brief List of coordinates of boundary nodes
+        std::vector<Point<dim>> boundary_coord;
 
         /// @brief List of coordinates of inlet nodes.
         std::vector<Point<dim>> inlet_nodes_coord;
