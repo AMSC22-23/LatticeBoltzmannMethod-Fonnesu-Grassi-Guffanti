@@ -19,6 +19,7 @@
 
 // =========== LLALBM INCLUDES ===========
 #include "Logger.hpp"
+#include "aliases.hpp" 
 // =======================================
 
 namespace llalbm::core::collisions
@@ -36,9 +37,11 @@ namespace llalbm::core::collisions
     >
     class BGKCollisionPolicy
     {
+    private:
         /// @brief Logger of the collision policy
         Logger l;
 
+    public:
         BGKCollisionPolicy()
         : l ("GENERIC BGK", std::cout)
         {
@@ -56,9 +59,10 @@ namespace llalbm::core::collisions
     class BGKCollisionPolicy<2>
     {
     private:
-        std::array<Eigen::Index, 2> lattice_dimensions;
+        //std::array<Eigen::Index, 2> lattice_dimensions;
     public:
         static double tau;
+        //std::array<Eigen::Index, 2> lattice_nodes; 
         
         /**
          * @brief Initializes the BGK collision policy with the
@@ -69,6 +73,18 @@ namespace llalbm::core::collisions
         static void initialize(double tau_)
         {
             tau = tau_;
+        }
+
+        /**
+         * @brief Calculates collisions using bgk
+         * 
+         * @param populations of the nodes
+         * @param equilibrium_populations of the nodes
+         * @param after_collision_populations to be streamed
+         */
+        void collide(Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, std::vector<Point<2>> fluid_nodes)
+        {
+
         }
     };
     // initialization of the relaxation constant in the 2-D BGK collision operator.
