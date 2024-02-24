@@ -15,16 +15,17 @@
 
 // =========== LLALBM INCLUDES ===========
 #include "Logger.hpp"
+#include "aliases.hpp"
 // =======================================
+
+//6 2 5
+//3 0 1
+//7 4 8
 
 namespace llalbm::core
 {
-    using namespace Eigen;
+    //using namespace Eigen;
     using namespace llalbm::util::logger;
-
-    /// Generic d-dimensional point described by its set of coordinates
-    template<std::size_t d>
-    using Point = Matrix<std::size_t, d, 1>;
 
     // TODO: partial specialization for a distributed lattice
     /**
@@ -91,10 +92,13 @@ namespace llalbm::core
         /// @brief Number of elements per lattice dimension.
         const std::array<Eigen::Index, dim> lattice_dimensions; 
 
-        // ========= COORDINATES OF IMPORTANT NODES =========
+        // ========= COORDINATES OF ALL NODES =========
         
+        /// @brief List of coordinates of fluid nodes
+        std::vector<Point<dim>> fluid_nodes;
+
         /// @brief List of coordinates of boundary nodes
-        std::vector<Point<dim>> boundary_coord;
+        std::vector<boundaryPoint<dim>> boundary_coord;
 
         /// @brief List of coordinates of inlet nodes.
         std::vector<Point<dim>> inlet_nodes_coord;
