@@ -169,6 +169,17 @@ namespace llalbm::core
             global_u = Tensor<double, dim + 1>(global_u_data);
             logger.info("Global velocity tensor build");
 
+            D2Q9 << 0 , 0,
+                1 , 0,
+                0 , 1, 
+                -1, 0,
+                0 ,-1,
+                1 , 1,
+                -1, 1,
+                -1,-1,
+                1 ,-1;
+
+            logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
             //TODO:
             //TODO:

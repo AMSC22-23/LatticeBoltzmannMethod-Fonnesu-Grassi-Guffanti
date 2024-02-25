@@ -26,23 +26,6 @@ using boundaryPoint = std::tuple<Point<d>, btypes>;
 
 /// Velocity Sets
 /// D2Q9
-class vSets
-{
-private:
-    /* data */
-public:
-    Matrix<double,9,2> D2Q9;
-    Matrix<double,27,3> D3Q27;
-    vSets(){
-        D2Q9 << 0 , 0,
-                1 , 0,
-                0 , 1, 
-                -1, 0,
-                0 ,-1,
-                1 , 1,
-                -1, 1,
-                -1,-1,
-                1 ,-1;
-    }
-    
-};
+
+extern Matrix<double,9,2> D2Q9;
+extern Matrix<double,27,3> D3Q27;
