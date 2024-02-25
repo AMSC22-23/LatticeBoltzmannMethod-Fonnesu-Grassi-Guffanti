@@ -58,7 +58,7 @@ namespace llalbm::core::boundaries
                 lattice_nodes = l;
                 boundary_nodes = b;
             }*/
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord){
+            void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord, Tensor<double, 2> /*global_rho*/, Tensor<double, 3> /*global_u*/){
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
                     double x = std::get<0>(boundary_coord[bnode])[0];
