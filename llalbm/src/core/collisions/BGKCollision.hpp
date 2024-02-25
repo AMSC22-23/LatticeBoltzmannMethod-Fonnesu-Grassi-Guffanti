@@ -22,7 +22,7 @@
 #include "aliases.hpp" 
 // =======================================
 
-namespace llalbm::core::collisions
+namespace llalbm::core::collisions 
 {
 
     using namespace llalbm::util::logger;
@@ -62,6 +62,8 @@ namespace llalbm::core::collisions
         //std::array<Eigen::Index, 2> lattice_dimensions;
     public:
         static double tau;
+        const double tauinv = 1.0/tau;
+        const double omtauinv = 1.0 - tauinv;
         //std::array<Eigen::Index, 2> lattice_nodes; 
         
         /**
@@ -82,9 +84,32 @@ namespace llalbm::core::collisions
          * @param equilibrium_populations of the nodes
          * @param after_collision_populations to be streamed
          */
-        void collide(Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, std::vector<Point<2>> fluid_nodes)
+        void stream_collide(Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, std::vector<Point<2>> fluid_nodes, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
         {
+            for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
+            {
+                double x = fluid_nodes[fnode][0];
+                double y = fluid_nodes[fnode][1];
 
+                double p0 = populations(x, y, 0);
+                double p1 = populations(x-1, y, 1);
+                double p2 = populations(x, y-1, 2);
+                double p3 = populations(x+1, y, 3);
+                double p4 = populations(x, y+1, 4);
+                double p5 = populations(x-1, y-1, 5);
+                double p6 = populations(x+1, y-1, 6);
+                double p7 = populations(x+1, y+1, 7);
+                double p8 = populations(x-1, y+1, 8);
+
+                double rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+                double rhoinv = 1.0/rho;
+
+                double tw0r = tauinv * D2Q9(0, 2) * rho;
+                double twsr = tauinv * D2Q9(1, 2) * rho;
+                double twdr = tauinv * D2Q9(5, 2) * rho;
+
+                
+            }
         }
     };
     // initialization of the relaxation constant in the 2-D BGK collision operator.
