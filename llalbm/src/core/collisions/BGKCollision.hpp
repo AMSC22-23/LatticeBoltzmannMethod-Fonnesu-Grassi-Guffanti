@@ -104,15 +104,34 @@ namespace llalbm::core::collisions
                 double rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
                 double rhoinv = 1.0/rho;
 
+                double ux = rhoinv * (p1 + p5 + p8 -(p3 + p6 + p7));
+                double uy = rhoinv * (p2 + p5 + p6 -(p4+p7+p8));
+
                 double tw0r = tauinv * D2Q9(0, 2) * rho;
                 double twsr = tauinv * D2Q9(1, 2) * rho;
                 double twdr = tauinv * D2Q9(5, 2) * rho;
+            
+                double omusq = 1.0 - 1.5 * (ux * ux + uy*uy);
 
-                
+                double tux = 3.0*ux;
+                double tuy = 3.0*uy;
+                after_collision_populations(x,y,0)= omtauinv*p0 + tw0r*(omusq);
+
+                double cidot3u = tux; //(?)
+                after_collision_populations(x,y,1)= omtauinv*p1 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,2)= omtauinv*p2 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,3)= omtauinv*p3 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,4)= omtauinv*p4 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+
+                cidot3u = tux + tuy;
+                after_collision_populations(x,y,5)= omtauinv*p5 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,6)= omtauinv*p6 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,7)= omtauinv*p7 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+                after_collision_populations(x,y,8)= omtauinv*p8 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
             }
         }
     };
     // initialization of the relaxation constant in the 2-D BGK collision operator.
-    double BGKCollisionPolicy<2>::tau = 0.0;
+    //double BGKCollisionPolicy<2>::tau = 0.0;
 
 }; // namespace llalbm::core::collisions
