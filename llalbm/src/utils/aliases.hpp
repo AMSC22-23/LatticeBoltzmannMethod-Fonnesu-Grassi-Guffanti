@@ -24,8 +24,10 @@ enum btypes {TOP_WALL, RIGHT_WALL, BOTTOM_WALL, LEFT_WALL, RIGHT_TOP_C, RIGHT_BO
 template<std::size_t d>
 using boundaryPoint = std::tuple<Point<d>, btypes>; 
 
-/// Velocity Sets
+/// Velocity Sets dim +1
 /// D2Q9
 
-extern Matrix<double,9,2> D2Q9;
-extern Matrix<double,27,3> D3Q27;
+extern Matrix<double,9,3> D2Q9;
+
+/// D3Q27
+extern Matrix<double,27,4> D3Q27;
