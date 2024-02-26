@@ -42,7 +42,7 @@ namespace llalbm::core::collisions
         Logger l;
 
     public:
-        BGKCollisionPolicy()
+        BGKCollisionPolicy() 
         : l ("GENERIC BGK", std::cout)
         {
             l.error("GENERIC BGK COLLISION NOT IMPLEMENTED");
@@ -78,13 +78,16 @@ namespace llalbm::core::collisions
         }
 
         /**
-         * @brief Calculates collisions using bgk
+         * @brief method that calculates the new populations of a node, its rho and its velocities
          * 
-         * @param populations of the nodes
-         * @param equilibrium_populations of the nodes
-         * @param after_collision_populations to be streamed
+         * @param populations of the node
+         * @param after_collision_populations of the node to be streamed
+         * @param fluid_nodes vector containing coordinates of all the fluid nodes of the lattice
+         * @param global_rho tensor containing all densities
+         * @param global_u tensor containing all velocities 
+         * @param save boolean used to save rho and u when necessary
          */
-        void stream_collide(Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, std::vector<Point<2>> fluid_nodes, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+        void stream_collide(const Tensor<double, 3> &populations, /*Tensor<double, 3> &equilibrium_populations,*/ Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, bool save)
         {
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
             {
@@ -107,6 +110,13 @@ namespace llalbm::core::collisions
                 double ux = rhoinv * (p1 + p5 + p8 -(p3 + p6 + p7));
                 double uy = rhoinv * (p2 + p5 + p6 -(p4+p7+p8));
 
+                /*if(save)
+                {
+                    global_rho(x,y) = rho;
+                    global_u(x,y,0) = ux;
+                    global_u(x,y,1) = uy;
+                }*/
+
                 double tw0r = tauinv * D2Q9(0, 2) * rho;
                 double twsr = tauinv * D2Q9(1, 2) * rho;
                 double twdr = tauinv * D2Q9(5, 2) * rho;
@@ -115,6 +125,7 @@ namespace llalbm::core::collisions
 
                 double tux = 3.0*ux;
                 double tuy = 3.0*uy;
+                
                 after_collision_populations(x,y,0)= omtauinv*p0 + tw0r*(omusq);
 
                 double cidot3u = tux; //(?)
@@ -128,6 +139,12 @@ namespace llalbm::core::collisions
                 after_collision_populations(x,y,6)= omtauinv*p6 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,7)= omtauinv*p7 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,8)= omtauinv*p8 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
+
+                // TODO: quando tutti i thread hanno finito l'esecuzione del metodo, bisogna fare lo streaming 
+                // da after_collision_populations a populations??? Non si può fare qui perché dobbiamo avere 
+                // sincronizzazione tra i thread (credo)
+                // TODO: si potrebbe fare anche prima del metodo??? Da vedere con calma, comunque non credo 
+                // perché ci sono da considerare i boundaries
             }
         }
     };
