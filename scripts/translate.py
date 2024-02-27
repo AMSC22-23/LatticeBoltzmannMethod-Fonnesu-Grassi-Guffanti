@@ -32,8 +32,8 @@ from PIL import Image
 FLUID = 1 #WHITE
 BOUNDARY = 2 #BLACK
 INLET = 3 #BLUE
-OUTLET = 4
-OBSTACLE = 5
+OUTLET = 4 #RED
+OBSTACLE = 5 #GREEN
 
 def is_boundary(pixel: tuple[int, int, int]) -> bool: 
     """
