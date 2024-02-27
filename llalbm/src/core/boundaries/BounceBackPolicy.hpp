@@ -52,6 +52,9 @@ namespace llalbm::core::boundaries
         private:
             //std::array<Eigen::Index, 2> lattice_nodes; 
             //std::vector<Point<2>> boundary_nodes;
+            double x, y;
+            // double p0;
+            double p1, p2, p3, p4, p5, p6, p7, p8;
             
         public: 
             /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
@@ -59,10 +62,33 @@ namespace llalbm::core::boundaries
                 boundary_nodes = b;
             }*/
             void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord, Tensor<double, 2> /*global_rho*/, Tensor<double, 3> /*global_u*/){
+                
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
-                    double x = std::get<0>(boundary_coord[bnode])[0];
-                    double y = std::get<0>(boundary_coord[bnode])[1];
+                    x = std::get<0>(boundary_coord[bnode])[0];
+                    y = std::get<0>(boundary_coord[bnode])[1];
+
+                    // p0 = populations(x, y, 0);
+                    p1 = populations(x, y, 1);
+                    p2 = populations(x, y, 2);
+                    p3 = populations(x, y, 3);
+                    p4 = populations(x, y, 4);
+                    p5 = populations(x, y, 5);
+                    p6 = populations(x, y, 6);
+                    p7 = populations(x, y, 7);
+                    p8 = populations(x, y, 8);
+
+                    // populations(x,y,0) = p0;
+                    populations(x,y,1) = p3;
+                    populations(x,y,2) = p4;
+                    populations(x,y,3) = p1;
+                    populations(x,y,4) = p2;
+                    populations(x,y,5) = p7;
+                    populations(x,y,6) = p8;
+                    populations(x,y,7) = p5;
+                    populations(x,y,8) = p6;
+
+                    /*
                     switch (std::get<1>(boundary_coord[bnode]))
                     {
                     case TOP_WALL:                        
@@ -112,7 +138,7 @@ namespace llalbm::core::boundaries
                         populations(x,y,8) = populations(x,y,6);
                         populations(x,y,4) = populations(x,y,2);
                         break;
-                    }
+                    }*/
                 }
                 
             }

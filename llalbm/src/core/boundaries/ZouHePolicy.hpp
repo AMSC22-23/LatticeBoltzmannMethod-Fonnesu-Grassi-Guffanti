@@ -51,6 +51,8 @@ namespace llalbm::core::boundaries
         private:
             //std::array<Eigen::Index, 2> lattice_nodes; 
             //std::vector<Point<2>> boundary_nodes;
+            double x, y;
+            double rho, ru;
             
         public: 
             /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
@@ -64,37 +66,37 @@ namespace llalbm::core::boundaries
             void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u){
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
-                    double x = std::get<0>(boundary_coord[bnode])[0];
-                    double y = std::get<0>(boundary_coord[bnode])[1];
+                    x = std::get<0>(boundary_coord[bnode])[0];
+                    y = std::get<0>(boundary_coord[bnode])[1];
                     switch (std::get<1>(boundary_coord[bnode]))
                     {
                     case TOP_WALL:        
-                        const double rho = (populations(x,y,0) + populations(x,y,1) + populations(x,y,3) + 2.0 * (populations(x,y,2) + populations(x,y,5) + populations(x,y,6))) / (1.0 + global_u(x,y,1)); 
-                        const double ru = rho * global_u(x,y,1);
+                        rho = (populations(x,y,0) + populations(x,y,1) + populations(x,y,3) + 2.0 * (populations(x,y,2) + populations(x,y,5) + populations(x,y,6))) / (1.0 + global_u(x,y,1)); 
+                        ru = rho * global_u(x,y,1);
                         populations(x,y,4) = populations(x,y,2) - two_thirds * ru;
                         populations(x,y,7) = populations(x,y,5) - one_sixth * ru + one_half * (populations(x,y,1) - populations(x,y,3));
                         populations(x,y,8) = populations(x,y,6) - one_sixth * ru + one_half * (populations(x,y,3) - populations(x,y,1));
                         break;
                     
                     case LEFT_WALL:
-                        const double rho = (populations(x,y,0) + populations(x,y,2) + populations(x,y,4) + 2.0 * (populations(x,y,3) + populations(x,y,7) + populations(x,y,6))) / (1.0 - global_u(x,y,0)); 
-                        const double ru = rho * global_u(x,y,0);
+                        rho = (populations(x,y,0) + populations(x,y,2) + populations(x,y,4) + 2.0 * (populations(x,y,3) + populations(x,y,7) + populations(x,y,6))) / (1.0 - global_u(x,y,0)); 
+                        ru = rho * global_u(x,y,0);
                         populations(x,y,1) = populations(x,y,3) + two_thirds * ru;
                         populations(x,y,5) = populations(x,y,7) + one_sixth * ru - one_half * (populations(x,y,2) - populations(x,y,4));
                         populations(x,y,8) = populations(x,y,6) + one_sixth * ru - one_half * (populations(x,y,4) - populations(x,y,2));
                         break;
 
                     case RIGHT_WALL:
-                        const double rho = (populations(x,y,0) + populations(x,y,2) + populations(x,y,4) + 2.0 * (populations(x,y,1) + populations(x,y,5) + populations(x,y,8))) / (1.0 + global_u(x,y,0)); 
-                        const double ru = rho * global_u(x,y,0);
+                        rho = (populations(x,y,0) + populations(x,y,2) + populations(x,y,4) + 2.0 * (populations(x,y,1) + populations(x,y,5) + populations(x,y,8))) / (1.0 + global_u(x,y,0)); 
+                        ru = rho * global_u(x,y,0);
                         populations(x,y,3) = populations(x,y,1) - two_thirds * ru;
                         populations(x,y,7) = populations(x,y,5) - one_sixth * ru + one_half * (populations(x,y,2) - populations(x,y,4));
                         populations(x,y,6) = populations(x,y,8) - one_sixth * ru + one_half * (populations(x,y,4) - populations(x,y,2));
                         break;
 
                     case BOTTOM_WALL:
-                        const double rho = (populations(x,y,0) + populations(x,y,1) + populations(x,y,3) + 2.0 * (populations(x,y,4) + populations(x,y,7) + populations(x,y,8))) / (1.0 - global_u(x,y,1)); 
-                        const double ru = rho * global_u(x,y,1);
+                        rho = (populations(x,y,0) + populations(x,y,1) + populations(x,y,3) + 2.0 * (populations(x,y,4) + populations(x,y,7) + populations(x,y,8))) / (1.0 - global_u(x,y,1)); 
+                        ru = rho * global_u(x,y,1);
                         populations(x,y,2) = populations(x,y,2) + two_thirds * ru;
                         populations(x,y,5) = populations(x,y,7) + one_sixth * ru - one_half * (populations(x,y,1) - populations(x,y,3));
                         populations(x,y,6) = populations(x,y,8) + one_sixth * ru - one_half * (populations(x,y,3) - populations(x,y,1));

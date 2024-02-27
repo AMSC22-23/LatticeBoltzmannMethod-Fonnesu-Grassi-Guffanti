@@ -60,10 +60,16 @@ namespace llalbm::core::collisions
     {
     private:
         //std::array<Eigen::Index, 2> lattice_dimensions;
+        double x, y;
+        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+        double rho, rhoinv;
+        double ux, uy;
+        double tw0r, twsr, twdr;
+        double omusq, tux, tuy, cidot3u;
     public:
         static double tau;
-        const double tauinv = 1.0/tau;
-        const double omtauinv = 1.0 - tauinv;
+        static double tauinv;
+        static double omtauinv;
         //std::array<Eigen::Index, 2> lattice_nodes; 
         
         /**
@@ -75,6 +81,8 @@ namespace llalbm::core::collisions
         static void initialize(double tau_)
         {
             tau = tau_;
+            tauinv = 1.0/tau;
+            omtauinv = 1.0 - tauinv;
         }
 
         /**
@@ -89,26 +97,27 @@ namespace llalbm::core::collisions
          */
         void stream_collide(const Tensor<double, 3> &populations, /*Tensor<double, 3> &equilibrium_populations,*/ Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, bool save)
         {
+
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
             {
-                double x = fluid_nodes[fnode][0];
-                double y = fluid_nodes[fnode][1];
+                x = fluid_nodes[fnode][0];
+                y = fluid_nodes[fnode][1];
 
-                double p0 = populations(x, y, 0);
-                double p1 = populations(x-1, y, 1);
-                double p2 = populations(x, y-1, 2);
-                double p3 = populations(x+1, y, 3);
-                double p4 = populations(x, y+1, 4);
-                double p5 = populations(x-1, y-1, 5);
-                double p6 = populations(x+1, y-1, 6);
-                double p7 = populations(x+1, y+1, 7);
-                double p8 = populations(x-1, y+1, 8);
+                p0 = populations(x, y, 0);
+                p1 = populations(x-1, y, 1);
+                p2 = populations(x, y-1, 2);
+                p3 = populations(x+1, y, 3);
+                p4 = populations(x, y+1, 4);
+                p5 = populations(x-1, y-1, 5);
+                p6 = populations(x+1, y-1, 6);
+                p7 = populations(x+1, y+1, 7);
+                p8 = populations(x-1, y+1, 8);
 
-                double rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
-                double rhoinv = 1.0/rho;
+                rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+                rhoinv = 1.0/rho;
 
-                double ux = rhoinv * (p1 + p5 + p8 -(p3 + p6 + p7));
-                double uy = rhoinv * (p2 + p5 + p6 -(p4+p7+p8));
+                ux = rhoinv * (p1 + p5 + p8 -(p3 + p6 + p7));
+                uy = rhoinv * (p2 + p5 + p6 -(p4+p7+p8));
 
                 /*if(save)
                 {
@@ -117,18 +126,18 @@ namespace llalbm::core::collisions
                     global_u(x,y,1) = uy;
                 }*/
 
-                double tw0r = tauinv * D2Q9(0, 2) * rho;
-                double twsr = tauinv * D2Q9(1, 2) * rho;
-                double twdr = tauinv * D2Q9(5, 2) * rho;
+                tw0r = tauinv * D2Q9(0, 2) * rho;
+                twsr = tauinv * D2Q9(1, 2) * rho;
+                twdr = tauinv * D2Q9(5, 2) * rho;
             
-                double omusq = 1.0 - 1.5 * (ux * ux + uy*uy);
+                omusq = 1.0 - 1.5 * (ux * ux + uy*uy);
 
-                double tux = 3.0*ux;
-                double tuy = 3.0*uy;
+                tux = 3.0*ux;
+                tuy = 3.0*uy;
                 
                 after_collision_populations(x,y,0)= omtauinv*p0 + tw0r*(omusq);
 
-                double cidot3u = tux; //(?)
+                cidot3u = tux; //(?)
                 after_collision_populations(x,y,1)= omtauinv*p1 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,2)= omtauinv*p2 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,3)= omtauinv*p3 + twsr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
@@ -139,16 +148,20 @@ namespace llalbm::core::collisions
                 after_collision_populations(x,y,6)= omtauinv*p6 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,7)= omtauinv*p7 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
                 after_collision_populations(x,y,8)= omtauinv*p8 + twdr *(omusq + cidot3u * (1.0 + 0.5*cidot3u));
-
-                // TODO: quando tutti i thread hanno finito l'esecuzione del metodo, bisogna fare lo streaming 
-                // da after_collision_populations a populations??? Non si può fare qui perché dobbiamo avere 
-                // sincronizzazione tra i thread (credo)
-                // TODO: si potrebbe fare anche prima del metodo??? Da vedere con calma, comunque non credo 
-                // perché ci sono da considerare i boundaries
             }
+
+            // TODO: streaming
+            /* Dopo che sono state calcolate le after_collision_populations di TUTTI i fluid nodes, bisogna fare lo streaming.
+            3 modi (aggiungere altri in caso):
+            - se possibile aggiungere dentro il loop di stream_collide (post-sincronizzazione) per evitare di averne un altro;
+            - aggiungere un nuovo loop in stream_collide;
+            - creare un nuovo metodo per lo streaming.
+             */
         }
     };
     // initialization of the relaxation constant in the 2-D BGK collision operator.
-    //double BGKCollisionPolicy<2>::tau = 0.0;
+    double BGKCollisionPolicy<2>::tau = 0.0;
+    double BGKCollisionPolicy<2>::tauinv = 0.0;
+    double BGKCollisionPolicy<2>::omtauinv = 0.0;
 
 }; // namespace llalbm::core::collisions
