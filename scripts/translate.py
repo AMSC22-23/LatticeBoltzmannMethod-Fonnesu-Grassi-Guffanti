@@ -19,7 +19,7 @@
 #   To produce the velocity field the command to call is the following
 #   python translate.py path_to_image ux|uy path_to_output_dir [open]
 #      
-#
+#   0 S 1  Fluido 2 Boundary 3 Inlet 4 Outlet 5 Obstacle
 #
 
 import sys
@@ -29,8 +29,11 @@ import numpy
 import math
 from PIL import Image
 
-OPEN_BOUNDARY_NODE = 1
-BOUNDARY_NODE = 2
+FLUID = 1 #WHITE
+BOUNDARY = 2 #BLACK
+INLET = 3 #BLUE
+OUTLET = 4
+OBSTACLE = 5
 
 def is_boundary(pixel: tuple[int, int, int]) -> bool: 
     """
@@ -43,6 +46,21 @@ def is_fluid(pixel: tuple[int, int, int]) -> bool:
     A pixel is considered a fluid node if its color approaches white
     """
     return pixel[0] > 200 and pixel[1] > 200 and pixel[2] > 200
+def is_inlet(pixel: tuple[int, int, int]) -> bool:
+    """
+    A pixel is considered a inlet node if its color approaches blue
+    """
+    return pixel[0] < 100 and pixel[1] < 100 and pixel[2] > 200
+def is_outlet(pixel: tuple[int, int, int]) -> bool:
+    """
+    A pixel is considered a outlet node if its color approaches red
+    """
+    return pixel[0] > 200 and pixel[1] < 100 and pixel[2] < 100
+def is_obstacle(pixel: tuple[int, int, int]) -> bool:
+    """
+    A pixel is considered a outlet node if its color approaches green
+    """
+    return pixel[0] < 100 and pixel[1] > 200 and pixel[2] < 100
 
 # def is_solid(pixel):
 #     if (pixel[0]<100 and pixel[1]<100 and pixel[2]>100):
@@ -68,13 +86,25 @@ def produce_lattice(img: Image) -> tuple[int, int, int, list]:
     for idx, pixel in enumerate(pixels):
         j = idx % (width)
         i = int((idx - j) / width)
+        if(pixel[0] != 128):
+            print(f"{pixel[0]} {pixel[1]} {pixel[2]}")
+
         if is_fluid(pixel):
             if i == 0 or j == 0 or i == height - 1 or j == height - 1:
                 non_zero += 1 
-                non_zeroes.append((OPEN_BOUNDARY_NODE, i, j))
+                non_zeroes.append((FLUID, i, j))
         elif is_boundary(pixel):
                 non_zero += 1
-                non_zeroes.append((BOUNDARY_NODE, i, j))
+                non_zeroes.append((BOUNDARY, i, j))
+        elif is_inlet(pixel):
+                non_zero +=1
+                non_zeroes.append((INLET, i, j))
+        elif is_outlet(pixel):
+                non_zero +=1
+                non_zeroes.append((OUTLET, i, j))
+        elif is_obstacle(pixel):
+                non_zero +=1
+                non_zeroes.append((OBSTACLE, i, j))
 
     non_zero = len(non_zeroes)
     return (width, height, non_zero, non_zeroes)
