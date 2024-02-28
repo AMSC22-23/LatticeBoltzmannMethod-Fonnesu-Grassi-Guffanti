@@ -29,5 +29,5 @@ using boundaryPoint = std::tuple<Point<d>, btypes>;
 
 extern Matrix<double,9,3> D2Q9;
 
-/// D3Q27
-extern Matrix<double,27,4> D3Q27;
+/// D3Q19
+extern Matrix<double,19,4> D3Q19;

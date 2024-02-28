@@ -89,13 +89,14 @@ namespace llalbm::core::collisions
          * @brief method that calculates the new populations of a node, its rho and its velocities
          * 
          * @param populations of the node
+         * @param equilibrium_populations of the node
          * @param after_collision_populations of the node to be streamed
          * @param fluid_nodes vector containing coordinates of all the fluid nodes of the lattice
          * @param global_rho tensor containing all densities
          * @param global_u tensor containing all velocities 
          * @param save boolean used to save rho and u when necessary
          */
-        void stream_collide(const Tensor<double, 3> &populations, /*Tensor<double, 3> &equilibrium_populations,*/ Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, bool save)
+        void stream_collide(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, bool save)
         {
 
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)

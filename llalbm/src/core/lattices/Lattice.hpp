@@ -101,13 +101,13 @@ namespace llalbm::core
         std::vector<boundaryPoint<dim>> boundary_coord;
 
         /// @brief List of coordinates of inlet nodes.
-        std::vector<Point<dim>> inlet_nodes_coord;
+        std::vector<boundaryPoint<dim>> inlet_nodes_coord;
 
         /// @brief List of coordinates of outlet nodes.
-        std::vector<Point<dim>> outlet_nodes_coord;
+        std::vector<boundaryPoint<dim>> outlet_nodes_coord;
 
         /// @brief List of coordinates of the edges of obstacle nodes.
-        std::vector<Point<dim>> obstacle_nodes;
+        std::vector<boundaryPoint<dim>> obstacle_nodes;
 
         /// @brief Number of velocities in the velocity set
         const std::size_t q;
@@ -116,6 +116,9 @@ namespace llalbm::core
 
         /// @brief Logger.
         Logger logger;
+
+        /// @brief Boolean used to save macroscopic quantities
+        bool save;
 
     public:
         
@@ -169,7 +172,7 @@ namespace llalbm::core
             global_u = Tensor<double, dim + 1>(global_u_data);
             logger.info("Global velocity tensor build");
 
-            D2Q9 << 0 , 0, 0,
+            D2Q9 << 0 , 0, 4/9,
                 1 , 0, 1/9,
                 0 , 1, 1/9,
                 -1, 0, 1/9,
@@ -178,6 +181,27 @@ namespace llalbm::core
                 -1, 1, 1/36,
                 -1,-1, 1/36,
                 1 ,-1, 1/36;
+            
+            D3Q19 << 0, 0, 0, 1/3,
+                1, 0, 0, 1/18,
+                -1, 0, 0, 1/18,
+                0, 1, 0, 1/18,
+                0, -1, 0, 1/18,
+                0, 0, 1, 1/18,
+                0, 0, -1, 1/18,
+                1, 1, 0, 1/36,
+                -1, -1, 0, 1/36,
+                1, 0, 1, 1/36,
+                -1, 0, -1, 1/36,
+                0, 1, 1, 1/36,
+                0, -1, -1, 1/36,
+                1, -1, 0, 1/36,
+                -1, 1, 0, 1/36,
+                1, 0, -1, 1/36,
+                -1, 0, 1, 1/36,
+                0, 1, -1, 1/36,
+                0, -1, 1, 1/36;
+
 
             logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
@@ -186,6 +210,41 @@ namespace llalbm::core
 
             // Then, lattice construction is complete.
             logger.info("Lattice is ready.")
+        }
+
+        void perform_lbm(const std::size_t n_steps)
+        {
+            for (std::size_t i = 0; i < n_iter; i++)
+            {
+                // 1. The equilibrium populations are calculated for each node
+                for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
+                {
+                    // Compute equilibrium population
+                }
+
+                //2. Perform the collisions
+                collision_policy.stream_collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, save);
+
+                //3. Streaming
+                // Da decidere se fare qua o in stream_collide, come descritto nel metodo
+
+                //4. Perform the collision at the boundaries
+                boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
+                obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
+                inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
+                outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
+
+                // 5. Update the macroscopic quantities
+                // L'update per i fluid nodes viene fatto in stream_collide: da capire se vogliamo fare qui (o in update_boundaries)
+                // l'update per i boundaries o se vogliamo fare qui l'update di tutto quanto.
+
+                // TODO:
+                /*
+                1. Decidere quando settare save a true;
+                2. Decidere gli argomenti del metodo;
+                3. Bisogna fare set_inlets?
+                */
+            }
         }
 
     };
