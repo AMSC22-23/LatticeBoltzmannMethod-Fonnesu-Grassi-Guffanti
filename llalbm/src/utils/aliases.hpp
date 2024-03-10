@@ -21,6 +21,11 @@ template<std::size_t d>
 using Point = Matrix<std::size_t, d, 1>;
 
 enum btypes {TOP_WALL, RIGHT_WALL, BOTTOM_WALL, LEFT_WALL, RIGHT_TOP_C, RIGHT_BOTTOM_C, LEFT_BOTTOM_C, LEFT_TOP_C };
+
+/// @brief Type of nodes
+enum InputNodeType {SOLID = 0, FLUID, BOUNDARY, INLET, OUTLET, OBSTACLE};
+
+
 template<std::size_t d>
 using boundaryPoint = std::tuple<Point<d>, btypes>; 
 
