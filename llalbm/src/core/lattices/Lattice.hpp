@@ -14,8 +14,8 @@
 // ======================================
 
 // =========== LLALBM INCLUDES ===========
-#include "Logger.hpp"
-#include "aliases.hpp"
+#include "../../utils/loggers/Logger.hpp"
+#include "../../utils/aliases.hpp"
 // =======================================
 
 //6 2 5
@@ -140,8 +140,8 @@ namespace llalbm::core
         ,   Logger("LATTICE", out_stream)
         {
             // Checking validity of input data
-            assert(lattice_dimensions.size() == dim && "[ERROR] The number of dimension data in the Lattice constructor"+
-            " must be equal to the number of spatial dimensions.");
+            assert(lattice_dimensions.size() == dim && 
+            "[ERROR] The number of dimension data in the Lattice constructor \n must be equal to the number of spatial dimensions.");
 
             logger.info("Constructing Lattice Object...");
             logger.info("Number of dimensions = " + dim);
@@ -166,7 +166,7 @@ namespace llalbm::core
             // Building the gloabl velocity tensor
             std::array<Eigen::Index, dim + 1> global_u_data;
             for (std::size_t i = 0; i < dim; ++i) {
-               global_u_data[i] = lattice_dims[i];
+               global_u_data[i] = lattice_dimensions[i];
             }
             global_u_data[dim] = dim;
             global_u = Tensor<double, dim + 1>(global_u_data);
@@ -209,12 +209,12 @@ namespace llalbm::core
             //TODO:
 
             // Then, lattice construction is complete.
-            logger.info("Lattice is ready.")
+            logger.info("Lattice is ready.");
         }
 
         void perform_lbm(const std::size_t n_steps)
         {
-            for (std::size_t i = 0; i < n_iter; i++)
+            for (std::size_t i = 0; i < n_steps; i++)
             {
                 // 1. The equilibrium populations are calculated for each node
                 for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)

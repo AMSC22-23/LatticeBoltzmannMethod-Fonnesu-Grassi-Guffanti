@@ -2,11 +2,12 @@
 #define LLALBM_HPP
 
 // Main Lattice objects
-#include "Lattice.hpp"
-#include "DistributedLattice.hpp"
+#include "../src/core/lattices/Lattice.hpp"
 
 // Utils - Logger utility
-#include "Logger.hpp"
+#include "../src/utils/loggers/Logger.hpp"
+#include "../src/utils/readers/LatticeReader.hpp"
+#include "../src/utils/aliases.hpp"
 
 
 #endif // LLALBM_HPP

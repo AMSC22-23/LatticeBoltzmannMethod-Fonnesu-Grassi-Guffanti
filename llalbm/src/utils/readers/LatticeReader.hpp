@@ -15,8 +15,8 @@
 // ======================================
 
 // =========== LLALBM INCLUDES ===========
-#include "Logger.hpp"
-#include "aliases.hpp"
+#include "../../utils/loggers/Logger.hpp"
+#include "../../utils/aliases.hpp" 
 // =======================================
 
 
@@ -83,29 +83,33 @@ namespace llalbm::util::reader
     void read_lattice_file(
         const std::string& path,
         std::vector<Point<dim>>& fluid_nodes,
-        std::vector<boundaryPoint<dim>> boundary_coord,
-        std::vector<boundaryPoint<dim>> inlet_nodes_coord,
-        std::vector<boundaryPoint<dim>> outlet_nodes_coord,
-        std::vector<boundaryPoint<dim>> obstacle_nodes,
+        std::vector<boundaryPoint<dim>>& boundary_coord,
+        std::vector<boundaryPoint<dim>>& inlet_nodes_coord,
+        std::vector<boundaryPoint<dim>>& outlet_nodes_coord,
+        std::vector<boundaryPoint<dim>>& obstacle_nodes,
         std::array<Eigen::Index, dim>& lattice_dimensions)
     {
         // In order to read the file, instantiate an input file stream.
         std::ifstream in(path);
-        assert(in.is_open() && "\n\n ERROR, the LTC input file could not be opened.");
+        assert(in.is_open() && "ERROR, the LTC input file could not be opened.");
 
         // If the file has been opened correctly, then the header is checked.
         // A correct Matrix Market Header is as follows
 
-        logger.info(".mtx file was opened, validating header");
+        logger.info(".ltc file was opened, validating header");
         
         std::string header;
+        std::stringstream string_stream;
+        
+        // Check consistency of the header 
+        //  - template dimensions == header dimensions
+        //  - extensions are positive
+        //  - sum of elements is equal to product of extensions
         std::getline(in, header);
         
-        // TODO: Check consistency of the header 
-        //       - template dimensions == header dimensions
-        //       - extensions are positive
-        //       - sum of elements is equal to product of extensions
-        
+        // The first element should be the number of dimensions
+        logger.info(header);
+
         // Data structures allocation
         // TODO: Allocate space for intermediate tensor of types
         // TODO: Allocate space for the vectors

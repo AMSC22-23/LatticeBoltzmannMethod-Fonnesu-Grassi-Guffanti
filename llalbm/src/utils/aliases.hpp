@@ -1,3 +1,6 @@
+#ifndef LLALBM_ALIASES_HPP
+#define LLALBM_ALIASES_HPP
+
 // =========== STL INCLUDES ===========
 #include <vector>
 #include <array>
@@ -10,9 +13,6 @@
 #include <Eigen/Core>
 // ======================================
 
-// =========== LLALBM INCLUDES ===========
-#include "Logger.hpp"
-// =======================================
 
 
 using namespace Eigen; 
@@ -23,7 +23,7 @@ using Point = Matrix<std::size_t, d, 1>;
 enum btypes {TOP_WALL, RIGHT_WALL, BOTTOM_WALL, LEFT_WALL, RIGHT_TOP_C, RIGHT_BOTTOM_C, LEFT_BOTTOM_C, LEFT_TOP_C };
 
 /// @brief Type of nodes
-enum InputNodeType {SOLID = 0, FLUID, BOUNDARY, INLET, OUTLET, OBSTACLE};
+enum InputNodeType {FLUID = 0, SOLID, BOUNDARY, INLET, OUTLET, OBSTACLE};
 
 
 template<std::size_t d>
@@ -36,3 +36,5 @@ extern Matrix<double,9,3> D2Q9;
 
 /// D3Q19
 extern Matrix<double,19,4> D3Q19;
+
+#endif
