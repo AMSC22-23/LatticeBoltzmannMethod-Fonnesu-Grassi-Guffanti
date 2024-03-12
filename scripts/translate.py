@@ -93,9 +93,6 @@ def produce_lattice(img: Image) -> tuple[int, int, int, list]:
         j = idx % (width)
         i = int((idx - j) / width)
 
-        if(pixel[0] != 128):
-            print(f"{pixel[0]} {pixel[1]} {pixel[2]}")
-
     
         if is_boundary(pixel):
                 boundaries += 1
@@ -212,9 +209,9 @@ def execute_translate():
     if not os.path.exists(args[3]):
         os.mkdir(args[3])
 
-    with open(f"{args[3]}" + f"{args[2]}.mtx", "w") as file:
+    with open(f"{args[3]}" + f"{args[2]}.txt", "w") as file:
         file.write("%%2\n")
-        file.write(f"{height} {width}\n{fluids} {solids} {boundaries} {inlets} {outlets} {obstacles}")
+        file.write(f"{height} {width}\n{fluids} {solids} {boundaries} {inlets} {outlets} {obstacles}\n")
         [file.write(f"{nz[1]} {nz[2]} {nz[0]}\n") for nz in non_zeroes]
     file.close()
 
