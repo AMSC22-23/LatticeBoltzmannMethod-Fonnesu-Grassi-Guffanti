@@ -8,4 +8,4 @@ endmacro()
 
 
 # Adding reading executable
-add_test_executable(LatticeReading.out "LatticeReadingTest.cpp")
+add_test_executable(LatticeReading.out "unit/LatticeReadingTest.cpp")

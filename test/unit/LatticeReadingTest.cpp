@@ -4,7 +4,7 @@ int main()
 {
     using namespace llalbm;
 
-    const std::string path = "./file.txt";
+    const std::string path = "../test/assets/reading_test.txt";
     std::vector<Point<2>> fluid_nodes;
     std::vector<boundaryPoint<2>> boundary_coord;
     std::vector<boundaryPoint<2>> inlet_nodes_coord;
