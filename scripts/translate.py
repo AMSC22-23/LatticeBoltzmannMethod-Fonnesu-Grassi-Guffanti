@@ -19,7 +19,7 @@
 #   To produce the velocity field the command to call is the following
 #   python translate.py path_to_image ux|uy path_to_output_dir [open]
 #      
-#   0 S 1  Fluido 2 Boundary 3 Inlet 4 Outlet 5 Obstacle
+#   1 S 0 Fluido 2 Boundary 3 Inlet 4 Outlet 5 Obstacle
 #
 
 import sys
@@ -29,7 +29,7 @@ import numpy
 import math
 from PIL import Image
 
-FLUID = 1 #WHITE
+SOLID = 1 #GREY I THINK
 BOUNDARY = 2 #BLACK
 INLET = 3 #BLUE
 OUTLET = 4 #RED
@@ -77,37 +77,46 @@ def produce_lattice(img: Image) -> tuple[int, int, int, list]:
     pixels = list(img.getdata())
 
     non_zero = 0
+    solids = 0
+    boundaries = 0
+    inlets = 0
+    outlets = 0
+    obstacles = 0
     i = 0
     j = 0
     non_zeroes = []
+    
     # number of boundaries, either solid or open.
     # the linearized index is idx = (i * width) + j
     # which means that j = idx % width and i = (idx - j)/width
     for idx, pixel in enumerate(pixels):
         j = idx % (width)
         i = int((idx - j) / width)
+
         if(pixel[0] != 128):
             print(f"{pixel[0]} {pixel[1]} {pixel[2]}")
 
-        if is_fluid(pixel):
-            if i == 0 or j == 0 or i == height - 1 or j == height - 1:
-                non_zero += 1 
-                non_zeroes.append((FLUID, i, j))
-        elif is_boundary(pixel):
-                non_zero += 1
+    
+        if is_boundary(pixel):
+                boundaries += 1
                 non_zeroes.append((BOUNDARY, i, j))
         elif is_inlet(pixel):
-                non_zero +=1
+                inlets +=1
                 non_zeroes.append((INLET, i, j))
         elif is_outlet(pixel):
-                non_zero +=1
+                outlets +=1
                 non_zeroes.append((OUTLET, i, j))
         elif is_obstacle(pixel):
-                non_zero +=1
+                obstacles +=1
                 non_zeroes.append((OBSTACLE, i, j))
+        elif not(is_fluid(pixel)):
+                solids += 1 
+                non_zeroes.append((SOLID, i, j))
+            
 
     non_zero = len(non_zeroes)
-    return (width, height, non_zero, non_zeroes)
+    fluids = (width * height) - non_zero
+    return (width, height, fluids, solids, boundaries, inlets, outlets, obstacles, non_zeroes)
 
 def produce_rho(img: Image) -> tuple[int, int, int, list]:
     """
@@ -185,7 +194,7 @@ def execute_translate():
 
 
     if "lattice" == args[2]:
-        width, height, non_zero, non_zeroes = produce_lattice(img)
+        width, height, fluids, solids, boundaries, inlets, outlets, obstacles, non_zeroes = produce_lattice(img)
     elif "rho" == args[2]:
         width, height, non_zero, non_zeroes = produce_rho(img)
     elif "ux" == args[2] or "uy" == args[2]:
@@ -204,9 +213,9 @@ def execute_translate():
         os.mkdir(args[3])
 
     with open(f"{args[3]}" + f"{args[2]}.mtx", "w") as file:
-        file.write("%%MatrixMarket matrix coordinate real general\n")
-        file.write(f"{height} {width} {non_zero}\n")
-        [file.write(f"{nz[1] + 1} {nz[2] + 1} {nz[0]}\n") for nz in non_zeroes]
+        file.write("%%2\n")
+        file.write(f"{height} {width}\n{fluids} {solids} {boundaries} {inlets} {outlets} {obstacles}")
+        [file.write(f"{nz[1]} {nz[2]} {nz[0]}\n") for nz in non_zeroes]
     file.close()
 
 if __name__ == "__main__":
