@@ -120,12 +120,12 @@ namespace llalbm::core::collisions
                 ux = rhoinv * (p1 + p5 + p8 -(p3 + p6 + p7));
                 uy = rhoinv * (p2 + p5 + p6 -(p4+p7+p8));
 
-                /*if(save)
+                if(save)
                 {
                     global_rho(x,y) = rho;
                     global_u(x,y,0) = ux;
                     global_u(x,y,1) = uy;
-                }*/
+                }
 
                 tw0r = tauinv * D2Q9(0, 2) * rho;
                 twsr = tauinv * D2Q9(1, 2) * rho;
