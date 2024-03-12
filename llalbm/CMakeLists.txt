@@ -1,17 +1,18 @@
+# Set the source directory and gather source files
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
 # Create llalbm target
-add_library(LLALBM SHARED ${SOURCES})
+add_library(LLALBM INTERFACE)
 
-
-# include OpenMP, MPI and Eigen
+# Find dependencies: MPI, OpenMP, and Eigen
 find_package(MPI REQUIRED)
-cmake_policy(SET CMP0074 NEW)
 find_package(OpenMP REQUIRED)
-find_package(Eigen3 REQUIRED NO_MODULE
-		HINTS $ENV{mkEigenPrefix})
+find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
 
+# Link libraries to the llalbm target
+target_include_directories(LLALBM INTERFACE 
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+	"${CMAKE_CURRENT_SOURCE_DIR}/src"
+	"${EIGEN3_INCLUDE_DIR}")
 
-# Link libraries to the executable
-target_link_libraries(LLALBM PUBLIC MPI::MPI_CXX Eigen3::Eigen OpenMP::OpenMP_CXX)
-
-# Additional settings for MPI
-target_include_directories(LLALBM PUBLIC ${MPI_C_INCLUDE_PATH})
+message("LLALBM INCLUDE DIRECTORY : ${CMAKE_CURRENT_SOURCE_DIR}/include")
