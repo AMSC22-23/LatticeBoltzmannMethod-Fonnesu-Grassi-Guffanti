@@ -210,7 +210,7 @@ def execute_translate():
         os.mkdir(args[3])
 
     with open(f"{args[3]}" + f"{args[2]}.txt", "w") as file:
-        file.write("%%2\n")
+        file.write("2\n")
         file.write(f"{height} {width}\n{fluids} {solids} {boundaries} {inlets} {outlets} {obstacles}\n")
         [file.write(f"{nz[1]} {nz[2]} {nz[0]}\n") for nz in non_zeroes]
     file.close()
