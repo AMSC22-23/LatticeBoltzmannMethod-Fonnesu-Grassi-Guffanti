@@ -51,7 +51,7 @@ namespace llalbm::core::boundaries
         private:
             //std::array<Eigen::Index, 2> lattice_nodes; 
             //std::vector<Point<2>> boundary_nodes;
-            double x, y;
+            Eigen::Index x, y;
             double rho, ru;
             
         public: 
@@ -63,12 +63,12 @@ namespace llalbm::core::boundaries
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
 
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u){
+            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u){
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
-                    x = std::get<0>(boundary_coord[bnode])[0];
-                    y = std::get<0>(boundary_coord[bnode])[1];
-                    switch (std::get<1>(boundary_coord[bnode]))
+                    x = boundary_coord[bnode].coords[0];
+                    y = boundary_coord[bnode].coords[1];
+                    switch (boundary_coord[bnode].type)
                     {
                     case TOP_WALL:        
                         rho = (populations(x,y,0) + populations(x,y,1) + populations(x,y,3) + 2.0 * (populations(x,y,2) + populations(x,y,5) + populations(x,y,6))) / (1.0 + global_u(x,y,1)); 

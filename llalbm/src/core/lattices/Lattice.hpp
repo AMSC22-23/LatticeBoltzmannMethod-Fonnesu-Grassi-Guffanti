@@ -98,16 +98,16 @@ namespace llalbm::core
         std::vector<Point<dim>> fluid_nodes;
 
         /// @brief List of coordinates of boundary nodes
-        std::vector<boundaryPoint<dim>> boundary_coord;
+        std::vector<BoundaryPoint<dim>> boundary_coord;
 
         /// @brief List of coordinates of inlet nodes.
-        std::vector<boundaryPoint<dim>> inlet_nodes_coord;
+        std::vector<BoundaryPoint<dim>> inlet_nodes_coord;
 
         /// @brief List of coordinates of outlet nodes.
-        std::vector<boundaryPoint<dim>> outlet_nodes_coord;
+        std::vector<BoundaryPoint<dim>> outlet_nodes_coord;
 
         /// @brief List of coordinates of the edges of obstacle nodes.
-        std::vector<boundaryPoint<dim>> obstacle_nodes;
+        std::vector<BoundaryPoint<dim>> obstacle_nodes;
 
         /// @brief Number of velocities in the velocity set
         const std::size_t q;

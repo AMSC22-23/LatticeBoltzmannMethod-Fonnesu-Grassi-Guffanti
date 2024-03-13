@@ -52,7 +52,7 @@ namespace llalbm::core::boundaries
         private:
             //std::array<Eigen::Index, 2> lattice_nodes; 
             //std::vector<Point<2>> boundary_nodes;
-            double x, y;
+            Eigen::Index x, y;
             // double p0;
             double p1, p2, p3, p4, p5, p6, p7, p8;
             
@@ -61,12 +61,12 @@ namespace llalbm::core::boundaries
                 lattice_nodes = l;
                 boundary_nodes = b;
             }*/
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<boundaryPoint<2>> &boundary_coord, Tensor<double, 2> /*global_rho*/, Tensor<double, 3> /*global_u*/){
+            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> /*global_rho*/, Tensor<double, 3> /*global_u*/){
                 
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
-                    x = std::get<0>(boundary_coord[bnode])[0];
-                    y = std::get<0>(boundary_coord[bnode])[1];
+                    x = boundary_coord[bnode].coords[0];
+                    y = boundary_coord[bnode].coords[1];
 
                     // p0 = populations(x, y, 0);
                     p1 = populations(x, y, 1);

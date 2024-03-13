@@ -60,7 +60,7 @@ namespace llalbm::core::collisions
     {
     private:
         //std::array<Eigen::Index, 2> lattice_dimensions;
-        double x, y;
+        Eigen::Index x, y;
         double p0, p1, p2, p3, p4, p5, p6, p7, p8;
         double rho, rhoinv;
         double ux, uy;
@@ -101,8 +101,8 @@ namespace llalbm::core::collisions
 
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
             {
-                x = fluid_nodes[fnode][0];
-                y = fluid_nodes[fnode][1];
+                x = fluid_nodes[fnode].coords[0];
+                y = fluid_nodes[fnode].coords[1];
 
                 p0 = populations(x, y, 0);
                 p1 = populations(x-1, y, 1);

@@ -13,21 +13,42 @@
 #include <Eigen/Core>
 // ======================================
 
-
-
 using namespace Eigen; 
-/// Generic d-dimensional point described by its set of coordinates
-template<std::size_t d>
-using Point = Matrix<std::size_t, d, 1>;
 
-enum btypes {TOP_WALL, RIGHT_WALL, BOTTOM_WALL, LEFT_WALL, RIGHT_TOP_C, RIGHT_BOTTOM_C, LEFT_BOTTOM_C, LEFT_TOP_C };
+/// Generic coordinate of a point
+using Coord = Eigen::Index;
+
+/// Different types of boundaries, identified when the lattice is created.
+enum btypes {
+    NONE = 0, 
+    TOP_WALL,
+    RIGHT_WALL,
+    BOTTOM_WALL,
+    LEFT_WALL,
+    RIGHT_TOP_C,
+    RIGHT_BOTTOM_C,
+    LEFT_BOTTOM_C,
+    LEFT_TOP_C
+};
 
 /// @brief Type of nodes
 enum InputNodeType {FLUID = 0, SOLID, BOUNDARY, INLET, OUTLET, OBSTACLE};
 
+template<std::size_t d>
+struct Point 
+{
+    Eigen::Index coords[d];
+};
+
 
 template<std::size_t d>
-using boundaryPoint = std::tuple<Point<d>, btypes>; 
+struct BoundaryPoint
+{
+    Eigen::Index coords[d];
+    btypes type;
+};
+
+// using boundaryPoint = std::tuple<Coord, btypes>; 
 
 /// Velocity Sets dim +1
 /// D2Q9
