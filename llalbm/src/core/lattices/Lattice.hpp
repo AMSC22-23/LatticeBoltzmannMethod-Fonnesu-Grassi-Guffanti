@@ -16,6 +16,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp"
+#include "../equilibriums/Equilibrium.hpp"
 // =======================================
 
 //6 2 5
@@ -217,11 +218,8 @@ namespace llalbm::core
             for (std::size_t i = 0; i < n_steps; i++)
             {
                 // 1. The equilibrium populations are calculated for each node
-                for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
-                {
-                    // Compute equilibrium population
-                }
-
+                llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes,populations,equilibrium_populations,global_u,global_rho);
+                
                 //2. Perform the collisions
                 collision_policy.stream_collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, save);
 
