@@ -52,95 +52,67 @@ namespace llalbm::core::boundaries
         private:
             //std::array<Eigen::Index, 2> lattice_nodes; 
             //std::vector<Point<2>> boundary_nodes;
-            Eigen::Index x, y;
-            // double p0;
-            double p1, p2, p3, p4, p5, p6, p7, p8;
+            Eigen::Index i, j;
+            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
             
         public: 
             /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
                 lattice_nodes = l;
                 boundary_nodes = b;
             }*/
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> /*global_rho*/, Tensor<double, 3> /*global_u*/){
-                
+            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord)
+            {
+                auto n_rows = populations.dimensions()[0];
+                auto n_cols = populations.dimensions()[1];
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
-                    x = boundary_coord[bnode].coords[0];
-                    y = boundary_coord[bnode].coords[1];
+                    i = boundary_coord[bnode].coords[0];
+                    j = boundary_coord[bnode].coords[1];
 
-                    // p0 = populations(x, y, 0);
-                    p1 = populations(x, y, 1);
-                    p2 = populations(x, y, 2);
-                    p3 = populations(x, y, 3);
-                    p4 = populations(x, y, 4);
-                    p5 = populations(x, y, 5);
-                    p6 = populations(x, y, 6);
-                    p7 = populations(x, y, 7);
-                    p8 = populations(x, y, 8);
+                    p0 = populations(i, j, 0);
+                    p1 = populations(i, j, 1);
+                    p2 = populations(i, j, 2);
+                    p3 = populations(i, j, 3);
+                    p4 = populations(i, j, 4);
+                    p5 = populations(i, j, 5);
+                    p6 = populations(i, j, 6);
+                    p7 = populations(i, j, 7);
+                    p8 = populations(i, j, 8);
 
-                    // populations(x,y,0) = p0;
-                    populations(x,y,1) = p3;
-                    populations(x,y,2) = p4;
-                    populations(x,y,3) = p1;
-                    populations(x,y,4) = p2;
-                    populations(x,y,5) = p7;
-                    populations(x,y,6) = p8;
-                    populations(x,y,7) = p5;
-                    populations(x,y,8) = p6;
-
-                    /*
-                    switch (std::get<1>(boundary_coord[bnode]))
+                    populations(i,j,0) = p0;
+                    if(j != 0)
                     {
-                    case TOP_WALL:                        
-                        populations(x,y,4) = populations(x,y,2);
-                        populations(x,y,8) = populations(x,y,6);
-                        populations(x,y,7) = populations(x,y,5);
-                        break;
-                    
-                    case LEFT_WALL:
-                        populations(x,y,1) = populations(x,y,3);
-                        populations(x,y,5) = populations(x,y,7);
-                        populations(x,y,8) = populations(x,y,6);
-                        break;
-
-                    case RIGHT_WALL:
-                        populations(x,y,3) = populations(x,y,1);
-                        populations(x,y,7) = populations(x,y,5);
-                        populations(x,y,6) = populations(x,y,8);
-                        break;
-
-                    case BOTTOM_WALL:
-                        populations(x,y,2) = populations(x,y,4);
-                        populations(x,y,6) = populations(x,y,8);
-                        populations(x,y,5) = populations(x,y,7);
-                        break;
-
-                    case RIGHT_BOTTOM_C:
-                        populations(x,y,3) = populations(x,y,1);
-                        populations(x,y,6) = populations(x,y,8);
-                        populations(x,y,2) = populations(x,y,4);
-                        break;
-
-                    case LEFT_BOTTOM_C:
-                        populations(x,y,2) = populations(x,y,4);
-                        populations(x,y,1) = populations(x,y,3);
-                        populations(x,y,5) = populations(x,y,7);
-                        break;
-
-                    case RIGHT_TOP_C:
-                        populations(x,y,3) = populations(x,y,1);
-                        populations(x,y,7) = populations(x,y,5);
-                        populations(x,y,4) = populations(x,y,2);
-                        break;
-
-                    case LEFT_TOP_C:
-                        populations(x,y,1) = populations(x,y,3);
-                        populations(x,y,8) = populations(x,y,6);
-                        populations(x,y,4) = populations(x,y,2);
-                        break;
-                    }*/
+                        populations(i, j-1, 3) = p1;
+                    }
+                    if(i != n_rows-1)
+                    {
+                        populations(i+1, j, 4) = p2;
+                    }
+                    if(j != n_cols-1)
+                    {
+                        populations(i, j+1, 1) = p3;
+                    }
+                    if(i != 0)
+                    {
+                        populations(i-1, j, 2) = p4;
+                    }
+                    if(i != n_rows-1 && j != 0)
+                    {
+                        populations(i+1, j-1, 7) = p5;
+                    }
+                    if(i != n_rows-1 && j != n_cols-1)
+                    {
+                        populations(i+1, j+1, 8) = p6;
+                    }
+                    if(i != 0 && j != n_cols-1)
+                    {
+                        populations(i-1, j+1, 5) = p7;
+                    }
+                    if(i != 0 && j != 0)
+                    {
+                        populations(i-1, j-1, 6) = p8;
+                    }
                 }
-                
             }
     };
 

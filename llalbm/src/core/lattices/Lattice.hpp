@@ -16,6 +16,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp"
+#include "../../utils/writers/LatticeWriter.hpp"
 #include "../equilibriums/Equilibrium.hpp"
 // =======================================
 
@@ -206,42 +207,44 @@ namespace llalbm::core
 
             logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
-            //TODO:
-            //TODO:
+            //TODO: understand how to handle output directory creation (if here or in another class)
 
             // Then, lattice construction is complete.
             logger.info("Lattice is ready.");
         }
 
-        void perform_lbm(const std::size_t n_steps)
+        void perform_lbm(const std::size_t n_steps, const std::size_t save_step = 5, const bool should_save = true)
         {
             for (std::size_t i = 0; i < n_steps; i++)
             {
+                // TODO: Set inlets and outlets
+
+                save = (i%save_step == 0 && should_save);
+
                 // 1. The equilibrium populations are calculated for each node
                 llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes,populations,equilibrium_populations,global_u,global_rho);
                 
                 //2. Perform the collisions
-                collision_policy.stream_collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, save);
+                // TODO: Vedere equilibrium
+                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u);
 
                 //3. Streaming
-                // Da decidere se fare qua o in stream_collide, come descritto nel metodo
+                collision_policy.stream(populations, after_collision_populations);
 
                 //4. Perform the collision at the boundaries
+                //TODO: prooagare -> attenzione ai limiti e ai nodi solidi
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
-                // 5. Update the macroscopic quantities
-                // L'update per i fluid nodes viene fatto in stream_collide: da capire se vogliamo fare qui (o in update_boundaries)
-                // l'update per i boundaries o se vogliamo fare qui l'update di tutto quanto.
+                // 5. Update the macroscopic quantities for boundaries -> Understand what to do
 
-                // TODO:
-                /*
-                1. Decidere quando settare save a true;
-                2. Decidere gli argomenti del metodo;
-                3. Bisogna fare set_inlets?
-                */
+                // 6. Save ux and uy on files
+                if(save)
+                {
+                    write_lattice_file(global_u, i);
+                }
             }
         }
 
