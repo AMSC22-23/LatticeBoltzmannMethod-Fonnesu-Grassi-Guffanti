@@ -1,7 +1,7 @@
 #ifndef LLALBM_ALIASES_HPP
 #define LLALBM_ALIASES_HPP
 
-// =========== STL INCLUDES ===========
+// =========== STL INCLUDES =============
 #include <vector>
 #include <array>
 #include <cassert>
@@ -15,10 +15,15 @@
 
 using namespace Eigen; 
 
+
+// =======================================================================================================
+//              COORDINATES, NODES and BOUNDARIES
+// =======================================================================================================
+
 /// Generic coordinate of a point
 using Coord = Eigen::Index;
 
-/// Different types of boundaries, identified when the lattice is created.
+/// @brief Different types of boundaries, identified when the lattice is created/read from file.
 enum btypes {
     NONE = 0, 
     TOP_WALL,
@@ -32,15 +37,26 @@ enum btypes {
 };
 
 /// @brief Type of nodes
-enum InputNodeType {FLUID = 0, SOLID, BOUNDARY, INLET, OUTLET, OBSTACLE};
+enum InputNodeType {
+    FLUID = 0,
+    SOLID = 1, 
+    BOUNDARY = 2, 
+    INLET = 3, 
+    OUTLET = 4, 
+    OBSTACLE = 5
+};
 
+/// @brief Struct describing the coordinates of a node
+/// @tparam d umber of dimensions, directly indicating the total number of coordinates 
 template<std::size_t d>
 struct Point 
 {
     Eigen::Index coords[d];
 };
 
-
+/// @brief Struct describing a point at a boundary: in this case, it may be necessary to
+/// know what type of node (wall, edge, angle) a boundary is
+/// @tparam d Number of dimensions, directly indicating the total number of coordinates
 template<std::size_t d>
 struct BoundaryPoint
 {
@@ -48,14 +64,25 @@ struct BoundaryPoint
     btypes type;
 };
 
-// using boundaryPoint = std::tuple<Coord, btypes>; 
 
-/// Velocity Sets dim +1
-/// D2Q9
+// =======================================================================================================
+// =======================================================================================================
+// =======================================================================================================
 
+
+// =======================================================================================================
+//                  VELOCITY SETS (for 2D and 3D)
+// =======================================================================================================
+
+/// @brief D2Q9 velocity set
 extern Matrix<double,9,3> D2Q9;
 
-/// D3Q19
+/// @brief D3Q19 velocity set
 extern Matrix<double,19,4> D3Q19;
+
+// =======================================================================================================
+// =======================================================================================================
+// =======================================================================================================
+
 
 #endif
