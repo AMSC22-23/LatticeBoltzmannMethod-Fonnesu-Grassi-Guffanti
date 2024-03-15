@@ -201,7 +201,7 @@ namespace llalbm::core
         // =========================================================================================
         // =========================================================================================
 
-        
+
     public:
         
         /**
@@ -342,6 +342,13 @@ namespace llalbm::core
          * @return Eigen::Tensor<double, dim>& 
          */
         Eigen::Tensor<double, dim>& get_global_rho() { return global_rho; }
+
+        /**
+         * @brief Get the lattice dimensions object
+         * 
+         * @return std::array<Eigen::Index, dim> 
+         */
+        std::array<Eigen::Index, dim>& get_lattice_dimensions() { return lattice_dimensions; }
 
         // ========================================================================================= 
         // ========================================================================================= 
