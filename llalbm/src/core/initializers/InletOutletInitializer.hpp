@@ -33,6 +33,9 @@ namespace llalbm::core::initializers
     {
         public: 
 
+        static std::vector<BoundaryPoint<dim>> emptyV;
+        static Eigen::Tensor<double, dim + 1> emptyT;
+
         static std::vector<BoundaryPoint<dim>>& inlet_nodes;
         static std::vector<BoundaryPoint<dim>>& outlet_nodes;
 
@@ -126,6 +129,22 @@ namespace llalbm::core::initializers
 
     };
 
+    template<std::size_t dim>
+    std::vector<BoundaryPoint<dim>> VelocityInitializer<dim>::emptyV;
+    template<std::size_t dim>
+    Eigen::Tensor<double, dim + 1> VelocityInitializer<dim>::emptyT;
+    template<std::size_t dim>
+    std::vector<BoundaryPoint<dim>>& VelocityInitializer<dim>::inlet_nodes = VelocityInitializer<dim>::emptyV;
+    template<std::size_t dim>
+    std::vector<BoundaryPoint<dim>>& VelocityInitializer<dim>::outlet_nodes = VelocityInitializer<dim>::emptyV;
+    template<std::size_t dim>
+    Eigen::Tensor<double, dim + 1>& VelocityInitializer<dim>::velocity_tensor = VelocityInitializer<dim>::emptyT;
+    template<std::size_t dim>
+    std::array<Eigen::Index, dim> VelocityInitializer<dim>::lattice_dimensions;
+    template<std::size_t dim>
+    std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::inlet_update_function;
+    template<std::size_t dim>
+    std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::outlet_update_function;
 
 
 }; // namespace llalbm::core::initializers
