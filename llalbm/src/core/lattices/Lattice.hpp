@@ -122,7 +122,86 @@ namespace llalbm::core
 
         /// @brief Boolean used to save macroscopic quantities
         bool save;
+    
+    private:
 
+        // ========================================================================================= 
+        //                        GATEKEEPING FUNCTIONS FOR LATTICE CONSTRUCTION
+        // ========================================================================================= 
+
+        /**
+         * @brief Initializes the velocity sets for the D2Q9 and D3Q19 lattices.
+         */
+        void initialize_velocity_sets()
+        {
+
+            D2Q9 << 0 , 0, 4/9,
+                1 , 0, 1/9,
+                0 , 1, 1/9,
+                -1, 0, 1/9,
+                0 ,-1, 1/9,
+                1 , 1, 1/36,
+                -1, 1, 1/36,
+                -1,-1, 1/36,
+                1 ,-1, 1/36;
+            
+            D3Q19 << 0, 0, 0, 1/3,
+                1, 0, 0, 1/18,
+                -1, 0, 0, 1/18,
+                0, 1, 0, 1/18,
+                0, -1, 0, 1/18,
+                0, 0, 1, 1/18,
+                0, 0, -1, 1/18,
+                1, 1, 0, 1/36,
+                -1, -1, 0, 1/36,
+                1, 0, 1, 1/36,
+                -1, 0, -1, 1/36,
+                0, 1, 1, 1/36,
+                0, -1, -1, 1/36,
+                1, -1, 0, 1/36,
+                -1, 1, 0, 1/36,
+                1, 0, -1, 1/36,
+                -1, 0, 1, 1/36,
+                0, 1, -1, 1/36,
+                0, -1, 1, 1/36;
+        }
+
+        /**
+         * @brief Builds the tensors that describe the lattice.
+         */
+        void build_tensors()
+        {
+            // Building the population tensor
+            std::array<Eigen::Index, dim+1> populations_data;
+            for (std::size_t i = 0; i < dim; ++i) {
+               populations_data[i] = lattice_dimensions[i];
+            }
+            populations_data[dim] = q;
+            
+            populations = Tensor<double, dim + 1>(populations_data);
+            equilibrium_populations = Tensor<double, dim + 1>(populations_data);
+            after_collision_populations = Tensor<double, dim + 1>(populations_data);
+            logger.info("Populations tensors built");
+
+            // Building the global density tensor
+            global_rho = Tensor<double, dim>(lattice_dimensions);
+            logger.info("Global density tensor built");
+
+            // Building the gloabl velocity tensor
+            std::array<Eigen::Index, dim + 1> global_u_data;
+            for (std::size_t i = 0; i < dim; ++i) {
+               global_u_data[i] = lattice_dimensions[i];
+            }
+            global_u_data[dim] = dim;
+            global_u = Tensor<double, dim + 1>(global_u_data);
+            logger.info("Global velocity tensor build");
+        }
+
+        // =========================================================================================
+        // =========================================================================================
+        // =========================================================================================
+
+        
     public:
         
         /**
@@ -149,66 +228,24 @@ namespace llalbm::core
             logger.info("Constructing Lattice Object...");
             logger.info("Number of dimensions = " + dim);
             logger.info("Numero of velocities = " + q);
-        
-            // Building the population tensor
-            std::array<Eigen::Index, dim+1> populations_data;
-            for (std::size_t i = 0; i < dim; ++i) {
-               populations_data[i] = lattice_dimensions[i];
-            }
-            populations_data[dim] = q;
-            
-            populations = Tensor<double, dim + 1>(populations_data);
-            equilibrium_populations = Tensor<double, dim + 1>(populations_data);
-            after_collision_populations = Tensor<double, dim + 1>(populations_data);
-            logger.info("Populations tensors built");
 
-            // Building the global density tensor
-            global_rho = Tensor<double, dim>(lattice_dimensions);
-            logger.info("Global density tensor built");
 
-            // Building the gloabl velocity tensor
-            std::array<Eigen::Index, dim + 1> global_u_data;
-            for (std::size_t i = 0; i < dim; ++i) {
-               global_u_data[i] = lattice_dimensions[i];
-            }
-            global_u_data[dim] = dim;
-            global_u = Tensor<double, dim + 1>(global_u_data);
-            logger.info("Global velocity tensor build");
+            // Build the tensors
+            build_tensors();
 
-            
-            D2Q9 << 0 , 0, 4/9,
-                1 , 0, 1/9,
-                0 , 1, 1/9,
-                -1, 0, 1/9,
-                0 ,-1, 1/9,
-                1 , 1, 1/36,
-                -1, 1, 1/36,
-                -1,-1, 1/36,
-                1 ,-1, 1/36;
-            
-            D3Q19 << 0, 0, 0, 1/3,
-                1, 0, 0, 1/18,
-                -1, 0, 0, 1/18,
-                0, 1, 0, 1/18,
-                0, -1, 0, 1/18,
-                0, 0, 1, 1/18,
-                0, 0, -1, 1/18,
-                1, 1, 0, 1/36,
-                -1, -1, 0, 1/36,
-                1, 0, 1, 1/36,
-                -1, 0, -1, 1/36,
-                0, 1, 1, 1/36,
-                0, -1, -1, 1/36,
-                1, -1, 0, 1/36,
-                -1, 1, 0, 1/36,
-                1, 0, -1, 1/36,
-                -1, 0, 1, 1/36,
-                0, 1, -1, 1/36,
-                0, -1, 1, 1/36;
+            // Initializes the velocity sets
+            initialize_velocity_sets();
 
             logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
             //TODO: understand how to handle output directory creation (if here or in another class)
+
+            // Attach the nodes vectors to the initialization policy
+            initialization_policy.attach_nodes(
+                inlet_nodes_coord,
+                outlet_nodes_coord
+            );
+            logger.info("Nodes attached to the initialization policy");
 
             // Then, lattice construction is complete.
             logger.info("Lattice is ready.");
@@ -230,66 +267,24 @@ namespace llalbm::core
             logger.info("Constructing Lattice Object...");
             logger.info("Number of dimensions = " + dim);
             logger.info("Numero of velocities = " + q);
-        
-            // Building the population tensor
-            std::array<Eigen::Index, dim+1> populations_data;
-            for (std::size_t i = 0; i < dim; ++i) {
-               populations_data[i] = lattice_dimensions[i];
-            }
-            populations_data[dim] = q;
+
+            // Build the tensors
+            build_tensors();
+
+            // Initialize the velocity sets
+            initialize_velocity_sets();
             
-            populations = Tensor<double, dim + 1>(populations_data);
-            equilibrium_populations = Tensor<double, dim + 1>(populations_data);
-            after_collision_populations = Tensor<double, dim + 1>(populations_data);
-            logger.info("Populations tensors built");
-
-            // Building the global density tensor
-            global_rho = Tensor<double, dim>(lattice_dimensions);
-            logger.info("Global density tensor built");
-
-            // Building the gloabl velocity tensor
-            std::array<Eigen::Index, dim + 1> global_u_data;
-            for (std::size_t i = 0; i < dim; ++i) {
-               global_u_data[i] = lattice_dimensions[i];
-            }
-            global_u_data[dim] = dim;
-            global_u = Tensor<double, dim + 1>(global_u_data);
-            logger.info("Global velocity tensor build");
-
-            D2Q9 << 0 , 0, 4/9,
-                1 , 0, 1/9,
-                0 , 1, 1/9,
-                -1, 0, 1/9,
-                0 ,-1, 1/9,
-                1 , 1, 1/36,
-                -1, 1, 1/36,
-                -1,-1, 1/36,
-                1 ,-1, 1/36;
-            
-            D3Q19 << 0, 0, 0, 1/3,
-                1, 0, 0, 1/18,
-                -1, 0, 0, 1/18,
-                0, 1, 0, 1/18,
-                0, -1, 0, 1/18,
-                0, 0, 1, 1/18,
-                0, 0, -1, 1/18,
-                1, 1, 0, 1/36,
-                -1, -1, 0, 1/36,
-                1, 0, 1, 1/36,
-                -1, 0, -1, 1/36,
-                0, 1, 1, 1/36,
-                0, -1, -1, 1/36,
-                1, -1, 0, 1/36,
-                -1, 1, 0, 1/36,
-                1, 0, -1, 1/36,
-                -1, 0, 1, 1/36,
-                0, 1, -1, 1/36,
-                0, -1, 1, 1/36;
-
 
             logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
             //TODO: understand how to handle output directory creation (if here or in another class)
+
+            // Attach the nodes vectors to the initialization policy
+            initialization_policy.attach_nodes(
+                inlet_nodes_coord,
+                outlet_nodes_coord
+            );
+            logger.info("Nodes attached to the initialization policy");
 
             // Then, lattice construction is complete.
             logger.info("Lattice is ready.");
@@ -329,6 +324,29 @@ namespace llalbm::core
                 }
             }
         }
+
+        // ========================================================================================= 
+        //                                     GETTERS AND SETTERS     
+        // ========================================================================================= 
+
+        /**
+         * @brief Get the global u object
+         * 
+         * @return Eigen::Tensor<double, dim + 1>& 
+         */
+        Eigen::Tensor<double, dim + 1>& get_global_u() { return global_u; }
+
+        /**
+         * @brief Get the global rho object
+         * 
+         * @return Eigen::Tensor<double, dim>& 
+         */
+        Eigen::Tensor<double, dim>& get_global_rho() { return global_rho; }
+
+        // ========================================================================================= 
+        // ========================================================================================= 
+        // ========================================================================================= 
+
 
     };
 } // namespace llalbm::core
