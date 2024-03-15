@@ -218,7 +218,7 @@ namespace llalbm::core
             std::ostream& out_stream = std::cout
         )
         :   lattice_dimensions (lattice_dimensions_)
-        ,   q (q)
+        ,   q (q_)
         ,   logger("LATTICE", out_stream)
         {
             // Checking validity of input data
@@ -226,8 +226,8 @@ namespace llalbm::core
             "[ERROR] The number of dimension data in the Lattice constructor \n must be equal to the number of spatial dimensions.");
 
             logger.info("Constructing Lattice Object...");
-            logger.info("Number of dimensions = " + dim);
-            logger.info("Numero of velocities = " + q);
+            logger.info("Number of dimensions = " + std::to_string(dim));
+            logger.info("Number of velocities = " + std::to_string(q));
 
 
             // Build the tensors
@@ -256,7 +256,7 @@ namespace llalbm::core
             const std::size_t& q_,
             std::ostream& out_stream = std::cout
         )
-        :   q (q)
+        :   q (q_)
         ,   logger("LATTICE", out_stream)
         {
             llalbm::util::reader::read_lattice_file(path_,fluid_nodes,boundary_coord,inlet_nodes_coord,outlet_nodes_coord,obstacle_nodes,lattice_dimensions);
@@ -265,8 +265,8 @@ namespace llalbm::core
             "[ERROR] The number of dimension data in the Lattice constructor \n must be equal to the number of spatial dimensions.");
 
             logger.info("Constructing Lattice Object...");
-            logger.info("Number of dimensions = " + dim);
-            logger.info("Numero of velocities = " + q);
+            logger.info("Number of dimensions = " + std::to_string(dim));
+            logger.info("Number of velocities = " + std::to_string(q_));
 
             // Build the tensors
             build_tensors();
