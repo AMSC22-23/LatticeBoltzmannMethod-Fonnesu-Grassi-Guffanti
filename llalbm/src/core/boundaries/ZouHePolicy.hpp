@@ -36,6 +36,7 @@ namespace llalbm::core::boundaries
     {
     private:
         /* data */
+        Logger log;
     public:
         ZouHePolicy(/* args */)
         : log("Generic ZH" , std::cout)

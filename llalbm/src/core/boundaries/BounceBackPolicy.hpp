@@ -37,6 +37,7 @@ namespace llalbm::core::boundaries
     {
     private:
         /* data */
+        Logger log;
     public:
         BounceBackPolicy(/* args */)
         : log("Generic BB" , std::cout)

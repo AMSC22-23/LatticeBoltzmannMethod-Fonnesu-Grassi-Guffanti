@@ -14,7 +14,7 @@
 #   
 #   As far as usage is concerned, the python script is called by running the following command, for 
 #   density and structure:
-#   python translate.py path_to_image lattice|rho path_to_output_dir
+#   python translate.py path_to_image lattice|rho path_to_output_dir outputfilename
 #   
 #   To produce the velocity field the command to call is the following
 #   python translate.py path_to_image ux|uy path_to_output_dir [open]
@@ -195,11 +195,11 @@ def execute_translate():
     elif "rho" == args[2]:
         width, height, non_zero, non_zeroes = produce_rho(img)
     elif "ux" == args[2] or "uy" == args[2]:
-        if len(args) == 5:
-            if "open" == args[4]:
+        if len(args) == 6:
+            if "open" == args[5]:
                 width, height, non_zero, non_zeroes = produce_velocity(img,True)
             else:
-                print(f"{args[4]} is not an accepted parameter")
+                print(f"{args[5]} is not an accepted parameter")
         else:
             width, height, non_zero, non_zeroes = produce_velocity(img,False)
     else:
@@ -209,7 +209,7 @@ def execute_translate():
     if not os.path.exists(args[3]):
         os.mkdir(args[3])
 
-    with open(f"{args[3]}" + f"{args[2]}.txt", "w") as file:
+    with open(f"{args[3]}" + f"{args[4]}-{args[2]}.txt", "w") as file:
         file.write("2\n")
         file.write(f"{height} {width}\n{fluids} {solids} {boundaries} {inlets} {outlets} {obstacles}\n")
         [file.write(f"{nz[1]} {nz[2]} {nz[0]}\n") for nz in non_zeroes]

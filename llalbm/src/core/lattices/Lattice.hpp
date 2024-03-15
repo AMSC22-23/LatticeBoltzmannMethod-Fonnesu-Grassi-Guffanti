@@ -17,6 +17,7 @@
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp"
 #include "../../utils/writers/LatticeWriter.hpp"
+#include "../../utils/readers/LatticeReader.hpp"
 #include "../equilibriums/Equilibrium.hpp"
 // =======================================
 
@@ -92,7 +93,7 @@ namespace llalbm::core
         Tensor<double, dim + 1> global_u;
 
         /// @brief Number of elements per lattice dimension.
-        const std::array<Eigen::Index, dim> lattice_dimensions; 
+        std::array<Eigen::Index, dim> lattice_dimensions; 
 
         // ========= COORDINATES OF ALL NODES =========
         
@@ -139,8 +140,89 @@ namespace llalbm::core
         )
         :   lattice_dimensions (lattice_dimensions_)
         ,   q (q)
-        ,   Logger("LATTICE", out_stream)
+        ,   logger("LATTICE", out_stream)
         {
+            // Checking validity of input data
+            assert(lattice_dimensions.size() == dim && 
+            "[ERROR] The number of dimension data in the Lattice constructor \n must be equal to the number of spatial dimensions.");
+
+            logger.info("Constructing Lattice Object...");
+            logger.info("Number of dimensions = " + dim);
+            logger.info("Numero of velocities = " + q);
+        
+            // Building the population tensor
+            std::array<Eigen::Index, dim+1> populations_data;
+            for (std::size_t i = 0; i < dim; ++i) {
+               populations_data[i] = lattice_dimensions[i];
+            }
+            populations_data[dim] = q;
+            
+            populations = Tensor<double, dim + 1>(populations_data);
+            equilibrium_populations = Tensor<double, dim + 1>(populations_data);
+            after_collision_populations = Tensor<double, dim + 1>(populations_data);
+            logger.info("Populations tensors built");
+
+            // Building the global density tensor
+            global_rho = Tensor<double, dim>(lattice_dimensions);
+            logger.info("Global density tensor built");
+
+            // Building the gloabl velocity tensor
+            std::array<Eigen::Index, dim + 1> global_u_data;
+            for (std::size_t i = 0; i < dim; ++i) {
+               global_u_data[i] = lattice_dimensions[i];
+            }
+            global_u_data[dim] = dim;
+            global_u = Tensor<double, dim + 1>(global_u_data);
+            logger.info("Global velocity tensor build");
+
+            
+            D2Q9 << 0 , 0, 4/9,
+                1 , 0, 1/9,
+                0 , 1, 1/9,
+                -1, 0, 1/9,
+                0 ,-1, 1/9,
+                1 , 1, 1/36,
+                -1, 1, 1/36,
+                -1,-1, 1/36,
+                1 ,-1, 1/36;
+            
+            D3Q19 << 0, 0, 0, 1/3,
+                1, 0, 0, 1/18,
+                -1, 0, 0, 1/18,
+                0, 1, 0, 1/18,
+                0, -1, 0, 1/18,
+                0, 0, 1, 1/18,
+                0, 0, -1, 1/18,
+                1, 1, 0, 1/36,
+                -1, -1, 0, 1/36,
+                1, 0, 1, 1/36,
+                -1, 0, -1, 1/36,
+                0, 1, 1, 1/36,
+                0, -1, -1, 1/36,
+                1, -1, 0, 1/36,
+                -1, 1, 0, 1/36,
+                1, 0, -1, 1/36,
+                -1, 0, 1, 1/36,
+                0, 1, -1, 1/36,
+                0, -1, 1, 1/36;
+
+            logger.info("Velocity Sets initialized");
+            //TODO: once collisions/boundary etc have been defined, attach relevant data.
+            //TODO: understand how to handle output directory creation (if here or in another class)
+
+            // Then, lattice construction is complete.
+            logger.info("Lattice is ready.");
+        }
+
+        Lattice(
+            const std::string& path_,
+            const std::size_t& q_,
+            std::ostream& out_stream = std::cout
+        )
+        :   q (q)
+        ,   logger("LATTICE", out_stream)
+        {
+            llalbm::util::reader::read_lattice_file(path_,fluid_nodes,boundary_coord,inlet_nodes_coord,outlet_nodes_coord,obstacle_nodes,lattice_dimensions);
             // Checking validity of input data
             assert(lattice_dimensions.size() == dim && 
             "[ERROR] The number of dimension data in the Lattice constructor \n must be equal to the number of spatial dimensions.");
