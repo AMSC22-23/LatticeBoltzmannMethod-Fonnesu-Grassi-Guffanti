@@ -29,8 +29,8 @@ namespace llalbm::core::equilibrium
         
         
         public:
-        static double rho,ux,uy,u2;
         static void calc_equilibrium(std::vector<Point<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
+            double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
             constexpr double one18 = (1.0/18.0);
             constexpr double one36 = (1.0/36.0);

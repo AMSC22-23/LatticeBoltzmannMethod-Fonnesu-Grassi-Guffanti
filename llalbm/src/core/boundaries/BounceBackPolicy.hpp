@@ -61,7 +61,7 @@ namespace llalbm::core::boundaries
                 lattice_nodes = l;
                 boundary_nodes = b;
             }*/
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord)
+            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 auto n_rows = populations.dimensions()[0];
                 auto n_cols = populations.dimensions()[1];
