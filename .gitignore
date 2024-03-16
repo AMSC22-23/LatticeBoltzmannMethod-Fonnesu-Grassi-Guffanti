@@ -9,3 +9,6 @@
 
 # Build directory at the top of the hierarchy
 build/
+
+# Results directory at the top of the hierarchy
+results

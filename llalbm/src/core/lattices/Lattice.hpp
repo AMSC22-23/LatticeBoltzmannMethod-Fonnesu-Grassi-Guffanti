@@ -82,7 +82,6 @@ namespace llalbm::core
         /// @brief Equilibrium populations tensor.
         Tensor<double, dim + 1> equilibrium_populations;
 
-        // TODO: undestrand whether it would be better to move this tensor directly inside the policy.
         /// @brief Tensor of populations after the collision step and before the streaming step.
         Tensor<double, dim + 1> after_collision_populations;
 
@@ -276,8 +275,6 @@ namespace llalbm::core
             
 
             logger.info("Velocity Sets initialized");
-            //TODO: once collisions/boundary etc have been defined, attach relevant data.
-            //TODO: understand how to handle output directory creation (if here or in another class)
 
             // Attach the nodes vectors to the initialization policy
             initialization_policy.attach_nodes(
@@ -290,39 +287,57 @@ namespace llalbm::core
             logger.info("Lattice is ready.");
         }
 
-        void perform_lbm(const std::size_t n_steps, const std::size_t save_step = 5, const bool should_save = true)
+        void perform_lbm(const double time, const double time_step = 0.05, const std::size_t save_step = 5, const bool should_save = true)
         {
+            assert(time_step > 0 && "ERROR: time step must be greater than 0");
+            assert(time > 0 && "ERROR: simulation time must be greater than 0");
+            assert(time > time_step && "ERROR: simulation time must be greater than the time step");
+
+            // Initialize the values of the tensors
             global_rho.setConstant(1);
             global_u.setConstant(0);
-            llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
+
+            // The output directory is created only if the user wants to save the results
+            if (should_save)
+            {
+                llalbm::util::writer::create_output_directory();
+            }
+            else
+            {
+                logger.info("Results will not be saved");
+            }
+            
+            // Compute the total number of iterations
+            const std::size_t n_steps = time/time_step;
+            std::size_t saved_file = 0;
+
+            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
             for (std::size_t i = 0; i < n_steps; i++)
             {
-                // TODO: Set inlets and outlets
+                initialization_policy.update_nodes(i, global_u, global_rho);
 
                 save = (i%save_step == 0 && should_save);
 
                 // 1. The equilibrium populations are calculated for each node
-                llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
+                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
                 
                 //2. Perform the collisions
-                collision_policy.collide(populations,after_collision_populations, fluid_nodes, global_rho, global_u);
+                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u);
 
                 //3. Streaming
-                collision_policy.stream(populations, after_collision_populations);
+                collision_policy.stream(populations, after_collision_populations, fluid_nodes);
 
                 //4. Perform the collision at the boundaries
-                //TODO: prooagare -> attenzione ai limiti e ai nodi solidi
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
-
-                // 5. Update the macroscopic quantities for boundaries -> Understand what to do
-
-                // 6. Save ux and uy on files
+                
+                // 5. Save ux and uy on files
                 if(save)
                 {
-                    write_lattice_file(global_u, i);
+                    llalbm::util::writer::write_lattice_file<dim>(global_u, saved_file);
+                    saved_file++;
                 }
             }
         }

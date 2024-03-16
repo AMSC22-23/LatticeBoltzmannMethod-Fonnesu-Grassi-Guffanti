@@ -38,8 +38,8 @@ namespace llalbm::core::initializers
 
         static std::array<Eigen::Index, dim> lattice_dimensions;
         
-        static std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> inlet_update_function;
-        static std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> outlet_update_function;
+        static std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> inlet_update_function;
+        static std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> outlet_update_function;
     
         public:
         /**
@@ -73,8 +73,8 @@ namespace llalbm::core::initializers
          * @param outlet_update_function_ Array of functions that update the outlet nodes
          */
         static void attach_update_functions(
-            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim>& inlet_update_function_,
-            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim>& outlet_update_function_
+            std::array<std::function<double (double, BoundaryPoint<dim>)>, dim>& inlet_update_function_,
+            std::array<std::function<double (double, BoundaryPoint<dim>)>, dim>& outlet_update_function_
         )
         {
             inlet_update_function = inlet_update_function_;
@@ -86,7 +86,7 @@ namespace llalbm::core::initializers
          * 
          * @param time_step Current time step
          */
-        static void update_nodes(const std::size_t& time_step, Eigen::Tensor<double, dim+1>& velocity_tensor, Eigen::Tensor<double, dim> density_tensor)
+        static void update_nodes(const double& time_step, Eigen::Tensor<double, dim+1>& velocity_tensor, Eigen::Tensor<double, dim> density_tensor)
         {
             std::size_t inlet_size = inlet_nodes.size();
             std::size_t outlet_size = outlet_nodes.size();
@@ -143,9 +143,9 @@ namespace llalbm::core::initializers
     template<std::size_t dim>
     std::vector<BoundaryPoint<dim>> VelocityInitializer<dim>::outlet_nodes;
     template<std::size_t dim>
-    std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::inlet_update_function;
+    std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::inlet_update_function;
     template<std::size_t dim>
-    std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::outlet_update_function;
+    std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::outlet_update_function;
 
 
 }; // namespace llalbm::core::initializers

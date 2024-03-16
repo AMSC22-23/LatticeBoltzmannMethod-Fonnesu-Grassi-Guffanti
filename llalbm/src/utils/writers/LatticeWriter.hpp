@@ -63,6 +63,7 @@ namespace llalbm::util::writer
 
         std::string output_file_path_u_y = output_dir_path + "/output-" + std::to_string(iteration_count) + "u_y.txt";
         std::ofstream output_file_u_y(output_file_path_u_y);
+        
 
         assert(output_file_u_x.is_open() && "ERROR: u_x file could not be opened");
         assert(output_file_u_y.is_open() && "ERROR: u_y file could not be opened");
@@ -71,13 +72,17 @@ namespace llalbm::util::writer
             for (Eigen::Index j = 0; j < global_u.dimension(1); ++j) {
                 output_file_u_x << global_u(i, j, 0) << " ";
                 output_file_u_y << global_u(i, j, 1) << " ";
+
             }
+            output_file_u_x << std::endl;
+            output_file_u_y << std::endl;
+
         }
 
         output_file_u_x.close();
         output_file_u_y.close();
 
-        logger.info("Iteration " + iteration_count);
+        logger.info("Iteration " + std::to_string(iteration_count));
     }
 
 }
