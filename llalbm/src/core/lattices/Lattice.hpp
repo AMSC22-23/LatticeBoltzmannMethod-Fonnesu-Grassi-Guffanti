@@ -294,7 +294,7 @@ namespace llalbm::core
         {
             global_rho.setConstant(1);
             global_u.setConstant(0);
-            llalbm::core:equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
+            llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
             for (std::size_t i = 0; i < n_steps; i++)
             {
                 // TODO: Set inlets and outlets
@@ -351,6 +351,41 @@ namespace llalbm::core
          * @return std::array<Eigen::Index, dim> 
          */
         std::array<Eigen::Index, dim>& get_lattice_dimensions() { return lattice_dimensions; }
+
+        /**
+         * @brief Get the fluid nodes object
+         * 
+         * @return std::vector<Point<dim>>& 
+         */
+        std::vector<Point<dim>>& get_fluid_nodes(){ return fluid_nodes; }
+        
+        /**
+         * @brief Get the boundary nodes object
+         * 
+         * @return std::vector<BoundaryPoint<dim>>& 
+         */
+        std::vector<BoundaryPoint<dim>>& get_boundary_nodes(){ return boundary_coord; }
+
+        /**
+         * @brief Get the inlet nodes object
+         * 
+         * @return std::vector<BoundaryPoint<dim>>& 
+         */
+        std::vector<BoundaryPoint<dim>>& get_inlet_nodes(){ return inlet_nodes_coord; }
+
+        /**
+         * @brief Get the outlet nodes object
+         * 
+         * @return std::vector<BoundaryPoint<dim>>& 
+         */
+        std::vector<BoundaryPoint<dim>>& get_outlet_nodes(){ return outlet_nodes_coord; }
+
+        /**
+         * @brief Get the obstacle nodes object
+         * 
+         * @return std::vector<BoundaryPoint<dim>>& 
+         */
+        std::vector<BoundaryPoint<dim>>& get_obstacle_nodes(){ return obstacle_nodes; }
 
         // ========================================================================================= 
         // ========================================================================================= 
