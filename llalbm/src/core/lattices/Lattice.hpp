@@ -292,6 +292,9 @@ namespace llalbm::core
 
         void perform_lbm(const std::size_t n_steps, const std::size_t save_step = 5, const bool should_save = true)
         {
+            global_rho.setConstant(1);
+            global_u.setConstant(0);
+            llalbm::core:equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
             for (std::size_t i = 0; i < n_steps; i++)
             {
                 // TODO: Set inlets and outlets
@@ -299,11 +302,10 @@ namespace llalbm::core
                 save = (i%save_step == 0 && should_save);
 
                 // 1. The equilibrium populations are calculated for each node
-                llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes,populations,equilibrium_populations,global_u,global_rho);
+                llalbm::core::equilibrium::Equilibrium<2>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
                 
                 //2. Perform the collisions
-                // TODO: Vedere equilibrium
-                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u);
+                collision_policy.collide(populations,after_collision_populations, fluid_nodes, global_rho, global_u);
 
                 //3. Streaming
                 collision_policy.stream(populations, after_collision_populations);
