@@ -51,7 +51,7 @@ enum InputNodeType {
 template<std::size_t d>
 struct Point 
 {
-    Eigen::Index coords[d];
+    Eigen::array<double, d> coords;
 };
 
 /// @brief Struct describing a point at a boundary: in this case, it may be necessary to
@@ -60,7 +60,7 @@ struct Point
 template<std::size_t d>
 struct BoundaryPoint
 {
-    Eigen::Index coords[d];
+    Eigen::array<double, d> coords;
     btypes type;
 };
 

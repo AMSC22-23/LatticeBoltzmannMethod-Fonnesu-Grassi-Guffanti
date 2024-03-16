@@ -102,7 +102,7 @@ namespace llalbm::util::reader
             std::vector<BoundaryPoint<ranks>>& inlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& outlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& obstacle_nodes_coord,
-            Eigen::Index indices[],
+            Eigen::array<Eigen::Index, ranks>& indices,
             std::array<std::size_t, 5>& occupations
         )
         {
@@ -157,7 +157,7 @@ namespace llalbm::util::reader
             std::vector<BoundaryPoint<ranks>>& inlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& outlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& obstacle_nodes_coord,
-            Eigen::Index indices[],
+            Eigen::array<Eigen::Index, ranks>& indices,
             std::array<std::size_t, 5>& occupations
         )
         {
@@ -208,8 +208,9 @@ namespace llalbm::util::reader
      * @note Templating is in the type of tensor, so that the function can be reused
      * 
      * @tparam TensorType Type of the tensor to be loaded
+     * @tparam Number of physical dimensions
      */
-    template<typename TensorType>
+    template<typename TensorType, std::size_t dim>
     struct TensorLoader
     {
         /**
@@ -223,7 +224,7 @@ namespace llalbm::util::reader
          * @param dims Number of ranks of the tenso
          * @param coords Vector, of type @code
          */
-        static void load_tensor_from_file(std::ifstream& in, TensorType& tensor, const std::size_t& total_elems, const std::size_t& dims, Eigen::Index coords[])
+        static void load_tensor_from_file(std::ifstream& in, TensorType& tensor, const std::size_t& total_elems, const std::size_t& dims, Eigen::array<Eigen::Index, dim>& coords)
         {
             std::string file_line;
             std::vector<std::string> splitted;
@@ -542,10 +543,10 @@ namespace llalbm::util::reader
         // Load the contents of the file in memory
         std::size_t non_fluids = all_different_nodes - fluid_nodes_coord.size();
         
-        Eigen::Index indices[dim];
+        Eigen::array<Eigen::Index, dim> indices;
         std::array<std::size_t, 5> occupations;
         std::fill(occupations.begin(), occupations.end(), 0);
-        TensorLoader<Eigen::Tensor<std::size_t, dim>>::load_tensor_from_file(in, intermediate_types, non_fluids, file_dimensions, indices);
+        TensorLoader<Eigen::Tensor<std::size_t, dim>, dim>::load_tensor_from_file(in, intermediate_types, non_fluids, file_dimensions, indices);
         // Then, populate with the correct coordinates the vectors.
 
         logger.info("==Read completed==");
