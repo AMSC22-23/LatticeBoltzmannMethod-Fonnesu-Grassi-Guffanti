@@ -1,5 +1,5 @@
-#ifndef LLALBM_LID_DRIVEN_INITIALIZER_HPP
-#define LLALBM_LID_DRIVEN_INITIALIZER_HPP
+#ifndef LLALBM_INLET_OUTLET_INITIALIZER_HPP
+#define LLALBM_INLET_OUTLET_INITIALIZER_HPP
 
 
 // =========== STL INCLUDES ===========
@@ -33,13 +33,8 @@ namespace llalbm::core::initializers
     {
         public: 
 
-        static std::vector<BoundaryPoint<dim>> emptyV;
-        static Eigen::Tensor<double, dim + 1> emptyT;
-
-        static std::vector<BoundaryPoint<dim>>& inlet_nodes;
-        static std::vector<BoundaryPoint<dim>>& outlet_nodes;
-
-        static Eigen::Tensor<double, dim + 1>& velocity_tensor;
+        static std::vector<BoundaryPoint<dim>> inlet_nodes;
+        static std::vector<BoundaryPoint<dim>> outlet_nodes;
 
         static std::array<Eigen::Index, dim> lattice_dimensions;
         
@@ -71,22 +66,6 @@ namespace llalbm::core::initializers
         }
 
         /**
-         * @brief Static method that links the tensor and its related information
-         * to the initializer, via the passage of references.
-         * 
-         * @param velocity_tensor_ Tensor containing the components of the velocity 
-         * @param lattice_dimensions_ Extension of each dimension of the tensor.
-         */
-        static void attach_tensor(
-            Eigen::Tensor<double, dim + 1>& velocity_tensor_,
-            std::array<Eigen::Index, dim> lattice_dimensions_
-        )
-        {
-            lattice_dimensions = lattice_dimensions_;
-            velocity_tensor = velocity_tensor_;
-        }
-
-        /**
          * @brief Static method that links the update functions to the initializer,
          * via the passage of references.
          * 
@@ -94,8 +73,8 @@ namespace llalbm::core::initializers
          * @param outlet_update_function_ Array of functions that update the outlet nodes
          */
         static void attach_update_functions(
-            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> inlet_update_function_,
-            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> outlet_update_function_
+            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim>& inlet_update_function_,
+            std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim>& outlet_update_function_
         )
         {
             inlet_update_function = inlet_update_function_;
@@ -107,40 +86,62 @@ namespace llalbm::core::initializers
          * 
          * @param time_step Current time step
          */
-        static void update_nodes(const std::size_t& time_step)
+        static void update_nodes(const std::size_t& time_step, Eigen::Tensor<double, dim+1>& velocity_tensor, Eigen::Tensor<double, dim> density_tensor)
         {
             std::size_t inlet_size = inlet_nodes.size();
             std::size_t outlet_size = outlet_nodes.size();
 
             // At the given time step, update the inlet nodes by
             // calling the update function for each dimension
-            Eigen::Index coordinates[dim + 1];
-            
+            Eigen::array<Eigen::Index, dim+1> coordinates;
+
             for (std::size_t i = 0; i < inlet_size; ++i)
             {
-                memcpy(coordinates, inlet_nodes[i].coords, dim * sizeof(Eigen::Index));
+                for (std::size_t k = 0; k < dim; ++k)
+                {
+                    coordinates[k] = inlet_nodes[i].coords[k];
+                }
+
                 for (std::size_t j = 0; j < dim; ++j)
                 {
                     coordinates[dim] = j;
-                    velocity_tensor(coordinates) = inlet_update_function[j](time_step, inlet_nodes[i]);
+                    double val = inlet_update_function[j](time_step, inlet_nodes[i]);
+                    velocity_tensor(coordinates) = val;
                 }
             }
         }
 
+        static void print_data()
+        {
+            // Print the inlet nodes
+            std::cout << "Inlet nodes: " << std::endl;
+            for (std::size_t i = 0; i < inlet_nodes.size(); ++i)
+            {
+                std::cout << "Node " << i << ": ";
+                for (std::size_t j = 0; j < dim; ++j)
+                {
+                    std::cout << inlet_nodes[i].coords[j] << " ";
+                }
+                std::cout << std::endl;
+            }
+            // Print the outlet nodes
+            std::cout << "Outlet nodes: " << std::endl;
+            for (std::size_t i = 0; i < outlet_nodes.size(); ++i)
+            {
+                std::cout << "Node " << i << ": ";
+                for (std::size_t j = 0; j < dim; ++j)
+                {
+                    std::cout << outlet_nodes[i].coords[j] << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
     };
 
     template<std::size_t dim>
-    std::vector<BoundaryPoint<dim>> VelocityInitializer<dim>::emptyV;
+    std::vector<BoundaryPoint<dim>> VelocityInitializer<dim>::inlet_nodes;
     template<std::size_t dim>
-    Eigen::Tensor<double, dim + 1> VelocityInitializer<dim>::emptyT;
-    template<std::size_t dim>
-    std::vector<BoundaryPoint<dim>>& VelocityInitializer<dim>::inlet_nodes = VelocityInitializer<dim>::emptyV;
-    template<std::size_t dim>
-    std::vector<BoundaryPoint<dim>>& VelocityInitializer<dim>::outlet_nodes = VelocityInitializer<dim>::emptyV;
-    template<std::size_t dim>
-    Eigen::Tensor<double, dim + 1>& VelocityInitializer<dim>::velocity_tensor = VelocityInitializer<dim>::emptyT;
-    template<std::size_t dim>
-    std::array<Eigen::Index, dim> VelocityInitializer<dim>::lattice_dimensions;
+    std::vector<BoundaryPoint<dim>> VelocityInitializer<dim>::outlet_nodes;
     template<std::size_t dim>
     std::array<std::function<double (std::size_t, BoundaryPoint<dim>)>, dim> VelocityInitializer<dim>::inlet_update_function;
     template<std::size_t dim>
@@ -149,4 +150,4 @@ namespace llalbm::core::initializers
 
 }; // namespace llalbm::core::initializers
 
-#endif // LLALBM_LID_DRIVEN_INITIALIZER_HPP
+#endif // LLALBM_INLET_OUTLET_INITIALIZER
