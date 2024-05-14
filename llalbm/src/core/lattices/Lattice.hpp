@@ -287,7 +287,7 @@ namespace llalbm::core
             logger.info("Lattice is ready.");
         }
 
-        void perform_lbm(const double time, const double time_step = 0.05, const std::size_t save_step = 5, const bool should_save = true)
+        void perform_lbm(const double time, const double time_step = 0.05, const std::size_t save_step = 1, const bool should_save = true)
         {
             assert(time_step > 0 && "ERROR: time step must be greater than 0");
             assert(time > 0 && "ERROR: simulation time must be greater than 0");
@@ -311,34 +311,84 @@ namespace llalbm::core
             const std::size_t n_steps = time/time_step;
             std::size_t saved_file = 0;
 
+            // Inizitialization
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
+
             for (std::size_t i = 0; i < n_steps; i++)
             {
-                initialization_policy.update_nodes(i, global_u, global_rho);
-
                 save = (i%save_step == 0 && should_save);
 
-                // 1. The equilibrium populations are calculated for each node
+                // This will be controlled
+                initialization_policy.update_nodes(i, global_u, global_rho);
+
+                // 1) Update of the macroscopic quantities
+                initialization_policy.update_macro(populations, fluid_nodes, global_rho, global_u);
+
+                // 2) Compute equilibrium populations
                 llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
                 
-                //2. Perform the collisions
-                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u);
+                // 3) Save ux and uy on files
+                if(save)
+                {
+                    llalbm::util::writer::write_lattice_file<dim>(global_u, saved_file);
+                    saved_file++;
+                }
 
-                //3. Streaming
+                // 4) Compute collisions
+                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
+
+                // 5) Propagate after collision populations
                 collision_policy.stream(populations, after_collision_populations, fluid_nodes);
+
+
+                // if(i == 0){
+                //     for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
+                //     {
+                //         int ii = fluid_nodes[fnode].coords[0];
+                //         int jj = fluid_nodes[fnode].coords[1];
+                //         if(ii == 2){
+                //             std::cout << ii << std::endl;
+                //             std::cout << jj << std::endl;
+                //             std::cout << after_collision_populations(ii,jj,0);
+                //             std::cout << ", " << after_collision_populations(ii,jj,1);
+                //             std::cout << ", " << after_collision_populations(ii,jj,2);
+                //             std::cout << ", " << after_collision_populations(ii,jj,3);
+                //             std::cout << ", " << after_collision_populations(ii,jj,4);
+                //             std::cout << ", " << after_collision_populations(ii,jj,5);
+                //             std::cout << ", " << after_collision_populations(ii,jj,6);
+                //             std::cout << ", " << after_collision_populations(ii,jj,7);
+                //             std::cout << ", " << after_collision_populations(ii,jj,8) << std::endl;
+                //         }
+                //     }
+                // }
+
+                // if(i == 0){
+                //     for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
+                //     {
+                //         int ii = fluid_nodes[fnode].coords[0];
+                //         int jj = fluid_nodes[fnode].coords[1];
+                //         if(ii == 1){
+                //             std::cout << ii << std::endl;
+                //             std::cout << jj << std::endl;
+                //             std::cout << populations(ii,jj,0);
+                //             std::cout << ", " << populations(ii,jj,1);
+                //             std::cout << ", " << populations(ii,jj,2);
+                //             std::cout << ", " << populations(ii,jj,3);
+                //             std::cout << ", " << populations(ii,jj,4);
+                //             std::cout << ", " << populations(ii,jj,5);
+                //             std::cout << ", " << populations(ii,jj,6);
+                //             std::cout << ", " << populations(ii,jj,7);
+                //             std::cout << ", " << populations(ii,jj,8) << std::endl;
+                //         }
+                //     }
+                // }
 
                 //4. Perform the collision at the boundaries
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
-                
-                // 5. Save ux and uy on files
-                if(save)
-                {
-                    llalbm::util::writer::write_lattice_file<dim>(global_u, saved_file);
-                    saved_file++;
-                }
+
             }
         }
 

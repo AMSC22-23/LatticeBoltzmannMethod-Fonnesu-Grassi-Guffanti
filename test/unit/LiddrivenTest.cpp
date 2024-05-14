@@ -12,11 +12,11 @@ int main()
                             initializers::VelocityInitializer<2>> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     
-    std::array< std::function<double(std::size_t,BoundaryPoint<2>)>,2> VelocityFunctions;
-    std::array< std::function<double(std::size_t,BoundaryPoint<2>)>,2> Outlets;
+    std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
+    std::array< std::function<double(double,BoundaryPoint<2>)>,2> Outlets;
 
-    VelocityFunctions[0] = [](std::size_t time, BoundaryPoint<2> Point){return 1.0/*Da vedere*/;};
-    VelocityFunctions[1] = [](std::size_t time, BoundaryPoint<2> Point){return 0.0;};
+    VelocityFunctions[0] = [](double time, BoundaryPoint<2> Point){return 1.0/*Da vedere*/;};
+    VelocityFunctions[1] = [](double time, BoundaryPoint<2> Point){return 0.0;};
     
     initializers::VelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
 

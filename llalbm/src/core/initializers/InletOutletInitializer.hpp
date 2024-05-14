@@ -31,7 +31,14 @@ namespace llalbm::core::initializers
     template<std::size_t dim>
     class VelocityInitializer
     {
-        public: 
+    private:
+
+        Eigen::Index j, i;
+        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+        double rho, rhoinv;
+        double ux, uy;
+
+    public: 
 
         static std::vector<BoundaryPoint<dim>> inlet_nodes;
         static std::vector<BoundaryPoint<dim>> outlet_nodes;
@@ -41,7 +48,6 @@ namespace llalbm::core::initializers
         static std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> inlet_update_function;
         static std::array<std::function<double (double, BoundaryPoint<dim>)>, dim> outlet_update_function;
     
-        public:
         /**
          * @brief Construct a new Lid Driven Initializer object
          * @note The constructor doesn't do anything special as this object is
@@ -79,6 +85,43 @@ namespace llalbm::core::initializers
         {
             inlet_update_function = inlet_update_function_;
             outlet_update_function = outlet_update_function_;
+        }
+
+        /**
+         * @brief Static method to update populations in D2Q9
+         * 
+         * @param populations tensor containing the populations of the nodes
+         * @param fluid_nodes vector containing all the fluid nodes
+         * @param global_rho tensor containing rho of all nodes
+         * @param global_u tensor containing u of all nodes
+         */
+        void update_macro(const Tensor<double, 3> &populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u)
+        {
+            for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
+            {
+                i = fluid_nodes[fnode].coords[0];
+                j = fluid_nodes[fnode].coords[1];
+
+                p0 = populations(i,j,0);
+                p1 = populations(i,j,1);
+                p2 = populations(i,j,2);
+                p3 = populations(i,j,3);
+                p4 = populations(i,j,4);
+                p5 = populations(i,j,5);
+                p6 = populations(i,j,6);
+                p7 = populations(i,j,7);
+                p8 = populations(i,j,8);
+
+                rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+                rhoinv = 1.0/rho;
+
+                ux = rhoinv * (p1 + p5 + p8 - (p3 + p6 + p7));
+                uy = rhoinv * (p2 + p5 + p6 - (p4 + p7 + p8));
+
+                global_rho(i,j) = rho;
+                global_u(i,j,0) = ux;
+                global_u(i,j,1) = uy;
+            }
         }
 
         /**

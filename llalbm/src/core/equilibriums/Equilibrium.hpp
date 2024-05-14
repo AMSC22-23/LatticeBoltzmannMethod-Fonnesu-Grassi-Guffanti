@@ -48,10 +48,10 @@ namespace llalbm::core::equilibrium
                 equilibrium_populations(i,j,2) =  one18 * rho * (2 + 6 * uy + 9 * uy * uy - 3 * u2);
                 equilibrium_populations(i,j,3) =  one18 * rho * (2 - 6 * ux + 9 * ux * ux - 3 * u2);
                 equilibrium_populations(i,j,4) =  one18 * rho * (2 - 6 * uy + 9 * uy * uy - 3 * u2);
-                equilibrium_populations(i,j,5) = one36 * rho * (1 + 3 * (ux + uy) + 4.5 * (ux + uy) * (ux + uy) - 1.5 * u2);
-                equilibrium_populations(i,j,6) = one36 * rho * (1 - 3 * (ux - uy) + 4.5 * (ux - uy) * (ux - uy) - 1.5 * u2);
-                equilibrium_populations(i,j,7) = one36 * rho * (1 - 3 * (ux + uy) + 4.5 * (ux + uy) * (ux + uy) - 1.5 * u2);
-                equilibrium_populations(i,j,8) = one36 * rho * (1 + 3 * (ux - uy) + 4.5 * (ux - uy) * (ux - uy) - 1.5 * u2);
+                equilibrium_populations(i,j,5) = one36 * rho * (1 + 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                equilibrium_populations(i,j,6) = one36 * rho * (1 - 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
+                equilibrium_populations(i,j,7) = one36 * rho * (1 - 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                equilibrium_populations(i,j,8) = one36 * rho * (1 + 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
             }            
         }
     };
