@@ -136,14 +136,14 @@ namespace llalbm::core::collisions
                 j = fluid_nodes[fnode].coords[1];
 
                 populations(i, j, 0) = after_collision_populations(i,j,0);
-                populations(i, j-1, 1) = after_collision_populations(i,j,1);
-                populations(i+1, j, 2) = after_collision_populations(i,j,2);
-                populations(i, j+1, 3) = after_collision_populations(i,j,3);
-                populations(i-1, j, 4) = after_collision_populations(i,j,4);
-                populations(i+1, j-1, 5) = after_collision_populations(i,j,5);
-                populations(i+1, j+1, 6) = after_collision_populations(i,j,6);
-                populations(i-1, j+1, 7) = after_collision_populations(i,j,7);
-                populations(i-1, j-1, 8) = after_collision_populations(i,j,8);
+                populations(i, j+1, 1) = after_collision_populations(i,j,1);
+                populations(i-1, j, 2) = after_collision_populations(i,j,2);
+                populations(i, j-1, 3) = after_collision_populations(i,j,3);
+                populations(i+1, j, 4) = after_collision_populations(i,j,4);
+                populations(i-1, j+1, 5) = after_collision_populations(i,j,5);
+                populations(i-1, j-1, 6) = after_collision_populations(i,j,6);
+                populations(i+1, j-1, 7) = after_collision_populations(i,j,7);
+                populations(i+1, j+1, 8) = after_collision_populations(i,j,8);
             }
         }
     };

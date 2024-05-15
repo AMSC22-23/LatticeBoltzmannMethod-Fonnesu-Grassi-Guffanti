@@ -75,8 +75,8 @@ namespace llalbm::core::boundaries
                         rho = (populations(i,j,0) + populations(i,j,1) + populations(i,j,3) + 2.0 * (populations(i,j,2) + populations(i,j,5) + populations(i,j,6))) / (1.0 + global_u(i,j,1)); 
                         ru = rho * global_u(i,j,1);
                         populations(i,j,4) = populations(i,j,2) - two_thirds * ru;
-                        populations(i,j,7) = populations(i,j,5) - one_sixth * ru + one_half * (populations(i,j,1) - populations(i,j,3));
-                        populations(i,j,8) = populations(i,j,6) - one_sixth * ru + one_half * (populations(i,j,3) - populations(i,j,1));
+                        populations(i,j,7) = populations(i,j,5) - one_sixth * ru - one_half * rho * global_u(i,j,0) + one_half * (populations(i,j,1) - populations(i,j,3));
+                        populations(i,j,8) = populations(i,j,6) - one_sixth * ru - one_half * rho * global_u(i,j,0) + one_half * (populations(i,j,3) - populations(i,j,1));
 
                         populations(i+1, j, 4) = populations(i,j,4);
                         populations(i+1, j-1, 7) = populations(i,j,7);

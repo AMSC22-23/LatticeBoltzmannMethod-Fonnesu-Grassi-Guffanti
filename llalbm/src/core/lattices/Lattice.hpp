@@ -287,7 +287,7 @@ namespace llalbm::core
             logger.info("Lattice is ready.");
         }
 
-        void perform_lbm(const double time, const double time_step = 0.05, const std::size_t save_step = 1, const bool should_save = true)
+        void perform_lbm(const double time, const double time_step = 1, const std::size_t save_step = 1, const bool should_save = true)
         {
             assert(time_step > 0 && "ERROR: time step must be greater than 0");
             assert(time > 0 && "ERROR: simulation time must be greater than 0");
@@ -337,53 +337,10 @@ namespace llalbm::core
                 // 4) Compute collisions
                 collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
 
-                // 5) Propagate after collision populations
+                // 5) Propagate after collision populations, also to not fluid nodes
                 collision_policy.stream(populations, after_collision_populations, fluid_nodes);
 
-
-                // if(i == 0){
-                //     for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
-                //     {
-                //         int ii = fluid_nodes[fnode].coords[0];
-                //         int jj = fluid_nodes[fnode].coords[1];
-                //         if(ii == 2){
-                //             std::cout << ii << std::endl;
-                //             std::cout << jj << std::endl;
-                //             std::cout << after_collision_populations(ii,jj,0);
-                //             std::cout << ", " << after_collision_populations(ii,jj,1);
-                //             std::cout << ", " << after_collision_populations(ii,jj,2);
-                //             std::cout << ", " << after_collision_populations(ii,jj,3);
-                //             std::cout << ", " << after_collision_populations(ii,jj,4);
-                //             std::cout << ", " << after_collision_populations(ii,jj,5);
-                //             std::cout << ", " << after_collision_populations(ii,jj,6);
-                //             std::cout << ", " << after_collision_populations(ii,jj,7);
-                //             std::cout << ", " << after_collision_populations(ii,jj,8) << std::endl;
-                //         }
-                //     }
-                // }
-
-                // if(i == 0){
-                //     for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
-                //     {
-                //         int ii = fluid_nodes[fnode].coords[0];
-                //         int jj = fluid_nodes[fnode].coords[1];
-                //         if(ii == 1){
-                //             std::cout << ii << std::endl;
-                //             std::cout << jj << std::endl;
-                //             std::cout << populations(ii,jj,0);
-                //             std::cout << ", " << populations(ii,jj,1);
-                //             std::cout << ", " << populations(ii,jj,2);
-                //             std::cout << ", " << populations(ii,jj,3);
-                //             std::cout << ", " << populations(ii,jj,4);
-                //             std::cout << ", " << populations(ii,jj,5);
-                //             std::cout << ", " << populations(ii,jj,6);
-                //             std::cout << ", " << populations(ii,jj,7);
-                //             std::cout << ", " << populations(ii,jj,8) << std::endl;
-                //         }
-                //     }
-                // }
-
-                //4. Perform the collision at the boundaries
+                // 6) Perform the collision at the boundaries
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);

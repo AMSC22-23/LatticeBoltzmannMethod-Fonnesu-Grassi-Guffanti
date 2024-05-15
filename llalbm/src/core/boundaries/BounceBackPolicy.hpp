@@ -51,16 +51,10 @@ namespace llalbm::core::boundaries
     class BounceBackPolicy<2>{
         
         private:
-            //std::array<Eigen::Index, 2> lattice_nodes; 
-            //std::vector<Point<2>> boundary_nodes;
             Eigen::Index i, j;
             double p0, p1, p2, p3, p4, p5, p6, p7, p8;
             
         public: 
-            /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
-                lattice_nodes = l;
-                boundary_nodes = b;
-            }*/
             void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 auto n_rows = populations.dimensions()[0];

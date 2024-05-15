@@ -22,6 +22,6 @@ int main()
 
     collisions::BGKCollisionPolicy<2>::initialize(0.6);
 
-    Lid.perform_lbm(5);
+    Lid.perform_lbm(100);
 
 }
