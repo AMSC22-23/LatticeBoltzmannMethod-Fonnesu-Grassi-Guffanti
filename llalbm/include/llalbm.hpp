@@ -12,6 +12,8 @@
 #include "../src/utils/loggers/Logger.hpp"
 #include "../src/utils/readers/LatticeReader.hpp"
 #include "../src/utils/aliases.hpp"
-
+#include "../src/utils/generation/ConstructionInfo.hpp"
+#include "../src/utils/generation/ConstructionTools.hpp"
+#include "../src/utils/MultiDimensionalLoop.hpp"
 
 #endif // LLALBM_HPP

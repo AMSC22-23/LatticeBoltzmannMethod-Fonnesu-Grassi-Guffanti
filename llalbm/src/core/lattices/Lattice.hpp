@@ -204,6 +204,15 @@ namespace llalbm::core
     public:
         
         /**
+         * @brief Construct a new completely empty lattice object
+         * 
+         */
+        Lattice()
+        :   q (0)
+        ,   logger("LATTICE", std::cout)
+        {}
+
+        /**
          * @brief Constructs a new Lattice object by instantiating the data structures and by initializing
          * the policies with useful information.
          * 
@@ -314,6 +323,7 @@ namespace llalbm::core
             // Inizitialization
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
 
+            logger.info("Will do " + std::to_string(n_steps) + " steps");
             for (std::size_t i = 0; i < n_steps; i++)
             {
                 save = (i%save_step == 0 && should_save);
@@ -347,6 +357,47 @@ namespace llalbm::core
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
             }
+        }
+
+        /**
+         * @brief Reinitializes a lattice object by reconstructing tensors and vectors of coordinates.
+         * 
+         * @param lattice_dimensions_ array indicating the extension of each spatial dimension in terms of grid points.
+         * @param fluid_nodes_ list of coordinates of fluid nodes.
+         * @param boundary_coord_ list of coordinates of boundary nodes.
+         * @param inlet_nodes_coord_ list of coordinates of inlet nodes.
+         * @param outlet_nodes_coord_ list of coordinates of outlet nodes.
+         * @param obstacle_nodes_ list of coordinates of obstacle nodes.
+         * 
+         * @note This function is useful when the user wants to reinitialize the lattice with different data
+         * or when the lattice has been created via the construction infrastructure.
+         */
+        void reinit(
+            const std::array<Eigen::Index, dim>& lattice_dimensions_,
+            const std::vector<Point<dim>>& fluid_nodes_,
+            const std::vector<BoundaryPoint<dim>>& boundary_coord_,
+            const std::vector<BoundaryPoint<dim>>& inlet_nodes_coord_,
+            const std::vector<BoundaryPoint<dim>>& outlet_nodes_coord_,
+            const std::vector<BoundaryPoint<dim>>& obstacle_nodes_
+        )
+        {
+            logger.info("Reinitializing lattice");
+            lattice_dimensions = lattice_dimensions_;
+            build_tensors();
+            initialize_velocity_sets();
+
+            boundary_coord = boundary_coord_;
+            inlet_nodes_coord = inlet_nodes_coord_;
+            outlet_nodes_coord = outlet_nodes_coord_;
+            obstacle_nodes = obstacle_nodes_;
+
+            initialization_policy.attach_nodes(
+                inlet_nodes_coord,
+                outlet_nodes_coord
+            );
+
+            logger.info("Reinitialization completed");
+
         }
 
         // ========================================================================================= 
@@ -409,6 +460,69 @@ namespace llalbm::core
          */
         std::vector<BoundaryPoint<dim>>& get_obstacle_nodes(){ return obstacle_nodes; }
 
+        /**
+         * @brief Prints the lattice non-fluid structure to an output stream
+         * 
+         * @param out output stream onto which the structure is printed
+         */
+        void print_lattice_structure(std::ostream& out) const 
+        {
+            unsigned int n_nodes = 0;
+
+            out << "Lattice Information" << std::endl;
+            out << "-> List of obstacle nodes: " << std::endl;
+            for (auto obstacle : obstacle_nodes)
+            {
+                for (unsigned int i = 0; i < dim; ++i)
+                {
+                    out << obstacle.coords[i] << " ";
+                }
+                out << "type " << obstacle.type;
+                out << std::endl;
+                n_nodes++;
+            }
+
+            out << "-> List of inlet nodes: " << std::endl;
+            for (auto inlet : inlet_nodes_coord)
+            {
+                for (unsigned int i = 0; i < dim; ++i)
+                {
+                    out << inlet.coords[i] << " ";
+                }
+                out << "type " << inlet.type;
+                out << std::endl;
+                n_nodes++;
+            }
+
+            out << "-> List of outlet nodes: " << std::endl;
+            for (auto outlet : outlet_nodes_coord)
+            {
+                for (unsigned int i = 0; i < dim; ++i)
+                {
+                    out << outlet.coords[i] << " ";
+                }
+                out << "type " << outlet.type;
+                out << std::endl;
+                n_nodes++;
+            }
+
+            out << "-> List of boundary nodes: " << std::endl;
+            for (auto boundary : boundary_coord)
+            {
+                for (unsigned int i = 0; i < dim; ++i)
+                {
+                    out << boundary.coords[i] << " ";
+                }
+                out << "type " << boundary.type;
+                out << std::endl;
+                n_nodes++;
+            }
+
+            out << "===================================" << std::endl;
+            out << "Cumulative number of non fluid: " << n_nodes << std::endl;
+            out << "===================================" << std::endl;
+
+        }
         // ========================================================================================= 
         // ========================================================================================= 
         // ========================================================================================= 
