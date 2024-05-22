@@ -173,7 +173,10 @@ public:
         }
 
         // Check for overlaps: the point must not be present in any other list
-        for (auto point = begin; point != end; point.coords[varying_dimension]++)
+        // TODO: 
+        auto end_copy = end;
+        end_copy.coords[varying_dimension]++;
+        for (auto point = begin; point != end_copy; point.coords[varying_dimension]++)
         {
             if (check_possible_overlap(point, inlet_nodes))
             {
