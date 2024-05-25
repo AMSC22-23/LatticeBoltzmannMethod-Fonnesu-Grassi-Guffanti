@@ -195,6 +195,18 @@ struct BoundaryPoint
         }
         return type == other.type;
     }
+
+    bool operator<(const BoundaryPoint<d>& other) const
+    {
+        for(std::size_t i = 0; i < d; ++i)
+        {
+            if (coords[i] < other.coords[i])
+                return true;
+            else if (coords[i] > other.coords[i])
+                return false;
+        }
+        return false;
+    }
 };
 
 /**

@@ -82,7 +82,7 @@ namespace llalbm::util::writer
         output_file_u_x.close();
         output_file_u_y.close();
 
-        logger.info("Iteration " + std::to_string(iteration_count));
+        logger.info("Output " + std::to_string(iteration_count));
     }
 
 }

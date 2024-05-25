@@ -55,10 +55,20 @@ int main()
         boundaries::BounceBackPolicy<2>,
         boundaries::ZouHePolicy<2>,
         boundaries::ZouHePolicy<2>,
-        initializers::VelocityInitializer<2>>(Lid, construction_info);
+        initializers::VelocityInitializer<2>>(Lid, 9, construction_info);
 
     std::ofstream out("file.txt");
 
-    Lid.print_lattice_structure(out);
+    Lid.print_lattice_structure(out, true);
+
+    ConstructionInfo<2> construction_info2_expected_fail;
+    build_lattice<2,
+        collisions::BGKCollisionPolicy<2>,
+        boundaries::BounceBackPolicy<2>,
+        boundaries::BounceBackPolicy<2>,
+        boundaries::ZouHePolicy<2>,
+        boundaries::ZouHePolicy<2>,
+        initializers::VelocityInitializer<2>>(Lid, 9, construction_info2_expected_fail);
+
     return 0;
 }

@@ -51,7 +51,7 @@ using namespace llalbm::util;
  * @param info ConstructionInfo object from which information is retrieved
  */
 template<
-    std::size_t dim                 ,   // Spacial dimensions of the simulation.
+    std::size_t dim                 ,
     typename CollisionPolicy        ,   // Policy managing the interaction between two fluid nodes.
     typename WallPolicy             ,   // Policy managing the interaction between a fluid node and a wall node.
     typename ObstaclePolicy         ,   // Policy managing the interaction between a fluid node and an internal obstacle.
@@ -59,11 +59,40 @@ template<
     typename OutletPolicy           ,   // Policy managing the interaction between an internal fluid node and an outlet policy.s
     typename InitializationPolicy       // Policy managing the initialization of the lattice.
 >
-void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, InletPolicy, OutletPolicy, InitializationPolicy>& lattice, const ConstructionInfo<dim>& info)
+void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, InletPolicy, OutletPolicy, InitializationPolicy>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
 {
     // Traduce ConstructionInfo sets into vectors
     Logger logger("ConstructionTools", std::cout);
     logger.info("Converting sets to vectors");
+
+    if (!info.are_dimensions_provided())
+    {
+        logger.error("Domain dimensions are not provided.");
+        logger.error("Please provide domain dimensions in the ConstructionInfo object");
+        logger.error("Exiting...");
+        exit(1);
+    }
+
+    if (!info.are_boundaries_provided())
+    {
+        logger.warn("Boundary nodes are not provided.");
+    }
+
+    if (!info.are_inlets_provided())
+    {
+        logger.warn("Inlet nodes are not provided.");
+    }
+
+    if (!info.are_outlets_provided())
+    {
+        logger.warn("Outlet nodes are not provided.");
+    }
+
+    if (!info.are_obstacles_provided())
+    {
+        logger.warn("Obstacle nodes are not provided.");
+    }
+
 
 
     auto boundary_nodes_set = info.get_boundary_nodes();
@@ -76,6 +105,12 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
     std::vector<BoundaryPoint<dim>> outlet_nodes;
     std::vector<BoundaryPoint<dim>> obstacle_nodes;
 
+
+    logger.info("There are " + std::to_string(boundary_nodes_set.size()) + " boundary nodes");
+    logger.info("There are " + std::to_string(inlet_nodes_set.size()) + " inlet nodes");
+    logger.info("There are " + std::to_string(outlet_nodes_set.size()) + " outlet nodes");
+    logger.info("There are " + std::to_string(obstacle_nodes_set.size()) + " obstacle nodes");
+    
     boundary_nodes.resize(boundary_nodes_set.size());
     inlet_nodes.resize(inlet_nodes_set.size());
     outlet_nodes.resize(outlet_nodes_set.size());
@@ -96,9 +131,15 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
     // from the possible coordinates
     Eigen::array<Eigen::Index, dim> grid_positions;
     Eigen::array<Eigen::Index, dim> dimensions = info.get_domain_dimensions();
+    
+    logger.info("Computing fluid nodes coordinates");
     llalbm::util::MultiDimensionalLoop<std::vector<Point<dim>>, Point<dim>, dim>::assign_grid_positions(fluid_nodes, dimensions, grid_positions);
     
-    // Remove the boundary nodes from the fluid nodes
+
+    // Remove any duplicates from fluid nodes to be sure
+    std::sort(fluid_nodes.begin(), fluid_nodes.end());
+    fluid_nodes.erase(std::unique(fluid_nodes.begin(), fluid_nodes.end()), fluid_nodes.end());
+
     logger.info("Removing boundary nodes from fluid nodes");
     for (auto boundary_node : boundary_nodes)
     {
@@ -126,6 +167,8 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
         auto it = std::find(fluid_nodes.begin(), fluid_nodes.end(), outlet_node);
         if (it != fluid_nodes.end())
         {
+            std::cout << std::endl;
+
             fluid_nodes.erase(it);
         }
     }
@@ -139,7 +182,6 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
             fluid_nodes.erase(it);
         }
     }
-
     // Last but not least, identify the inlet and outlet nodes
     logger.info("Identifying inlet and outlet nodes");
     identify_node_type(info.get_domain_dimensions(), inlet_nodes);
@@ -148,6 +190,7 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
     // Finally, reinitialize the lattice.
     auto domain = info.get_domain_dimensions();
     lattice.reinit(
+        q,
         domain,
         fluid_nodes,
         boundary_nodes,

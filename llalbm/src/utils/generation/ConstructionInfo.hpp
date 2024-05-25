@@ -81,16 +81,16 @@ private:
     Eigen::array<Eigen::Index, dim> domain_dimensions;
 
     /// List of boundary nodes
-    std::set<Point<dim>> boundary_nodes;
+    std::set<BoundaryPoint<dim>> boundary_nodes;
 
     /// List of inlet nodes
-    std::set<Point<dim>> inlet_nodes;
+    std::set<BoundaryPoint<dim>> inlet_nodes;
 
     /// List of outlet nodes
-    std::set<Point<dim>> outlet_nodes;
+    std::set<BoundaryPoint<dim>> outlet_nodes;
 
     /// List of obstacle nodes
-    std::set<Point<dim>> obstacle_nodes;
+    std::set<BoundaryPoint<dim>> obstacle_nodes;
 
     /// Logger object
     Logger l;
@@ -216,13 +216,13 @@ public:
             
 
             if (type == NonFluidNodeType::INLET)
-                inlet_nodes.insert(point);
+                inlet_nodes.insert(BoundaryPoint<2>(point));
             else if (type == NonFluidNodeType::OUTLET)
-                outlet_nodes.insert(point);
+                outlet_nodes.insert(BoundaryPoint<2>(point));
             else if (type == NonFluidNodeType::OBSTACLE)
-                obstacle_nodes.insert(point);
+                obstacle_nodes.insert(BoundaryPoint<2>(point));
             else if (type == NonFluidNodeType::BOUNDARY)
-                boundary_nodes.insert(point);
+                boundary_nodes.insert(BoundaryPoint<2>(point));
         }
         
 
@@ -250,9 +250,9 @@ public:
     /**
      * @brief Returns the list of boundary nodes.
      * 
-     * @return std::set<Point<dim>> 
+     * @return std::set<BoundaryPoint<dim>> 
      */
-    std::set<Point<dim>> get_boundary_nodes() const
+    std::set<BoundaryPoint<dim>> get_boundary_nodes() const
     {
         return boundary_nodes;
     }
@@ -260,9 +260,9 @@ public:
     /**
      * @brief Returns the list of inlet nodes.
      * 
-     * @return std::set<Point<dim>> 
+     * @return std::set<BoundaryPoint<dim>> 
      */
-    std::set<Point<dim>> get_inlet_nodes() const
+    std::set<BoundaryPoint<dim>> get_inlet_nodes() const
     {
         return inlet_nodes;
     }
@@ -270,9 +270,9 @@ public:
     /**
      * @brief Returns the list of outlet nodes.
      * 
-     * @return std::set<Point<dim>> 
+     * @return std::set<BoundaryPoint<dim>> 
      */
-    std::set<Point<dim>> get_outlet_nodes() const
+    std::set<BoundaryPoint<dim>> get_outlet_nodes() const
     {
         return outlet_nodes;
     }
@@ -280,11 +280,36 @@ public:
     /**
      * @brief Returns the list of obstacle nodes.
      * 
-     * @return std::set<Point<dim>> 
+     * @return std::set<BoundaryPoint<dim>> 
      */
-    std::set<Point<dim>> get_obstacle_nodes() const
+    std::set<BoundaryPoint<dim>> get_obstacle_nodes() const
     {
         return obstacle_nodes;
+    }
+
+    bool are_dimensions_provided() const
+    {
+        return dimensions_provided;
+    }
+
+    bool are_inlets_provided() const
+    {
+        return inlet_provided;
+    }
+
+    bool are_outlets_provided() const
+    {
+        return outlet_provided;
+    }
+
+    bool are_obstacles_provided() const
+    {
+        return obstacle_provided;
+    }
+
+    bool are_boundaries_provided() const
+    {
+        return boundaries_provided;
     }
 
     // ========================================================================================= 
@@ -292,6 +317,9 @@ public:
     // =========================================================================================
 
 private:
+
+    // TODO: WHEN ADDING CLOSED SHAPE OBSTACLES, THE INSIDE MUST BE SET TO BE AN OBSTACLE
+
 
     /**
      * @brief Checks whether two points are in a straight line
@@ -344,7 +372,7 @@ private:
      * 
      * @returns Whether an ovelap is present.
      */
-    bool check_possible_overlap(const Point<dim>& point, const std::set<Point<dim>>& to_check) const
+    bool check_possible_overlap(const BoundaryPoint<dim>& point, const std::set<BoundaryPoint<dim>>& to_check) const
     {
         const auto it = to_check.find(point);
         if (it != to_check.end())

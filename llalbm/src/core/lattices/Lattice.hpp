@@ -112,7 +112,7 @@ namespace llalbm::core
         std::vector<BoundaryPoint<dim>> obstacle_nodes;
 
         /// @brief Number of velocities in the velocity set
-        const std::size_t q;
+        std::size_t q;
 
         // ========= MISCELLANEOUS =========
 
@@ -170,6 +170,12 @@ namespace llalbm::core
          */
         void build_tensors()
         {
+            // Print the dimensions
+            logger.info("Dimensions:");
+            for (std::size_t i = 0; i < dim; ++i) {
+                logger.info("dim[" + std::to_string(i) + "] = " + std::to_string(lattice_dimensions[i]));
+            }
+
             // Building the population tensor
             std::array<Eigen::Index, dim+1> populations_data;
             for (std::size_t i = 0; i < dim; ++i) {
@@ -320,21 +326,30 @@ namespace llalbm::core
             const std::size_t n_steps = time/time_step;
             std::size_t saved_file = 0;
 
+            logger.info("Initial equilibrium computation");
             // Inizitialization
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
+            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(inlet_nodes_coord, populations, global_u, global_rho);
+            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(outlet_nodes_coord, populations, global_u, global_rho);
+
+            logger.info("... Done!");
+
 
             logger.info("Will do " + std::to_string(n_steps) + " steps");
             for (std::size_t i = 0; i < n_steps; i++)
             {
+                logger.info("Step " + std::to_string(i) + " of " + std::to_string(n_steps));
                 save = (i%save_step == 0 && should_save);
 
                 // This will be controlled
                 initialization_policy.update_nodes(i, global_u, global_rho);
 
                 // 1) Update of the macroscopic quantities
+                logger.info("   Updating macroscopic quantities");
                 initialization_policy.update_macro(populations, fluid_nodes, global_rho, global_u);
 
                 // 2) Compute equilibrium populations
+                logger.info("   Computing equilibrium populations");
                 llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
                 
                 // 3) Save ux and uy on files
@@ -345,14 +360,18 @@ namespace llalbm::core
                 }
 
                 // 4) Compute collisions
+                logger.info("   Colliding populations");
                 collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
 
                 // 5) Propagate after collision populations, also to not fluid nodes
+                logger.info("   Streaming populations");
                 collision_policy.stream(populations, after_collision_populations, fluid_nodes);
 
                 // 6) Perform the collision at the boundaries
+                logger.info("   Computing Boundary action");
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
+                logger.info("   Computing Inlet and Outlet action");
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
@@ -373,6 +392,7 @@ namespace llalbm::core
          * or when the lattice has been created via the construction infrastructure.
          */
         void reinit(
+            const std::size_t q_,
             const std::array<Eigen::Index, dim>& lattice_dimensions_,
             const std::vector<Point<dim>>& fluid_nodes_,
             const std::vector<BoundaryPoint<dim>>& boundary_coord_,
@@ -382,6 +402,7 @@ namespace llalbm::core
         )
         {
             logger.info("Reinitializing lattice");
+            q = q_;
             lattice_dimensions = lattice_dimensions_;
             build_tensors();
             initialize_velocity_sets();
@@ -390,6 +411,7 @@ namespace llalbm::core
             inlet_nodes_coord = inlet_nodes_coord_;
             outlet_nodes_coord = outlet_nodes_coord_;
             obstacle_nodes = obstacle_nodes_;
+            fluid_nodes = fluid_nodes_;
 
             initialization_policy.attach_nodes(
                 inlet_nodes_coord,
@@ -464,8 +486,9 @@ namespace llalbm::core
          * @brief Prints the lattice non-fluid structure to an output stream
          * 
          * @param out output stream onto which the structure is printed
+         * @param print_fluid boolean indicating whether to print the fluid nodes coordinates
          */
-        void print_lattice_structure(std::ostream& out) const 
+        void print_lattice_structure(std::ostream& out, const bool print_fluid = false) const 
         {
             unsigned int n_nodes = 0;
 
@@ -521,6 +544,20 @@ namespace llalbm::core
             out << "===================================" << std::endl;
             out << "Cumulative number of non fluid: " << n_nodes << std::endl;
             out << "===================================" << std::endl;
+
+            if (print_fluid)
+            {
+                out << "List of fluid nodes: " << std::endl;
+                for (auto fluid : fluid_nodes)
+                {
+                    for (unsigned int i = 0; i < dim; ++i)
+                    {
+                        out << fluid.coords[i] << " ";
+                    }
+                    out << std::endl;
+                }
+            
+            }
 
         }
         // ========================================================================================= 
