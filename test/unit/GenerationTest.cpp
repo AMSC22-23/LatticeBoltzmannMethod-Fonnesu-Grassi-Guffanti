@@ -8,11 +8,13 @@
 
 
 #include <iostream>
+
 #include "llalbm.hpp"
 
 int main()
 {
     using namespace llalbm::util::generation;
+    using namespace llalbm::core;
 
     ConstructionInfo<2> construction_info;
     
@@ -40,35 +42,27 @@ int main()
     nodes = construction_info.get_boundary_nodes();
     // Introduce boundaries all around.
 
-    llalbm::core::Lattice<2,collisions::BGKCollisionPolicy<2>,
-                            boundaries::BounceBackPolicy<2>,
-                            boundaries::BounceBackPolicy<2>,
-                            boundaries::ZouHePolicy<2>,
-                            boundaries::ZouHePolicy<2>, 
-                            initializers::VelocityInitializer<2>> Lid;
-
-    std::cout << "Building Lid driven cavity lattice from information" << std::endl;
-    build_lattice<
+    using Config = LatticeConfiguration<
         2,
         collisions::BGKCollisionPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::ZouHePolicy<2>,
-        boundaries::ZouHePolicy<2>,
-        initializers::VelocityInitializer<2>>(Lid, 9, construction_info);
+        boundaries::ZouHePolicy<2>, 
+        initializers::VelocityInitializer<2>
+    >;   
+
+    
+    Lattice<Config> Lid;
+    std::cout << "Building Lid driven cavity lattice from information" << std::endl;
+    build_lattice<2, Config>(Lid, 9, construction_info);
 
     std::ofstream out("file.txt");
 
     Lid.print_lattice_structure(out, true);
 
     ConstructionInfo<2> construction_info2_expected_fail;
-    build_lattice<2,
-        collisions::BGKCollisionPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::ZouHePolicy<2>,
-        boundaries::ZouHePolicy<2>,
-        initializers::VelocityInitializer<2>>(Lid, 9, construction_info2_expected_fail);
+    build_lattice<2, Config>(Lid, 9, construction_info2_expected_fail);
 
     return 0;
 }

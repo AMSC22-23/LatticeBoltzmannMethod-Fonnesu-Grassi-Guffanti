@@ -4,12 +4,14 @@
 int main()
 {
     using namespace llalbm::core;
-    llalbm::core::Lattice<2,collisions::BGKCollisionPolicy<2>,
+    using Config = LatticeConfiguration<2,collisions::BGKCollisionPolicy<2>,
                             boundaries::BounceBackPolicy<2>,
                             boundaries::BounceBackPolicy<2>,
                             boundaries::ZouHePolicy<2>,
                             boundaries::ZouHePolicy<2>, 
-                            initializers::VelocityInitializer<2>> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+                            initializers::VelocityInitializer<2>>;
+
+    llalbm::core::Lattice<Config> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     
     std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;

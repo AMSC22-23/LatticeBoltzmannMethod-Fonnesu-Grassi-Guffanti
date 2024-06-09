@@ -118,7 +118,7 @@ namespace llalbm::core::initializers
                 ux = rhoinv * (p1 + p5 + p8 - (p3 + p6 + p7));
                 uy = rhoinv * (p2 + p5 + p6 - (p4 + p7 + p8));
 
-                global_rho(i,j) = rho;
+                global_rho(i,j) = rho;  
                 global_u(i,j,0) = ux;
                 global_u(i,j,1) = uy;
             }
