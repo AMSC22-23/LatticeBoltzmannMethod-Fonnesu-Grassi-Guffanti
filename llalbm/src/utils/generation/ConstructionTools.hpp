@@ -146,7 +146,6 @@ void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, 
         }
     }
 
-    // Remove the inlet nodes from the fluid nodes
     logger.info("Removing inlet nodes from fluid nodes");
     for (auto inlet_node : inlet_nodes)
     {

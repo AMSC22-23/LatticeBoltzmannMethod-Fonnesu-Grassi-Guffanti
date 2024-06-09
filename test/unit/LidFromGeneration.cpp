@@ -6,7 +6,6 @@
  * 
  */
 
-#define LLALBM_VERBOSE
 
 #include "llalbm.hpp"
 #include "iostream"
@@ -38,13 +37,16 @@ int main()
 
     info.attach_domain_dimensions({100, 100});
 
-    info.add_nodes_interval({0, 0}, {0, 99}, generation::NonFluidNodeType::INLET);
-    info.add_nodes_interval({1, 0}, {99, 0}, generation::NonFluidNodeType::BOUNDARY);
+    info.add_nodes_interval({0, 1}, {0, 98}, generation::NonFluidNodeType::INLET);
+    info.add_nodes_interval({0, 0}, {99, 0}, generation::NonFluidNodeType::BOUNDARY);
     info.add_nodes_interval({99, 0}, {99, 99}, generation::NonFluidNodeType::BOUNDARY);
-    info.add_nodes_interval({1, 99}, {99, 99}, generation::NonFluidNodeType::BOUNDARY);
+    info.add_nodes_interval({0, 99}, {99, 99}, generation::NonFluidNodeType::BOUNDARY);
 
     generation::build_lattice<2, Config>(Lid, 9, info);
 
-    Lid.perform_lbm(1500, 1, 5);
+    std::ofstream out("file.txt");
+    Lid.print_lattice_structure(out, true);
+
+    Lid.perform_lbm(1500, 1, 10);
 
 }

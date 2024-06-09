@@ -43,11 +43,15 @@ namespace llalbm::util::writer
 
             for (const auto& entry : std::filesystem::directory_iterator(output_dir_path))
             {
+                #ifdef VERBOSE
                 std::cout << entry.path();
+                #endif
                 if (entry.path().extension() == ".bin" || entry.path().extension() == ".txt")
                 {
                     std::filesystem::remove(entry.path());
+                    #ifdef VERBOSE
                     std::cout<< " removed" << std::endl;
+                    #endif
                 }
             }
         }
@@ -82,7 +86,9 @@ namespace llalbm::util::writer
         output_file_u_x.close();
         output_file_u_y.close();
 
+        #ifdef LLALBM_VERBOSE
         logger.info("Output " + std::to_string(iteration_count));
+        #endif
     }
 
 }

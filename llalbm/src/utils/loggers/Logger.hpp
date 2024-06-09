@@ -22,6 +22,11 @@ namespace llalbm::util::logger
         ,   out_stream (out_stream_)
         {}
 
+        inline void info_no_return(const std::string& msg)
+        {
+            out_stream << "["<<name<<"-INFO] "<< msg;
+        }
+
         inline void info(const std::string& msg)
         {
             out_stream << "["<<name<<"-INFO] "<< msg << std::endl;

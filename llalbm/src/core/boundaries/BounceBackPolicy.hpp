@@ -75,34 +75,51 @@ namespace llalbm::core::boundaries
                     p8 = populations(i, j, 8);
 
                     populations(i,j,0) = p0;
+
+                    // Compute the bounce back populations
+                    /*
+                                j
+                              6 2 5
+                           i  3 0 1
+                              7 4 8
+                    */
+                   
+                    // If the node is not on the left wall we can propagate to the left
                     if(j != 0)
                     {
                         populations(i, j-1, 3) = p1;
                     }
+                    // If the node is not on the bottom wall we can propagate downwards
                     if(i != n_rows-1)
                     {
                         populations(i+1, j, 4) = p2;
                     }
+                    // If the node is not on the right wall we can propagate to the right
                     if(j != n_cols-1)
                     {
                         populations(i, j+1, 1) = p3;
                     }
+                    // If the node is not on the top wall we can propagate upwards
                     if(i != 0)
                     {
                         populations(i-1, j, 2) = p4;
                     }
+                    // If the node is not on the bottom left corner we can propagate to the bottom left
                     if(i != n_rows-1 && j != 0)
                     {
                         populations(i+1, j-1, 7) = p5;
                     }
+                    // If the node is not on the bottom right corner we can propagate to the bottom right
                     if(i != n_rows-1 && j != n_cols-1)
                     {
                         populations(i+1, j+1, 8) = p6;
                     }
+                    // If the node is not on the top right corner we can propagate to the top right
                     if(i != 0 && j != n_cols-1)
                     {
                         populations(i-1, j+1, 5) = p7;
                     }
+                    // If the node is not on the top left corner we can propagate to the top left
                     if(i != 0 && j != 0)
                     {
                         populations(i-1, j-1, 6) = p8;

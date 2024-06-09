@@ -38,19 +38,21 @@ namespace llalbm::core
      * is first instantiated. Templating allows for great versatility: with just a few limitations (mainly when using a GPU) the user is able to 
      * decide which policies to use or is free to implement other policies for the specific use-case.
      * 
+     * @tparam LatticeConfiguration Configuration of the lattice in terms of dimensions and policies.
     */
     template<
-        std::size_t dim                 ,   // Spacial dimensions of the simulation.
-        typename CollisionPolicy        ,   // Policy managing the interaction between two fluid nodes.
-        typename WallPolicy             ,   // Policy managing the interaction between a fluid node and a wall node.
-        typename ObstaclePolicy         ,   // Policy managing the interaction between a fluid node and an internal obstacle.
-        typename InletPolicy            ,   // Policy managing the interaction between an internal fluid node and an inlet node.
-        typename OutletPolicy           ,   // Policy managing the interaction between an internal fluid node and an outlet policy.s
-        typename InitializationPolicy       // Policy managing the initialization of the lattice.
+        typename LatticeConfiguration
     >
     class Lattice
     {
     private:
+        static constexpr std::size_t dim = LatticeConfiguration::dimensions;
+        using CollisionPolicy = typename LatticeConfiguration::collision_policy_t;
+        using WallPolicy = typename LatticeConfiguration::wall_policy_t;
+        using ObstaclePolicy = typename LatticeConfiguration::obstacle_policy_t;
+        using InletPolicy = typename LatticeConfiguration::inlet_policy_t;
+        using OutletPolicy = typename LatticeConfiguration::outlet_policy_t;
+        using InitializationPolicy = typename LatticeConfiguration::initialization_policy_t;
 
         // ========= POLICIES =========
 
@@ -326,31 +328,50 @@ namespace llalbm::core
             const std::size_t n_steps = time/time_step;
             std::size_t saved_file = 0;
 
+            #ifdef LLALBM_VERBOSE
             logger.info("Initial equilibrium computation");
+            #endif 
+
             // Inizitialization
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(inlet_nodes_coord, populations, global_u, global_rho);
             llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(outlet_nodes_coord, populations, global_u, global_rho);
 
+            #ifdef LLALBM_VERBOSE
             logger.info("... Done!");
-
+            #endif
 
             logger.info("Will do " + std::to_string(n_steps) + " steps");
             for (std::size_t i = 0; i < n_steps; i++)
             {
+                #ifndef LLALBM_VERBOSE
+                std::cout << "\rStep " + std::to_string(i) + " / " + std::to_string(n_steps) << std::flush;
+                #endif
+
+                #ifdef LLALBM_VERBOSE
                 logger.info("Step " + std::to_string(i) + " of " + std::to_string(n_steps));
+                #endif 
                 save = (i%save_step == 0 && should_save);
+
 
                 // This will be controlled
                 initialization_policy.update_nodes(i, global_u, global_rho);
 
                 // 1) Update of the macroscopic quantities
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Updating macroscopic quantities");
+                #endif
                 initialization_policy.update_macro(populations, fluid_nodes, global_rho, global_u);
 
                 // 2) Compute equilibrium populations
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Computing equilibrium populations");
-                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes,equilibrium_populations,global_u,global_rho);
+                #endif
+                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, equilibrium_populations,global_u,global_rho);
+                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(inlet_nodes_coord, equilibrium_populations,global_u,global_rho);
+                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(outlet_nodes_coord, equilibrium_populations,global_u,global_rho);
+
+
                 
                 // 3) Save ux and uy on files
                 if(save)
@@ -360,22 +381,39 @@ namespace llalbm::core
                 }
 
                 // 4) Compute collisions
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Colliding populations");
+                #endif
                 collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
+                collision_policy.collide_open_boundary(populations, equilibrium_populations, after_collision_populations, inlet_nodes_coord, global_rho, global_u, time_step);
+                collision_policy.collide_open_boundary(populations, equilibrium_populations, after_collision_populations, outlet_nodes_coord, global_rho, global_u, time_step);
+
 
                 // 5) Propagate after collision populations, also to not fluid nodes
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Streaming populations");
+                #endif
                 collision_policy.stream(populations, after_collision_populations, fluid_nodes);
+                collision_policy.stream_open_boundary(populations, after_collision_populations, inlet_nodes_coord);
+                collision_policy.stream_open_boundary(populations, after_collision_populations, outlet_nodes_coord);
+
 
                 // 6) Perform the collision at the boundaries
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Computing Boundary action");
+                #endif
                 boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
                 obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
+
+                // 7) Perform the collision at the inlets and outlets
+                #ifdef LLALBM_VERBOSE
                 logger.info("   Computing Inlet and Outlet action");
+                #endif
                 inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
             }
+            logger.info("Done!");
         }
 
         /**
