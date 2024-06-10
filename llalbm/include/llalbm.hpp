@@ -7,6 +7,7 @@
 #include "../src/core/boundaries/ZouHePolicy.hpp"
 #include "../src/core/collisions/BGKCollision.hpp"
 #include "../src/core/initializers/InletOutletInitializer.hpp"
+#include "../src/core/lattices/LatticeConfiguration.hpp"
 
 // Utils - Logger utility
 #include "../src/utils/loggers/Logger.hpp"

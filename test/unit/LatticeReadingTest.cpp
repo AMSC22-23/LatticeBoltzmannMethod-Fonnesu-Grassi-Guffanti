@@ -24,12 +24,15 @@ int main()
     );
 
     using namespace llalbm::core;
-    llalbm::core::Lattice<2,collisions::BGKCollisionPolicy<2>,
-                            boundaries::BounceBackPolicy<2>,
-                            boundaries::BounceBackPolicy<2>,
-                            boundaries::ZouHePolicy<2>,
-                            boundaries::ZouHePolicy<2>, 
-                            initializers::VelocityInitializer<2>> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    using Config = LatticeConfiguration<2,
+                        collisions::BGKCollisionPolicy<2>,
+                        boundaries::BounceBackPolicy<2>,
+                        boundaries::BounceBackPolicy<2>,
+                        boundaries::ZouHePolicy<2>,
+                        boundaries::ZouHePolicy<2>, 
+                        initializers::VelocityInitializer<2>>;
+
+    Lattice<Config> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out);

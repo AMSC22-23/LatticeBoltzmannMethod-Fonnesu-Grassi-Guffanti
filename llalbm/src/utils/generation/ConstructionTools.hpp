@@ -47,19 +47,15 @@ using namespace llalbm::util;
  * It's important notice that the lattice must already be built (eventually with a default constructor) before calling this function.
  * Template parameters are the same of the lattice
  * 
+ * @tparam LatticeConfiguration Configuration of the lattice
  * @param lattice Pre-built lattice to be reinitialized
  * @param info ConstructionInfo object from which information is retrieved
  */
 template<
-    std::size_t dim                 ,
-    typename CollisionPolicy        ,   // Policy managing the interaction between two fluid nodes.
-    typename WallPolicy             ,   // Policy managing the interaction between a fluid node and a wall node.
-    typename ObstaclePolicy         ,   // Policy managing the interaction between a fluid node and an internal obstacle.
-    typename InletPolicy            ,   // Policy managing the interaction between an internal fluid node and an inlet node.
-    typename OutletPolicy           ,   // Policy managing the interaction between an internal fluid node and an outlet policy.s
-    typename InitializationPolicy       // Policy managing the initialization of the lattice.
+    std::size_t dim,
+    typename LatticeConfiguration       
 >
-void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, InletPolicy, OutletPolicy, InitializationPolicy>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
+void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
 {
     // Traduce ConstructionInfo sets into vectors
     Logger logger("ConstructionTools", std::cout);
@@ -150,7 +146,6 @@ void build_lattice(Lattice<dim, CollisionPolicy, WallPolicy, ObstaclePolicy, Inl
         }
     }
 
-    // Remove the inlet nodes from the fluid nodes
     logger.info("Removing inlet nodes from fluid nodes");
     for (auto inlet_node : inlet_nodes)
     {
