@@ -43,15 +43,6 @@ int main()
     nodes = construction_info.get_boundary_nodes();
     // Introduce boundaries all around.
 
-    using Parallel = SerialPolicy<2, 
-        collisions::BGKCollisionPolicy<2>, 
-        boundaries::BounceBackPolicy<2>, 
-        boundaries::BounceBackPolicy<2>, 
-        boundaries::ZouHePolicy<2>, 
-        boundaries::ZouHePolicy<2>, 
-        initializers::VelocityInitializer<2>, 
-        equilibrium::DefaultEquilibrium<2>
-        >;
 
     using Config = LatticeConfiguration<
         2,
@@ -61,20 +52,21 @@ int main()
         boundaries::ZouHePolicy<2>,
         boundaries::ZouHePolicy<2>, 
         initializers::VelocityInitializer<2>,
-        Parallel
+        equilibrium::DefaultEquilibrium<2>
     >;   
 
+    using Parallel = SerialPolicy<2, Config>;
     
-    Lattice<Config> Lid;
+    Lattice<Config, Parallel> Lid;
     std::cout << "Building Lid driven cavity lattice from information" << std::endl;
-    build_lattice<2, Config>(Lid, 9, construction_info);
+    build_lattice<2, Config, Parallel>(Lid, 9, construction_info);
 
     std::ofstream out("file.txt");
 
     Lid.print_lattice_structure(out, true);
 
     ConstructionInfo<2> construction_info2_expected_fail;
-    build_lattice<2, Config>(Lid, 9, construction_info2_expected_fail);
+    build_lattice<2, Config, Parallel>(Lid, 9, construction_info2_expected_fail);
 
     return 0;
 }

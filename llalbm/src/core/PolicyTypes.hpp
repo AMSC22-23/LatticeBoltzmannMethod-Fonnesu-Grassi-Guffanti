@@ -62,55 +62,37 @@ namespace llalbm::core
     concept IsInitializationPolicy = std::is_base_of_v<InitializationPolicyTag, T>;
 
     template<
-        typename CollisionPolicy,
-        typename WallPolicy,
-        typename ObstaclePolicy,
-        typename InletPolicy,
-        typename OutletPolicy,
-        typename InitializationPolicy,
-        typename EquilibriumPolicy>
+        typename Configuration>
     concept IsGloballySerial = std::conjunction_v<
-        std::is_base_of<SequentialTag, CollisionPolicy>,
-        std::is_base_of<SequentialTag, WallPolicy>,
-        std::is_base_of<SequentialTag, ObstaclePolicy>,
-        std::is_base_of<SequentialTag, InletPolicy>,
-        std::is_base_of<SequentialTag, OutletPolicy>,
-        std::is_base_of<SequentialTag, InitializationPolicy>,
-        std::is_base_of<SequentialTag, EquilibriumPolicy>>;
+        std::is_base_of<SequentialTag, typename Configuration::collision_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::wall_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::obstacle_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::inlet_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::outlet_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::initialization_policy_t>,
+        std::is_base_of<SequentialTag, typename Configuration::equilibrium_policy_t>>;
 
     template<
-        typename CollisionPolicy,
-        typename WallPolicy,
-        typename ObstaclePolicy,
-        typename InletPolicy,
-        typename OutletPolicy,
-        typename InitializationPolicy,
-        typename EquilibriumPolicy>
+        typename Configuration>
     concept IsGloballyOpenMP = std::conjunction_v<
-        std::is_base_of<OMPTag, CollisionPolicy>,
-        std::is_base_of<OMPTag, WallPolicy>,
-        std::is_base_of<OMPTag, ObstaclePolicy>,
-        std::is_base_of<OMPTag, InletPolicy>,
-        std::is_base_of<OMPTag, OutletPolicy>,
-        std::is_base_of<OMPTag, InitializationPolicy>,
-        std::is_base_of<SequentialTag, EquilibriumPolicy>>;
+        std::is_base_of<OMPTag, typename Configuration::collision_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::wall_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::obstacle_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::inlet_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::outlet_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::initialization_policy_t>,
+        std::is_base_of<OMPTag, typename Configuration::equilibrium_policy_t>>;
 
     template<
-        typename CollisionPolicy,
-        typename WallPolicy,
-        typename ObstaclePolicy,
-        typename InletPolicy,
-        typename OutletPolicy,
-        typename InitializationPolicy,
-        typename EquilibriumPolicy>
+        typename Configuration>
     concept IsGloballyMPI = std::conjunction_v<
-        std::is_base_of<MPITag, CollisionPolicy>,
-        std::is_base_of<MPITag, WallPolicy>,
-        std::is_base_of<MPITag, ObstaclePolicy>,
-        std::is_base_of<MPITag, InletPolicy>,
-        std::is_base_of<MPITag, OutletPolicy>,
-        std::is_base_of<MPITag, InitializationPolicy>,
-        std::is_base_of<SequentialTag, EquilibriumPolicy>>;
+        std::is_base_of<MPITag, typename Configuration::collision_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::wall_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::obstacle_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::inlet_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::outlet_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::initialization_policy_t>,
+        std::is_base_of<MPITag, typename Configuration::equilibrium_policy_t>>;
 
 }; // llalbm::core
 

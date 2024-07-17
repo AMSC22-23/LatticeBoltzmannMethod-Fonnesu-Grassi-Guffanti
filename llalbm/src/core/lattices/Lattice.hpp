@@ -40,14 +40,14 @@ namespace llalbm::core
      * @tparam LatticeConfiguration Configuration of the lattice in terms of dimensions and policies.
     */
     template<
-        typename LatticeConfiguration
+        typename LatticeConfiguration,
+        typename ParallelizationPolicy
     >
     class Lattice
     {
     private:
         static constexpr std::size_t dim = LatticeConfiguration::dimensions;
-        using ParallelizationPolicy = typename LatticeConfiguration::parallelization_policy_t;
-
+        
         // ========= TENSORS OF THE LATTICE =========
 
         /// @brief Population tensor: at coordinates x (with x being an n-dimensional vector), we store

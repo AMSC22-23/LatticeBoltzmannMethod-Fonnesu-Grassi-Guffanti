@@ -25,16 +25,6 @@ int main()
 
     using namespace llalbm::core;
     
-    using Parallel = SerialPolicy<2, 
-        collisions::BGKCollisionPolicy<2>, 
-        boundaries::BounceBackPolicy<2>, 
-        boundaries::BounceBackPolicy<2>, 
-        boundaries::ZouHePolicy<2>, 
-        boundaries::ZouHePolicy<2>, 
-        initializers::VelocityInitializer<2>, 
-        equilibrium::DefaultEquilibrium<2>
-        >;
-
     using Config = LatticeConfiguration<
         2,
         collisions::BGKCollisionPolicy<2>,
@@ -43,10 +33,12 @@ int main()
         boundaries::ZouHePolicy<2>,
         boundaries::ZouHePolicy<2>, 
         initializers::VelocityInitializer<2>,
-        Parallel
+        equilibrium::DefaultEquilibrium<2>
     >;   
 
-    Lattice<Config> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    using Parallel = SerialPolicy<2, Config>;
+
+    Lattice<Config, Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out);

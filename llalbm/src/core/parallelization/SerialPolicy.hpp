@@ -26,24 +26,8 @@ namespace llalbm::core
      * @brief Serial policy, which is the base one.
      * 
      */
-    template <
-        std::size_t dim,                  // Spatial dimensions of the simulation.
-        typename CollisionPolicy,         // Policy managing the interaction between two fluid nodes.
-        typename WallPolicy,              // Policy managing the interaction between a fluid node and a wall node.
-        typename ObstaclePolicy,          // Policy managing the interaction between a fluid node and an internal obstacle.
-        typename InletPolicy,             // Policy managing the interaction between an internal fluid node and an inlet node.
-        typename OutletPolicy,            // Policy managing the interaction between an internal fluid node and an outlet node.
-        typename InitializationPolicy,    // Policy managing the initialization of the lattice
-        typename EquilibriumPolicy     
-    > requires
-        // Checking that the policy types are correct.
-        IsCollisionPolicy<CollisionPolicy> &&
-        IsBoundaryPolicy<WallPolicy> &&
-        IsBoundaryPolicy<ObstaclePolicy> &&
-        IsBoundaryPolicy<InletPolicy> &&
-        IsBoundaryPolicy<OutletPolicy> &&
-        IsInitializationPolicy<InitializationPolicy> &&
-        IsGloballySerial<CollisionPolicy, WallPolicy, ObstaclePolicy, InletPolicy, OutletPolicy, InitializationPolicy, EquilibriumPolicy>
+    template <std::size_t dim, typename Configuration>
+    requires IsGloballySerial<Configuration>
     class SerialPolicy : public SequentialTag {
     public:
         SerialPolicy() {
@@ -52,17 +36,18 @@ namespace llalbm::core
     };
 
 
-    template <
-        typename CollisionPolicy,         // Policy managing the interaction between two fluid nodes.
-        typename WallPolicy,              // Policy managing the interaction between a fluid node and a wall node.
-        typename ObstaclePolicy,          // Policy managing the interaction between a fluid node and an internal obstacle.
-        typename InletPolicy,             // Policy managing the interaction between an internal fluid node and an inlet node.
-        typename OutletPolicy,            // Policy managing the interaction between an internal fluid node and an outlet node.
-        typename InitializationPolicy,    // Policy managing the initialization of the lattice
-        typename EquilibriumPolicy 
-    >
-    class SerialPolicy<2, CollisionPolicy, WallPolicy, ObstaclePolicy, InletPolicy, OutletPolicy, InitializationPolicy, EquilibriumPolicy> : public SequentialTag {
+    template < typename Configuration >
+    class SerialPolicy<2, Configuration> : public SequentialTag {
     public:
+
+        using CollisionPolicy = typename Configuration::collision_policy_t;
+        using WallPolicy = typename Configuration::wall_policy_t;
+        using ObstaclePolicy = typename Configuration::obstacle_policy_t;
+        using InletPolicy = typename Configuration::inlet_policy_t;
+        using OutletPolicy = typename Configuration::outlet_policy_t;
+        using InitializationPolicy = typename Configuration::initialization_policy_t;
+        using EquilibriumPolicy = typename Configuration::equilibrium_policy_t;
+
 
         // ========================================================================================= 
         //  UPDATE OF THE BOUNDARIES 

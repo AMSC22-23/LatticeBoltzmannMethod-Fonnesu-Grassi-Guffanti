@@ -24,8 +24,8 @@ template<
     typename ObstaclePolicy,          // Policy managing the interaction between a fluid node and an internal obstacle.
     typename InletPolicy,             // Policy managing the interaction between an internal fluid node and an inlet node.
     typename OutletPolicy,            // Policy managing the interaction between an internal fluid node and an outlet node.
-    typename InitializationPolicy,     // Policy managing the initialization of the lattice.
-    typename ParallelizationPolicy   // Policy managing the parallelization of the simulation.
+    typename InitializationPolicy,    // Policy managing the initialization of the lattice.
+    typename EquilibriumPolicy
 > requires
     // Checking that the policy types are correct.
     IsCollisionPolicy<CollisionPolicy> &&
@@ -38,13 +38,13 @@ template<
 class LatticeConfiguration {
 public:
     static constexpr std::size_t dimensions = dim; // Dimensions of the lattice.
-    using parallelization_policy_t = ParallelizationPolicy; // Type alias for the parallelization policy.
     using collision_policy_t = CollisionPolicy;    // Type alias for the collision policy.
     using wall_policy_t = WallPolicy;              // Type alias for the wall policy.
     using obstacle_policy_t = ObstaclePolicy;      // Type alias for the obstacle policy.
     using inlet_policy_t = InletPolicy;            // Type alias for the inlet policy.
     using outlet_policy_t = OutletPolicy;          // Type alias for the outlet policy.
     using initialization_policy_t = InitializationPolicy; // Type alias for the initialization policy.
+    using equilibrium_policy_t = EquilibriumPolicy; // Type alias for the equilibrium policy.
 };
 
 } // namespace llalbm::core
