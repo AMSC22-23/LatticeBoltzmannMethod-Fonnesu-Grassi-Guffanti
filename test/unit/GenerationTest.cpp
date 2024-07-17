@@ -15,6 +15,7 @@ int main()
 {
     using namespace llalbm::util::generation;
     using namespace llalbm::core;
+    using namespace llalbm::core::equilibrium;
 
     ConstructionInfo<2> construction_info;
     
@@ -42,6 +43,16 @@ int main()
     nodes = construction_info.get_boundary_nodes();
     // Introduce boundaries all around.
 
+    using Parallel = SerialPolicy<2, 
+        collisions::BGKCollisionPolicy<2>, 
+        boundaries::BounceBackPolicy<2>, 
+        boundaries::BounceBackPolicy<2>, 
+        boundaries::ZouHePolicy<2>, 
+        boundaries::ZouHePolicy<2>, 
+        initializers::VelocityInitializer<2>, 
+        equilibrium::DefaultEquilibrium<2>
+        >;
+
     using Config = LatticeConfiguration<
         2,
         collisions::BGKCollisionPolicy<2>,
@@ -49,7 +60,8 @@ int main()
         boundaries::BounceBackPolicy<2>,
         boundaries::ZouHePolicy<2>,
         boundaries::ZouHePolicy<2>, 
-        initializers::VelocityInitializer<2>
+        initializers::VelocityInitializer<2>,
+        Parallel
     >;   
 
     

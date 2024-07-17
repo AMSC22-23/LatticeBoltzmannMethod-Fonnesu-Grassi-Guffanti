@@ -9,6 +9,9 @@
  * 
  */
 
+#ifndef LLALBM_ZOUHEPOLICY_HPP
+#define LLALBM_ZOUHEPOLICY_HPP
+
 #include <vector>
 #include <map>
 #include <array>
@@ -22,6 +25,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
+#include "../PolicyTypes.hpp"
 // =======================================
 
 
@@ -31,9 +35,8 @@ namespace llalbm::core::boundaries
     template<std::size_t d>
     using Point = Matrix<std::size_t, d, 1>;
 
-    template<
-        std::size_t dim>
-    class ZouHePolicy
+    template<std::size_t dim>
+    class ZouHePolicy : public BoundaryPolicyTag, public SequentialTag
     {
     private:
         /* data */
@@ -48,14 +51,8 @@ namespace llalbm::core::boundaries
     };
     
     template<>
-    class ZouHePolicy<2>
-    {
-        private:
-            //std::array<Eigen::Index, 2> lattice_nodes; 
-            //std::vector<Point<2>> boundary_nodes;
-            Eigen::Index i, j;
-            double rho, ru, rv;
-            
+    class ZouHePolicy<2> : public BoundaryPolicyTag, public SequentialTag
+    {       
         public: 
             /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
                 lattice_nodes = l;
@@ -65,7 +62,12 @@ namespace llalbm::core::boundaries
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
 
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u){
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                
+                Eigen::Index i, j;
+                double rho, ru, rv;
+                
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
                     i = boundary_coord[bnode].coords[0];
@@ -194,3 +196,5 @@ namespace llalbm::core::boundaries
     };
     
 } // namespace llalbm::core::boundaries
+
+#endif // LLALBM_ZOUHEPOLICY_HPP

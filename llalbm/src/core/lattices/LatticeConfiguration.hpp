@@ -1,4 +1,4 @@
-/**
+ /**
  * @file LatticeConfiguration.hpp
  * @brief Contains the class that describes the configuration of a lattice,
  * in terms of dimensions and policies
@@ -9,8 +9,12 @@
 
 // =========== STL INCLUDES ===========
 #include <cstddef> // for std::size_t
-// ======================================
+// ====================================
 
+// ========== LLALBM INCLUDES =========
+#include "../PolicyTypes.hpp" // for std::size_t
+#include "../parallelization/SerialPolicy.hpp" // for serial execution
+// ====================================
 namespace llalbm::core {
 
 template<
@@ -20,11 +24,21 @@ template<
     typename ObstaclePolicy,          // Policy managing the interaction between a fluid node and an internal obstacle.
     typename InletPolicy,             // Policy managing the interaction between an internal fluid node and an inlet node.
     typename OutletPolicy,            // Policy managing the interaction between an internal fluid node and an outlet node.
-    typename InitializationPolicy     // Policy managing the initialization of the lattice.
->
+    typename InitializationPolicy,     // Policy managing the initialization of the lattice.
+    typename ParallelizationPolicy   // Policy managing the parallelization of the simulation.
+> requires
+    // Checking that the policy types are correct.
+    IsCollisionPolicy<CollisionPolicy> &&
+    IsBoundaryPolicy<WallPolicy> &&
+    IsBoundaryPolicy<ObstaclePolicy> &&
+    IsBoundaryPolicy<InletPolicy> &&
+    IsBoundaryPolicy<OutletPolicy> &&
+    IsInitializationPolicy<InitializationPolicy>
+
 class LatticeConfiguration {
 public:
     static constexpr std::size_t dimensions = dim; // Dimensions of the lattice.
+    using parallelization_policy_t = ParallelizationPolicy; // Type alias for the parallelization policy.
     using collision_policy_t = CollisionPolicy;    // Type alias for the collision policy.
     using wall_policy_t = WallPolicy;              // Type alias for the wall policy.
     using obstacle_policy_t = ObstaclePolicy;      // Type alias for the obstacle policy.

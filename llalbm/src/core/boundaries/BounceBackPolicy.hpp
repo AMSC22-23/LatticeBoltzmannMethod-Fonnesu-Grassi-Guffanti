@@ -9,6 +9,9 @@
  * 
  */
 
+#ifndef LLALBM_BOUNCEBACKPOLICY_HPP
+#define LLALBM_BOUNCEBACKPOLICY_HPP
+
 #include <vector>
 #include <map>
 #include <array>
@@ -21,20 +24,20 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
-
+#include "../PolicyTypes.hpp"
 // =======================================
 
 
 namespace llalbm::core::boundaries
 {
     
-    using namespace llalbm::util::logger;  
+    using namespace llalbm::util::logger;
+    using namespace llalbm::core;  
     //using namespace Eigen;  
 
     template<
         std::size_t dim>
-    class BounceBackPolicy
-    {
+    class BounceBackPolicy : public BoundaryPolicyTag, public SequentialTag{
     private:
         /* data */
         Logger log;
@@ -48,15 +51,15 @@ namespace llalbm::core::boundaries
     };
 
     template<>
-    class BounceBackPolicy<2>{
-        
-        private:
-            Eigen::Index i, j;
-            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+    class BounceBackPolicy<2> : public BoundaryPolicyTag, public SequentialTag{
             
         public: 
-            void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
+
+                Eigen::Index i, j;
+                double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+
                 auto n_rows = populations.dimensions()[0];
                 auto n_cols = populations.dimensions()[1];
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
@@ -131,3 +134,5 @@ namespace llalbm::core::boundaries
 
 
 } // namespace llalbm::core::boundaries
+
+#endif // LLALBM_BOUNCEBACKPOLICY_HPP

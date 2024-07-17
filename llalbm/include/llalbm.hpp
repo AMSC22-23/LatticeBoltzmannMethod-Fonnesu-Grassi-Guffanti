@@ -8,6 +8,9 @@
 #include "../src/core/collisions/BGKCollision.hpp"
 #include "../src/core/initializers/InletOutletInitializer.hpp"
 #include "../src/core/lattices/LatticeConfiguration.hpp"
+#include "../src/core/equilibriums/DefaultEquilibrium.hpp"
+#include "../src/core/PolicyTypes.hpp"
+#include "../src/core/parallelization/SerialPolicy.hpp"
 
 // Utils - Logger utility
 #include "../src/utils/loggers/Logger.hpp"

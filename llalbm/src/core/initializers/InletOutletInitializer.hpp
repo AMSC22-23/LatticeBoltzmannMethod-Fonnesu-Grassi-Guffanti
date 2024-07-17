@@ -18,6 +18,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
+#include "../PolicyTypes.hpp"
 // =======================================
 
 
@@ -29,17 +30,9 @@ namespace llalbm::core::initializers
      * @tparam dim Number of physical dimensions
      */
     template<std::size_t dim>
-    class VelocityInitializer
+    class VelocityInitializer : public InitializationPolicyTag, public SequentialTag
     {
-    private:
-
-        Eigen::Index j, i;
-        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
-        double rho, rhoinv;
-        double ux, uy;
-
     public: 
-
         static std::vector<BoundaryPoint<dim>> inlet_nodes;
         static std::vector<BoundaryPoint<dim>> outlet_nodes;
 
@@ -95,8 +88,13 @@ namespace llalbm::core::initializers
          * @param global_rho tensor containing rho of all nodes
          * @param global_u tensor containing u of all nodes
          */
-        void update_macro(const Tensor<double, 3> &populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u)
+        static void update_macro(const Tensor<double, 3> &populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u)
         {
+            Eigen::Index j, i;
+            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+            double rho, rhoinv;
+            double ux, uy;
+
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
             {
                 i = fluid_nodes[fnode].coords[0];

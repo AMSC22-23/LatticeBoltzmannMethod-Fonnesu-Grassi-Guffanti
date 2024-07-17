@@ -18,7 +18,6 @@
 #include "../../utils/aliases.hpp"
 #include "../../utils/writers/LatticeWriter.hpp"
 #include "../../utils/readers/LatticeReader.hpp"
-#include "../equilibriums/Equilibrium.hpp"
 // =======================================
 
 //6 2 5
@@ -47,33 +46,7 @@ namespace llalbm::core
     {
     private:
         static constexpr std::size_t dim = LatticeConfiguration::dimensions;
-        using CollisionPolicy = typename LatticeConfiguration::collision_policy_t;
-        using WallPolicy = typename LatticeConfiguration::wall_policy_t;
-        using ObstaclePolicy = typename LatticeConfiguration::obstacle_policy_t;
-        using InletPolicy = typename LatticeConfiguration::inlet_policy_t;
-        using OutletPolicy = typename LatticeConfiguration::outlet_policy_t;
-        using InitializationPolicy = typename LatticeConfiguration::initialization_policy_t;
-
-        // ========= POLICIES =========
-
-        /// @brief Policy used to manage the interaction between two fluid nodes.
-        CollisionPolicy collision_policy;
-
-        /// @brief Policy used to manage the interaction between a fluid node and a boundary node.
-        WallPolicy boundary_policy;
-
-        /// @brief Policy used to manage the interaction between a fluid node and an internal obstacle.
-        ObstaclePolicy obstacle_policy;
-
-        /// @brief Policy used to manage the interaction between a fluid node and an inlet node.
-        InletPolicy inlet_policy;
-
-        /// @brief Policy used to manage the interaction between a fluid node and an outlet node
-        OutletPolicy outlet_policy;
-
-        /// @brief Policy used to manage the initialization of the lattice nodes (both when the lattice is being created)
-        /// and at the beginning of each iteration to set the values of boundary nodes.
-        InitializationPolicy initialization_policy;
+        using ParallelizationPolicy = typename LatticeConfiguration::parallelization_policy_t;
 
         // ========= TENSORS OF THE LATTICE =========
 
@@ -129,43 +102,6 @@ namespace llalbm::core
         // ========================================================================================= 
         //                        GATEKEEPING FUNCTIONS FOR LATTICE CONSTRUCTION
         // ========================================================================================= 
-
-        /**
-         * @brief Initializes the velocity sets for the D2Q9 and D3Q19 lattices.
-         */
-        void initialize_velocity_sets()
-        {
-
-            D2Q9 << 0 , 0, 4/9,
-                1 , 0, 1/9,
-                0 , 1, 1/9,
-                -1, 0, 1/9,
-                0 ,-1, 1/9,
-                1 , 1, 1/36,
-                -1, 1, 1/36,
-                -1,-1, 1/36,
-                1 ,-1, 1/36;
-            
-            D3Q19 << 0, 0, 0, 1/3,
-                1, 0, 0, 1/18,
-                -1, 0, 0, 1/18,
-                0, 1, 0, 1/18,
-                0, -1, 0, 1/18,
-                0, 0, 1, 1/18,
-                0, 0, -1, 1/18,
-                1, 1, 0, 1/36,
-                -1, -1, 0, 1/36,
-                1, 0, 1, 1/36,
-                -1, 0, -1, 1/36,
-                0, 1, 1, 1/36,
-                0, -1, -1, 1/36,
-                1, -1, 0, 1/36,
-                -1, 1, 0, 1/36,
-                1, 0, -1, 1/36,
-                -1, 0, 1, 1/36,
-                0, 1, -1, 1/36,
-                0, -1, 1, 1/36;
-        }
 
         /**
          * @brief Builds the tensors that describe the lattice.
@@ -249,15 +185,12 @@ namespace llalbm::core
             // Build the tensors
             build_tensors();
 
-            // Initializes the velocity sets
-            initialize_velocity_sets();
-
             logger.info("Velocity Sets initialized");
             //TODO: once collisions/boundary etc have been defined, attach relevant data.
             //TODO: understand how to handle output directory creation (if here or in another class)
 
             // Attach the nodes vectors to the initialization policy
-            initialization_policy.attach_nodes(
+            ParallelizationPolicy::attach_nodes(
                 inlet_nodes_coord,
                 outlet_nodes_coord
             );
@@ -287,14 +220,11 @@ namespace llalbm::core
             // Build the tensors
             build_tensors();
 
-            // Initialize the velocity sets
-            initialize_velocity_sets();
-            
 
             logger.info("Velocity Sets initialized");
 
             // Attach the nodes vectors to the initialization policy
-            initialization_policy.attach_nodes(
+            ParallelizationPolicy::attach_nodes(
                 inlet_nodes_coord,
                 outlet_nodes_coord
             );
@@ -333,9 +263,9 @@ namespace llalbm::core
             #endif 
 
             // Inizitialization
-            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
-            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(inlet_nodes_coord, populations, global_u, global_rho);
-            llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(outlet_nodes_coord, populations, global_u, global_rho);
+            ParallelizationPolicy::calc_equilibrium(fluid_nodes, populations, global_u, global_rho);
+            ParallelizationPolicy::calc_equilibrium(inlet_nodes_coord, populations, global_u, global_rho);
+            ParallelizationPolicy::calc_equilibrium(outlet_nodes_coord, populations, global_u, global_rho);
 
             #ifdef LLALBM_VERBOSE
             logger.info("... Done!");
@@ -355,21 +285,21 @@ namespace llalbm::core
 
 
                 // This will be controlled
-                initialization_policy.update_nodes(i, global_u, global_rho);
+                ParallelizationPolicy::update_nodes(i, global_u, global_rho);
 
                 // 1) Update of the macroscopic quantities
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Updating macroscopic quantities");
                 #endif
-                initialization_policy.update_macro(populations, fluid_nodes, global_rho, global_u);
+                ParallelizationPolicy::update_macro(populations, fluid_nodes, global_rho, global_u);
 
                 // 2) Compute equilibrium populations
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Computing equilibrium populations");
                 #endif
-                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(fluid_nodes, equilibrium_populations,global_u,global_rho);
-                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(inlet_nodes_coord, equilibrium_populations,global_u,global_rho);
-                llalbm::core::equilibrium::Equilibrium<dim>::calc_equilibrium(outlet_nodes_coord, equilibrium_populations,global_u,global_rho);
+                ParallelizationPolicy::calc_equilibrium(fluid_nodes, equilibrium_populations,global_u,global_rho);
+                ParallelizationPolicy::calc_equilibrium(inlet_nodes_coord, equilibrium_populations,global_u,global_rho);
+                ParallelizationPolicy::calc_equilibrium(outlet_nodes_coord, equilibrium_populations,global_u,global_rho);
 
 
                 
@@ -384,33 +314,33 @@ namespace llalbm::core
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Colliding populations");
                 #endif
-                collision_policy.collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
-                collision_policy.collide_open_boundary(populations, equilibrium_populations, after_collision_populations, inlet_nodes_coord, global_rho, global_u, time_step);
-                collision_policy.collide_open_boundary(populations, equilibrium_populations, after_collision_populations, outlet_nodes_coord, global_rho, global_u, time_step);
+                ParallelizationPolicy::collide(populations, equilibrium_populations, after_collision_populations, fluid_nodes, global_rho, global_u, time_step);
+                ParallelizationPolicy::collide_open_inlet_boundary(populations, equilibrium_populations, after_collision_populations, inlet_nodes_coord, global_rho, global_u, time_step);
+                ParallelizationPolicy::collide_open_outlet_boundary(populations, equilibrium_populations, after_collision_populations, outlet_nodes_coord, global_rho, global_u, time_step);
 
 
                 // 5) Propagate after collision populations, also to not fluid nodes
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Streaming populations");
                 #endif
-                collision_policy.stream(populations, after_collision_populations, fluid_nodes);
-                collision_policy.stream_open_boundary(populations, after_collision_populations, inlet_nodes_coord);
-                collision_policy.stream_open_boundary(populations, after_collision_populations, outlet_nodes_coord);
+                ParallelizationPolicy::stream(populations, after_collision_populations, fluid_nodes);
+                ParallelizationPolicy::stream_open_inlet_boundary(populations, after_collision_populations, inlet_nodes_coord);
+                ParallelizationPolicy::stream_open_outlet_boundary(populations, after_collision_populations, outlet_nodes_coord);
 
 
                 // 6) Perform the collision at the boundaries
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Computing Boundary action");
                 #endif
-                boundary_policy.update_boundaries(populations, boundary_coord, global_rho, global_u);
-                obstacle_policy.update_boundaries(populations, obstacle_nodes, global_rho, global_u);
+                ParallelizationPolicy::update_domain_boundaries(populations, boundary_coord, global_rho, global_u);
+                ParallelizationPolicy::update_obstacle_boundaries(populations, obstacle_nodes, global_rho, global_u);
 
                 // 7) Perform the collision at the inlets and outlets
                 #ifdef LLALBM_VERBOSE
                 logger.info("   Computing Inlet and Outlet action");
                 #endif
-                inlet_policy.update_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
-                outlet_policy.update_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
+                ParallelizationPolicy::update_inlet_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
+                ParallelizationPolicy::update_outlet_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
             }
             logger.info("Done!");
@@ -443,7 +373,6 @@ namespace llalbm::core
             q = q_;
             lattice_dimensions = lattice_dimensions_;
             build_tensors();
-            initialize_velocity_sets();
 
             boundary_coord = boundary_coord_;
             inlet_nodes_coord = inlet_nodes_coord_;
@@ -451,7 +380,7 @@ namespace llalbm::core
             obstacle_nodes = obstacle_nodes_;
             fluid_nodes = fluid_nodes_;
 
-            initialization_policy.attach_nodes(
+            ParallelizationPolicy::attach_nodes(
                 inlet_nodes_coord,
                 outlet_nodes_coord
             );

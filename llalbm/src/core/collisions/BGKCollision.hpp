@@ -20,6 +20,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
+#include "../PolicyTypes.hpp"
 // =======================================
 
 namespace llalbm::core::collisions 
@@ -32,10 +33,8 @@ namespace llalbm::core::collisions
      * 
      * @tparam dim the total number of spatial dimensions.
      */
-    template<
-        std::size_t dim    
-    >
-    class BGKCollisionPolicy
+    template<std::size_t dim>
+    class BGKCollisionPolicy : public CollisionPolicyTag, public SequentialTag
     {
     private:
         /// @brief Logger of the collision policy
@@ -56,13 +55,8 @@ namespace llalbm::core::collisions
      * use-case of two spatial dimensions.
      */
     template<>
-    class BGKCollisionPolicy<2>
+    class BGKCollisionPolicy<2> : public CollisionPolicyTag, public SequentialTag
     {
-    private:
-        Eigen::Index j, i;
-        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
-        double t;
-        double o_m_t;
 
     public:
         static double tau;
@@ -90,8 +84,13 @@ namespace llalbm::core::collisions
          * @param global_rho tensor containing all densities
          * @param global_u tensor containing all velocities 
          */
-        void collide(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, const double time_step)
+        static void collide(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, const double time_step)
         {
+
+            Eigen::Index j, i;
+            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+            double t;
+            double o_m_t;
 
             for(const auto& fluid_node : fluid_nodes)
             {
@@ -130,8 +129,13 @@ namespace llalbm::core::collisions
          * @param after_collision_populations of fluid nodes to be streamed
          * @param fluid_nodes vector containing coordinates of all the fluid nodes of the lattice
          */
-        void stream(Tensor<double, 3> &populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes)
+        static void stream(Tensor<double, 3> &populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes)
         {
+
+            Eigen::Index j, i;
+            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+            double t;
+            double o_m_t;
 
             auto n_rows = populations.dimensions()[0];
             auto n_cols = populations.dimensions()[1];
@@ -162,8 +166,14 @@ namespace llalbm::core::collisions
      * @param global_rho tensor containing all densities
      * @param global_u tensor containing all velocities 
      */
-    void collide_open_boundary(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<BoundaryPoint<2>> &open_boundary_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, const double time_step)
+    static void collide_open_boundary(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<BoundaryPoint<2>> &open_boundary_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, const double time_step)
     {
+
+        Eigen::Index j, i;
+        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+        double t;
+        double o_m_t;
+
         for(const auto& open_boundary : open_boundary_nodes)
         {
             i = open_boundary.coords[0];
@@ -201,8 +211,14 @@ namespace llalbm::core::collisions
      * @param after_collision_populations of border nodes to be streamed
      * @param open_boundary_nodes vector containing coordinates of all the border nodes of the lattice
      */
-    void stream_open_boundary(Tensor<double, 3> &populations, Tensor<double, 3> &after_collision_populations, const std::vector<BoundaryPoint<2>> &open_boundary_nodes)
+    static void stream_open_boundary(Tensor<double, 3> &populations, Tensor<double, 3> &after_collision_populations, const std::vector<BoundaryPoint<2>> &open_boundary_nodes)
     {
+
+        Eigen::Index j, i;
+        double p0, p1, p2, p3, p4, p5, p6, p7, p8;
+        double t;
+        double o_m_t;
+
         auto n_rows = populations.dimensions()[0];
         auto n_cols = populations.dimensions()[1];
         for(const auto& open_boundary : open_boundary_nodes)
