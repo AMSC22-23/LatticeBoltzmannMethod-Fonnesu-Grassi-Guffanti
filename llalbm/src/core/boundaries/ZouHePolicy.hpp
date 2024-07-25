@@ -68,7 +68,7 @@ namespace llalbm::core::boundaries
                 Eigen::Index i, j;
                 double rho, ru, rv;
                 
-                for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
+                for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++)
                 {
                     i = boundary_coord[bnode].coords[0];
                     j = boundary_coord[bnode].coords[1];
@@ -86,109 +86,44 @@ namespace llalbm::core::boundaries
                         
                         break;
                     
+                    case BOTTOM_WALL:
+                        rho = (populations(i,j,0) + populations(i,j,1) + populations(i,j,3) + 2.0 * (populations(i,j,4) + populations(i,j,7) + populations(i,j,8))) / (1.0 - global_u(i,j,1)); 
+                        
+                        global_rho(i,j) = rho;
+                        ru = rho * global_u(i,j,0);
+                        rv = rho * global_u(i,j,1);
+                        
+                        populations(i,j,2) = populations(i,j,4) + two_thirds * rv;
+                        populations(i,j,5) = populations(i,j,7) + one_sixth * rv + one_half * ru - one_half * (populations(i,j,1) - populations(i,j,3));
+                        populations(i,j,6) = populations(i,j,8) + one_sixth * rv - one_half * ru + one_half * (populations(i,j,1) - populations(i,j,3));
+
+                        break;
                     case LEFT_WALL:
                         rho = (populations(i,j,0) + populations(i,j,2) + populations(i,j,4) + 2.0 * (populations(i,j,3) + populations(i,j,7) + populations(i,j,6))) / (1.0 - global_u(i,j,0)); 
-                        ru = rho * global_u(i,j,0);
-                        populations(i,j,1) = populations(i,j,3) + two_thirds * ru;
-                        populations(i,j,5) = populations(i,j,7) + one_sixth * ru - one_half * (populations(i,j,2) - populations(i,j,4));
-                        populations(i,j,8) = populations(i,j,6) + one_sixth * ru - one_half * (populations(i,j,4) - populations(i,j,2));
 
-                        populations(i, j+1, 1) = populations(i,j,1);
-                        populations(i-1, j+1, 5) = populations(i,j,5);
-                        populations(i+1, j+1, 8) = populations(i,j,8);
+                        global_rho(i,j) = rho;
+                        ru = rho * global_u(i,j,0);
+                        rv = rho * global_u(i,j,1);
+
+                        populations(i,j,1) = populations(i,j,3) + two_thirds * ru;
+                        populations(i,j,5) = populations(i,j,7) + one_sixth * ru + one_half * rv - one_half * (populations(i,j,2) - populations(i,j,4));
+                        populations(i,j,8) = populations(i,j,6) + one_sixth * ru - one_half * rv + one_half * (populations(i,j,2) - populations(i,j,4));
+
                         break;
 
                     case RIGHT_WALL:
                         rho = (populations(i,j,0) + populations(i,j,2) + populations(i,j,4) + 2.0 * (populations(i,j,1) + populations(i,j,5) + populations(i,j,8))) / (1.0 + global_u(i,j,0)); 
+                        
+                        global_rho(i,j) = rho;
                         ru = rho * global_u(i,j,0);
+                        rv = rho * global_u(i,j,1);
+
                         populations(i,j,3) = populations(i,j,1) - two_thirds * ru;
-                        populations(i,j,7) = populations(i,j,5) - one_sixth * ru + one_half * (populations(i,j,2) - populations(i,j,4));
-                        populations(i,j,6) = populations(i,j,8) - one_sixth * ru + one_half * (populations(i,j,4) - populations(i,j,2));
+                        populations(i,j,7) = populations(i,j,5) - one_sixth * ru - one_half * rv + one_half * (populations(i,j,2) - populations(i,j,4));
+                        populations(i,j,6) = populations(i,j,8) - one_sixth * ru + one_half * rv - one_half * (populations(i,j,2) - populations(i,j,4));
 
-                        populations(i, j-1, 3) = populations(i,j,3);
-                        populations(i+1, j-1, 7) = populations(i,j,7);
-                        populations(i-1, j-1, 6) = populations(i,j,6);
                         break;
-
-                    case BOTTOM_WALL:
-                        rho = (populations(i,j,0) + populations(i,j,1) + populations(i,j,3) + 2.0 * (populations(i,j,4) + populations(i,j,7) + populations(i,j,8))) / (1.0 - global_u(i,j,1)); 
-                        ru = rho * global_u(i,j,1);
-                        populations(i,j,2) = populations(i,j,2) + two_thirds * ru;
-                        populations(i,j,5) = populations(i,j,7) + one_sixth * ru - one_half * (populations(i,j,1) - populations(i,j,3));
-                        populations(i,j,6) = populations(i,j,8) + one_sixth * ru - one_half * (populations(i,j,3) - populations(i,j,1));
-
-                        populations(i-1, j, 2) = populations(i,j,2);
-                        populations(i-1, j+1, 5) = populations(i,j,5);
-                        populations(i-1, j-1, 6) = populations(i,j,6);
-                        break;
-
-                    case RIGHT_BOTTOM_C:
-                        populations(i,j,3) = populations(i,j,1) - two_thirds * global_rho(i,j) * global_u(i,j,0);
-                        populations(i,j,2) = populations(i,j,4) + two_thirds * global_rho(i,j) * global_u(i,j,1);
-                        populations(i,j,6) = populations(i,j,8) - one_sixth * global_rho(i,j) * (global_u(i,j,0) - global_u(i,j,1));
-
-                        populations(i,j,5) = 0.0;
-                        populations(i,j,7) = 0.0;
-
-                        populations(i,j,0) = global_rho(i,j) 
-                                            - populations(i,j,1) - populations(i,j,2) - populations(i,j,3) - populations(i,j,4)
-                                            - populations(i,j,5) - populations(i,j,6) - populations(i,j,7) - populations(i,j,8);
-
-
-                        populations(i, j-1, 3) = populations(i,j,3);
-                        populations(i-1, j, 2) = populations(i,j,2);
-                        populations(i-1, j-1, 6) = populations(i,j,6);
-                        break;
-
-                    case LEFT_BOTTOM_C:
-                        populations(i,j,1) = populations(i,j,3) - two_thirds * global_rho(i,j) * global_u(i,j,0);
-                        populations(i,j,2) = populations(i,j,4) - two_thirds * global_rho(i,j) * global_u(i,j,1);
-                        populations(i,j,5) = populations(i,j,7) + one_sixth * global_rho(i,j) * (global_u(i,j,0) + global_u(i,j,1));
-
-                        populations(i,j,6) = 0.0;
-                        populations(i,j,8) = 0.0;
-
-                        populations(i,j,0) = global_rho(i,j) 
-                                            - populations(i,j,1) - populations(i,j,2) - populations(i,j,3) - populations(i,j,4)
-                                            - populations(i,j,5) - populations(i,j,6) - populations(i,j,7) - populations(i,j,8);
-                        
-                        populations(i, j+1, 1) = populations(i,j,1);
-                        populations(i-1, j, 2) = populations(i,j,2);
-                        populations(i-1, j+1, 5) = populations(i,j,5);
-                        break;
-
-                    case RIGHT_TOP_C:
-                        populations(i,j,3) = populations(i,j,1) - two_thirds * global_rho(i,j) * global_u(i,j,0);
-                        populations(i,j,4) = populations(i,j,2) - two_thirds * global_rho(i,j) * global_u(i,j,1);
-                        populations(i,j,7) = populations(i,j,5) - one_sixth * global_rho(i,j) * (global_u(i,j,0) + global_u(i,j,1));
-
-                        populations(i,j,6) = 0.0;
-                        populations(i,j,8) = 0.0;
-
-                        populations(i,j,0) = global_rho(i,j) 
-                                            - populations(i,j,1) - populations(i,j,2) - populations(i,j,3) - populations(i,j,4)
-                                            - populations(i,j,5) - populations(i,j,6) - populations(i,j,7) - populations(i,j,8);
-                        
-                        populations(i, j-1, 3) = populations(i,j,3);
-                        populations(i+1, j, 4) = populations(i,j,4);
-                        populations(i+1, j-1, 7) = populations(i,j,7);
-                        break;
-
-                    case LEFT_TOP_C:
-                        populations(i,j,1) = populations(i,j,3) + two_thirds * global_rho(i,j) * global_u(i,j,0);
-                        populations(i,j,4) = populations(i,j,2) - two_thirds * global_rho(i,j) * global_u(i,j,1);
-                        populations(i,j,8) = populations(i,j,6) + one_sixth * global_rho(i,j) * (global_u(i,j,0) - global_u(i,j,1));
-
-                        populations(i,j,5) = 0.0;
-                        populations(i,j,7) = 0.0;
-
-                        populations(i,j,0) = global_rho(i,j) 
-                                            - populations(i,j,1) - populations(i,j,2) - populations(i,j,3) - populations(i,j,4)
-                                            - populations(i,j,5) - populations(i,j,6) - populations(i,j,7) - populations(i,j,8);
-                        
-                        populations(i, j+1, 1) = populations(i,j,1);
-                        populations(i+1, j, 4) = populations(i,j,4);
-                        populations(i+1, j+1, 8) = populations(i,j,8);
+                    default:
                         break;
                     }
                 }

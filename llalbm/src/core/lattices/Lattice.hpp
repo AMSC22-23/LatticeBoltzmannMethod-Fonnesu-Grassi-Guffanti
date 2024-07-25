@@ -343,6 +343,7 @@ namespace llalbm::core
                 ParallelizationPolicy::update_outlet_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
 
             }
+            logger.info("\n");
             logger.info("Done!");
         }
 
