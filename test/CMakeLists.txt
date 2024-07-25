@@ -14,3 +14,5 @@ add_test_executable(InletUpdate.out "unit/InletUpdates.cpp")
 add_test_executable(LidExec.out "unit/LidExecTest.cpp")
 add_test_executable(GenerationTest.out "unit/GenerationTest.cpp")
 add_test_executable(LidFromGeneration.out "unit/LidFromGeneration.cpp")
+add_test_executable(PerimeterGeneration.out "unit/PerimeterGeneration.cpp")
+

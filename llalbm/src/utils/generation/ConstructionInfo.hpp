@@ -140,6 +140,7 @@ public:
         if (!dimensions_provided)
         {
             l.error("Dimensions of the computational domain have not been provided.");
+            return 0;
         }
 
         if (!check_domain_bounds(begin) || !check_domain_bounds(end))
@@ -216,13 +217,13 @@ public:
             
 
             if (type == NonFluidNodeType::INLET)
-                inlet_nodes.insert(BoundaryPoint<2>(point));
+                inlet_nodes.insert(BoundaryPoint<dim>(point));
             else if (type == NonFluidNodeType::OUTLET)
-                outlet_nodes.insert(BoundaryPoint<2>(point));
+                outlet_nodes.insert(BoundaryPoint<dim>(point));
             else if (type == NonFluidNodeType::OBSTACLE)
-                obstacle_nodes.insert(BoundaryPoint<2>(point));
+                obstacle_nodes.insert(BoundaryPoint<dim>(point));
             else if (type == NonFluidNodeType::BOUNDARY)
-                boundary_nodes.insert(BoundaryPoint<2>(point));
+                boundary_nodes.insert(BoundaryPoint<dim>(point));
         }
         
 
@@ -232,6 +233,52 @@ public:
 
     }
 
+    /**
+     * @brief Constructs a perimeter of the specified type of node
+     * 
+     * @param type Type of node of the perimeter
+     * @return Eigen::Index The number of added nodes
+     */
+    Eigen::Index add_perimeter_nodes(const NonFluidNodeType& type)
+    {
+        // First, check that the dimensions have been provided
+        if (!dimensions_provided)
+        {
+            l.error("Dimensions of the computational domain have not been provided.");
+            return 0;
+        }
+
+        // Then, add the perimeter nodes, which are points with one coordinate varying, and all the 
+        // others being fixed to either 0 or the domain dimensions
+        Eigen::Index added_nodes = 0;
+        for (std::size_t i = 0; i < dim; i++)
+        {
+            Eigen::Index current_domain_dimension = domain_dimensions[i];
+            
+            // Starting with the coordinates set to 0
+            for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
+            {
+                Eigen::array<Eigen::Index, dim> coords;
+                coords.fill(0);
+                coords[i] = idx;
+                BoundaryPoint<dim> point(coords);
+                insert_in_correct_set(point, type);
+                added_nodes++;
+            }
+
+            // Then, with the coordinates set to the domain dimensions
+            for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
+            {
+                Eigen::array<Eigen::Index, dim> coords;
+                coords.fill(current_domain_dimension - 1);
+                coords[i] = idx;
+                BoundaryPoint<dim> point(coords);
+                insert_in_correct_set(point, type);
+                added_nodes++;
+            }
+        }
+        return added_nodes;
+    }
     
     // ========================================================================================= 
     //                                      GETTERS AND SETTERS
@@ -381,8 +428,32 @@ private:
         }
         return false;
     }
-};
 
+    /**
+     * @brief Inserts a @link BoundaryPoint @endlink in the correct set, based on the type of node.
+     * 
+     * @param point Point to be inserted in the set
+     * @param type Type of the point
+     */
+    void insert_in_correct_set(const BoundaryPoint<dim>& point, const NonFluidNodeType& type)
+    {
+        if (type == NonFluidNodeType::INLET)
+        {
+            inlet_nodes.insert(point);
+        }
+        else if (type == NonFluidNodeType::OUTLET)
+        {
+            outlet_nodes.insert(point);
+        }
+        else if (type == NonFluidNodeType::OBSTACLE)
+        {
+            obstacle_nodes.insert(point);
+        }
+        else if (type == NonFluidNodeType::BOUNDARY)
+        {
+            boundary_nodes.insert(point);
+        }
+    }
 };
-
+}; // namespace llalbm::util::generation
 #endif // LLALBM_CONSTRUCTIONINFO_HPP
