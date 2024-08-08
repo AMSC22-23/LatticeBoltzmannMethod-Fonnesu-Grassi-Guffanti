@@ -181,7 +181,9 @@ public:
         {
             if (check_possible_overlap(point, inlet_nodes))
             {
+                #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in inlet nodes");
+                #endif
                 if (type == NonFluidNodeType::INLET)
                     continue;
                 else
@@ -189,7 +191,9 @@ public:
             }
             if (check_possible_overlap(point, boundary_nodes))
             {
-                l.warn("Overlap detected in boundary nodes");
+                #ifdef LLALBM_VERBOSE
+                l.warn("Overlap detected in inlet nodes");
+                #endif
                 if (type == NonFluidNodeType::BOUNDARY)
                     continue;
                 else
@@ -198,7 +202,9 @@ public:
             }
             if (check_possible_overlap(point, outlet_nodes))
             {
+                #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in outlet nodes");
+                #endif
                 if (type == NonFluidNodeType::OUTLET)
                     continue;
                 else
@@ -207,7 +213,9 @@ public:
             }
             if (check_possible_overlap(point, obstacle_nodes))
             {
+                #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in obstacle nodes");
+                #endif
                 if (type == NonFluidNodeType::OBSTACLE)
                     continue;
                 else

@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <cassert>
+#include <cmath>
 // ======================================
 
 // =========== EIGEN INCLUDES ===========
@@ -341,6 +342,18 @@ namespace llalbm::core
                 #endif
                 ParallelizationPolicy::update_inlet_boundaries(populations, inlet_nodes_coord, global_rho, global_u);
                 ParallelizationPolicy::update_outlet_boundaries(populations, outlet_nodes_coord, global_rho, global_u);
+
+                #ifdef LLALBM_DEBUG
+                std::cout << " -- Checking numerical stability" << std::endl;
+                for (std::size_t i = 0; i < global_u.size(); i++)
+                {
+                    if (std::isnan(global_u.data()[i]))
+                    {
+                        logger.error("Numerical instability detected in the velocity tensor");
+                        exit(1);
+                    }
+                }
+                #endif
 
             }
             logger.info("\n");

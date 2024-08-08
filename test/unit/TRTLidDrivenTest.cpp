@@ -2,10 +2,11 @@
 /**
  * @file LidFromGeneration.cpp
  * @author Luca Guffanti
- * @brief Lid driven cavity test made using the lattice construction infrastructure.
+ * @brief Lid driven cavity test made using the lattice construction infrastructure and the new TRT collision policy.
  * 
  */
 
+#define LLALBM_DEBUG 1
 
 #include "llalbm.hpp"
 #include "iostream"
@@ -18,7 +19,7 @@ int main()
 
     using Config = LatticeConfiguration<
         2,
-        collisions::BGKCollisionPolicy<2>,
+        collisions::TRTCollisionPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::ZouHePolicy<2>,
@@ -37,21 +38,24 @@ int main()
 
     VelocityFunctions[1] = [](double time, BoundaryPoint<2> Point){
         if (Point.coords[1] == 0)
-            return 0.01*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
+            return 0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         if (Point.coords[1] == 99)
-            return -0.01*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
+            return -0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         return 0.0;
             };
         VelocityFunctions[0] = [](double time, BoundaryPoint<2> Point){
         if (Point.coords[0] == 0)
-            return -0.01*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
+            return -0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         if (Point.coords[0] == 99)
-            return -0.01*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
+            return -0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         return 0.0;
             };
     
     initializers::VelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
-    collisions::BGKCollisionPolicy<2>::initialize(0.51, 0.01);
+
+    collisions::TRTCollisionPolicy<2>::initialize(0.9, 0.01, 1./std::sqrt(3.0));
+    collisions::TRTCollisionPolicy<2>::compute_magic_parameter();
+    collisions::TRTCollisionPolicy<2>::enforce_magic_parameter(1.0/4.0);
 
     generation::ConstructionInfo<2> info;
 
@@ -66,6 +70,6 @@ int main()
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out, true);
 
-    Lid.perform_lbm(35000, 1, 500);
+    Lid.perform_lbm(2000, 1, 10);
 
 }
