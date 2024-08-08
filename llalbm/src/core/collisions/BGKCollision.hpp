@@ -4,6 +4,9 @@
  * 
  */
 
+#ifndef LLALBM_BGK_COLLISION_HPP
+#define LLALBM_BGK_COLLISION_HPP
+
 // =========== STL INCLUDES ===========
 #include <vector>
 #include <map>
@@ -67,11 +70,38 @@ namespace llalbm::core::collisions
          * 
          * @param tau_ the relaxation constant
          */
-        static void initialize(double tau_)
+        static void initialize(const double& tau_, const double& max_speed = 0.2)
         {
             tau = tau_;
             std::cout << "Inizialization done:" << std::endl;
             std::cout << " Tau: " << tau << std::endl;
+            std::cout << " Max Speed: " << max_speed << std::endl;
+            std::cout << "====================================================" << std::endl;
+            if (tau <= 0.55)
+            {
+                std::cout << " The simulation might have stability issues." << std::endl;
+                std::cout << " Theoretical LIMIT of tau:" << "tau > " << 0.5 + (1/8.0) * max_speed << std::endl;
+            }
+            std::cout << " Allowed Reynolds Number: " << max_speed * 3.0 / (tau - 0.5) << std::endl;
+        }
+
+        /**
+         * @brief Inializes the value of the relaxation parameter based on the desired maximum velocity and Reynolds number
+         * of the simulation. 
+         * @note Quantities are expressed in lattice units.
+         * 
+         * @param max_velocity maximum velocity of the simulation 
+         * @param reynolds Reynolds number of the simulation
+         */
+        static void allowed_tau(const double& max_speed, const double& reynolds, const double& speed_of_sound_squared = 1.0/3.0)
+        {
+            tau = 0.5 + max_speed / (speed_of_sound_squared * reynolds);
+            std::cout << "Inizialization done:" << std::endl;
+            std::cout << " Max Speed: " << max_speed << std::endl;
+            std::cout << " Reynolds: " << reynolds << std::endl;
+            std::cout << " Speed of Sound Squared: " << speed_of_sound_squared << std::endl;
+            std::cout << "====================================================" << std::endl;
+            std::cout << " Smallest theoretical Tau: " << tau << std::endl;
         }
 
         /**
@@ -277,3 +307,5 @@ namespace llalbm::core::collisions
     double BGKCollisionPolicy<2>::tau = 0.0;
 
 }; // namespace llalbm::core::collisions
+
+#endif // LLALBM_BGK_COLLISION_HPP

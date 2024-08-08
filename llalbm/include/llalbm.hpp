@@ -6,6 +6,7 @@
 #include "../src/core/boundaries/BounceBackPolicy.hpp"
 #include "../src/core/boundaries/ZouHePolicy.hpp"
 #include "../src/core/collisions/BGKCollision.hpp"
+#include "../src/core/collisions/TRTCollision.hpp"
 #include "../src/core/initializers/InletOutletInitializer.hpp"
 #include "../src/core/lattices/LatticeConfiguration.hpp"
 #include "../src/core/equilibriums/DefaultEquilibrium.hpp"
