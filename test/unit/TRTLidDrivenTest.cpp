@@ -45,7 +45,7 @@ int main()
             };
         VelocityFunctions[0] = [](double time, BoundaryPoint<2> Point){
         if (Point.coords[0] == 0)
-            return -0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
+            return 0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         if (Point.coords[0] == 99)
             return -0.2*(1.0-std::exp(-((500*500*time)/(2*1000*1000))));
         return 0.0;
