@@ -446,6 +446,7 @@ namespace llalbm::core::collisions
 
             Eigen::Index j, i;
 
+            #pragma omp parallel for
             for(const auto& fluid_node : fluid_nodes)
             {
                 i = fluid_node.coords[0];
@@ -500,7 +501,7 @@ namespace llalbm::core::collisions
 
             Eigen::Index j, i;
 
-            
+            #pragma omp parallel for
             for(const auto& fluid_node : fluid_nodes)
             {
                 i = fluid_node.coords[0];
@@ -533,6 +534,7 @@ namespace llalbm::core::collisions
 
         Eigen::Index j, i;
 
+        #pragma omp parallel for
         for(const auto& open_boundary : open_boundary_nodes)
         {
             i = open_boundary.coords[0];
@@ -590,6 +592,7 @@ namespace llalbm::core::collisions
         auto n_rows = populations.dimensions()[0];
         auto n_cols = populations.dimensions()[1];
 
+        #pragma omp parallel for
         for(const auto& open_boundary : open_boundary_nodes)
         {
             i = open_boundary.coords[0];

@@ -150,10 +150,6 @@ namespace llalbm::core::boundaries
     class OMPZouHePolicy<2> : public BoundaryPolicyTag, public OMPTag
     {       
         public: 
-            /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
-                lattice_nodes = l;
-                boundary_nodes = b;
-            }*/
             static constexpr double two_thirds = 2.0/3.0;
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
@@ -164,6 +160,7 @@ namespace llalbm::core::boundaries
                 Eigen::Index i, j;
                 double rho, ru, rv;
                 
+                #pragma omp parallel for
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++)
                 {
                     i = boundary_coord[bnode].coords[0];
