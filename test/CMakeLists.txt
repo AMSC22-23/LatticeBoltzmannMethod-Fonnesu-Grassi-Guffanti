@@ -3,6 +3,10 @@ macro(add_test_executable TARGET_NAME SOURCE_FILE)
     target_link_libraries(${TARGET_NAME} PRIVATE LLALBM)
     target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/llalbm/include)
     message("${TARGET_NAME} uses include dir ${CMAKE_SOURCE_DIR}/llalbm/include")
+    find_package(OpenMP REQUIRED)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(${TARGET_NAME} PUBLIC OpenMP::OpenMP_CXX)
+    endif()
 endmacro()
 
 
@@ -17,5 +21,5 @@ add_test_executable(LidFromGeneration.out "unit/LidFromGeneration.cpp")
 add_test_executable(PerimeterGeneration.out "unit/PerimeterGeneration.cpp")
 add_test_executable(BGKParameterTest.out "unit/BGKParameterTest.cpp")
 add_test_executable(TRTLidDrivenTest.out "unit/TRTLidDrivenTest.cpp")
-
+add_test_executable(OMPTRTLidDrivenTest.out "unit/OMPTRTLidDrivenTest.cpp")
 

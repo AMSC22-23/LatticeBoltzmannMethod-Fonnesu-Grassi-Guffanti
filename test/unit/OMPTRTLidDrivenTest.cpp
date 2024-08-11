@@ -11,6 +11,7 @@
 
 #include "llalbm.hpp"
 #include "iostream"
+#include <omp.h>
 
 int main()
 {
@@ -20,16 +21,16 @@ int main()
 
     using Config = LatticeConfiguration<
         2,
-        collisions::TRTCollisionPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::ZouHePolicy<2>,
-        boundaries::ZouHePolicy<2>, 
-        initializers::VelocityInitializer<2>,
-        equilibrium::DefaultEquilibrium<2>
+        collisions::OMPTRTCollisionPolicy<2>,
+        boundaries::OMPBounceBackPolicy<2>,
+        boundaries::OMPBounceBackPolicy<2>,
+        boundaries::OMPZouHePolicy<2>,
+        boundaries::OMPZouHePolicy<2>, 
+        initializers::OMPVelocityInitializer<2>,
+        equilibrium::OMPDefaultEquilibrium<2>
     >;   
 
-    using Parallel = SerialPolicy<2, Config>;
+    using Parallel = OMPPolicy<2, Config>;
 
     llalbm::core::Lattice<Config, Parallel> Lid;
 
@@ -52,11 +53,11 @@ int main()
         return 0.0;
             };
     
-    initializers::VelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
+    initializers::OMPVelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
 
-    collisions::TRTCollisionPolicy<2>::initialize(0.9, 0.01, 1./std::sqrt(3.0));
-    collisions::TRTCollisionPolicy<2>::compute_magic_parameter();
-    collisions::TRTCollisionPolicy<2>::enforce_magic_parameter(1.0/4.0);
+    collisions::OMPTRTCollisionPolicy<2>::initialize(0.9, 0.01, 1./std::sqrt(3.0));
+    collisions::OMPTRTCollisionPolicy<2>::compute_magic_parameter();
+    collisions::OMPTRTCollisionPolicy<2>::enforce_magic_parameter(1.0/4.0);
 
     generation::ConstructionInfo<2> info;
 
@@ -71,6 +72,6 @@ int main()
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out, true);
 
-    Lid.perform_lbm(2000, 1, 10);
+    Lid.perform_lbm(1000, 1, 10);
 
 }

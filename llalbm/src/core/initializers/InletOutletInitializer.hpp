@@ -298,7 +298,7 @@ template<std::size_t dim>
             // calling the update function for each dimension
             Eigen::array<Eigen::Index, dim+1> coordinates;
 
-            #pragma omp parallel for collapse(3)
+            #pragma omp parallel for
             for (std::size_t i = 0; i < inlet_size; ++i)
             {
                 for (std::size_t k = 0; k < dim; ++k)
