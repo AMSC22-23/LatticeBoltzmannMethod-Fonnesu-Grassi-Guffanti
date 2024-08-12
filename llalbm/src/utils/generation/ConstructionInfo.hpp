@@ -24,6 +24,7 @@
 // =========== LLALBM INCLUDES ===========
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
+#include "../../utils/MultiDimensionalLoop.hpp"
 // =======================================
 
 namespace llalbm::util::generation
@@ -36,7 +37,6 @@ enum NonFluidNodeType
     BOUNDARY = 0,
     INLET = 1,
     OUTLET = 2,
-    OBSTACLE = 3
 }; 
 
 
@@ -56,7 +56,7 @@ enum NonFluidNodeType
  * 
  * @tparam dim number of physical dimensions of the computational domain 
  */
-template <unsigned int dim>
+template <std::size_t dim=2, std::size_t q=9>
 class ConstructionInfo
 {
 private:
@@ -78,7 +78,7 @@ private:
 
     /// List of dimensions of the computational domain. It's to be noted that coordinates the computational
     /// domain is modeled to be a hypercube, with edges extending from 0 to the dimensions.
-    Eigen::array<Eigen::Index, dim> domain_dimensions;
+    std::array<Eigen::Index, dim> domain_dimensions;
 
     /// List of boundary nodes
     std::set<BoundaryPoint<dim>> boundary_nodes;
@@ -90,7 +90,7 @@ private:
     std::set<BoundaryPoint<dim>> outlet_nodes;
 
     /// List of obstacle nodes
-    std::set<BoundaryPoint<dim>> obstacle_nodes;
+    std::set<ObstaclePoint<dim>> obstacle_nodes;
 
     /// Logger object
     Logger l;
@@ -107,7 +107,7 @@ public:
      * @param dims array of dimensions
      * @return number of elements that will constitute the lattice
      */
-    Eigen::Index attach_domain_dimensions(const Eigen::array<Eigen::Index, dim>& dims)
+    Eigen::Index attach_domain_dimensions(const std::array<Eigen::Index, dim>& dims)
     {
         domain_dimensions = dims;
         
@@ -123,7 +123,12 @@ public:
     } 
 
     // ========================================================================================= 
-    //                                     INLES AND OUTLETS
+    //                                INLES, OUTLETS AND BOUNDARIES
+    //
+    // The following methods are used to inlet, outlet or boundary nodes to the construction 
+    // information used to build the lattice. Inlets, outlets and boundary are functionally
+    // separated from obstacles, which are added with a different method as they must be 
+    // treated differently.
     // ========================================================================================= 
 
 
@@ -164,22 +169,16 @@ public:
         {
             outlet_provided = true;
         }
-        else if (type == NonFluidNodeType::OBSTACLE)
-        {
-            obstacle_provided = true;
-        }
         else if (type == NonFluidNodeType::BOUNDARY)
         {
             boundaries_provided = true;
         }
 
-        // Check for overlaps: the point must not be present in any other list
-        // TODO: 
         auto end_copy = end;
         end_copy.coords[varying_dimension]++;
         for (auto point = begin; point != end_copy; point.coords[varying_dimension]++)
         {
-            if (check_possible_overlap(point, inlet_nodes))
+            if (check_possible_overlap<BoundaryPoint<dim>>(point, inlet_nodes))
             {
                 #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in inlet nodes");
@@ -189,7 +188,7 @@ public:
                 else
                     inlet_nodes.erase(point);
             }
-            if (check_possible_overlap(point, boundary_nodes))
+            if (check_possible_overlap<BoundaryPoint<dim>>(point, boundary_nodes))
             {
                 #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in inlet nodes");
@@ -200,7 +199,7 @@ public:
                     boundary_nodes.erase(point);
             
             }
-            if (check_possible_overlap(point, outlet_nodes))
+            if (check_possible_overlap<BoundaryPoint<dim>>(point, outlet_nodes))
             {
                 #ifdef LLALBM_VERBOSE
                 l.warn("Overlap detected in outlet nodes");
@@ -211,25 +210,11 @@ public:
                     outlet_nodes.erase(point);
 
             }
-            if (check_possible_overlap(point, obstacle_nodes))
-            {
-                #ifdef LLALBM_VERBOSE
-                l.warn("Overlap detected in obstacle nodes");
-                #endif
-                if (type == NonFluidNodeType::OBSTACLE)
-                    continue;
-                else
-                    obstacle_nodes.erase(point);
-
-            }
-            
 
             if (type == NonFluidNodeType::INLET)
                 inlet_nodes.insert(BoundaryPoint<dim>(point));
             else if (type == NonFluidNodeType::OUTLET)
                 outlet_nodes.insert(BoundaryPoint<dim>(point));
-            else if (type == NonFluidNodeType::OBSTACLE)
-                obstacle_nodes.insert(BoundaryPoint<dim>(point));
             else if (type == NonFluidNodeType::BOUNDARY)
                 boundary_nodes.insert(BoundaryPoint<dim>(point));
         }
@@ -266,7 +251,7 @@ public:
             // Starting with the coordinates set to 0
             for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
             {
-                Eigen::array<Eigen::Index, dim> coords;
+                std::array<Eigen::Index, dim> coords;
                 coords.fill(0);
                 coords[i] = idx;
                 BoundaryPoint<dim> point(coords);
@@ -277,7 +262,7 @@ public:
             // Then, with the coordinates set to the domain dimensions
             for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
             {
-                Eigen::array<Eigen::Index, dim> coords;
+                std::array<Eigen::Index, dim> coords;
                 coords.fill(current_domain_dimension - 1);
                 coords[i] = idx;
                 BoundaryPoint<dim> point(coords);
@@ -287,6 +272,78 @@ public:
         }
         return added_nodes;
     }
+
+
+    // ========================================================================================= 
+    //                                          OBSTACLES
+    // Obstacles can be introduced in the lattice by using the following methods, which either 
+    // introduce a shape (usually built by providing an origin point and an extension) or a
+    // segment (built by providing two points) in the lattice.
+    // 
+    // ========================================================================================= 
+
+    /**
+     * @brief Adds an hyper rectangle to the computational domain, defined by an origin point and the extension of the solid along each dimension.
+     * 
+     * @param origin Origin point of the hyper rectangle. Considered to be the top left corner.
+     * @param extensions Array of positive numbers indicating the extension of the hyper rectangle along each dimension.
+     * @return Eigen::Index Number of added obstacle nodes.
+     */
+    Eigen::Index add_obstacle_hyper_rectangle(const Point<dim>& origin, const std::array<Eigen::Index,dim>& extensions)
+    {
+        // First verify that the domain has been constructed and that the point is inside the domain
+        if (!dimensions_provided)
+        {
+            l.error("Dimensions of the computational domain have not been provided.");
+            return 0;
+        }
+
+        if (!check_domain_bounds(origin))
+        {
+            l.error("Provided point is not inside the domain");
+            return 0;
+        }
+
+        // Then check the other extreme of the hyper rectangle is within the domain
+        Point<dim> end;
+        for (std::size_t i = 0; i < dim; i++)
+        {
+            end.coords[i] = origin.coords[i] + extensions[i];
+        }
+        if (!check_obstacle_domain_bounds(end))
+        {
+            l.error("The hyper rectangle would get outside the domain");
+            return 0;
+        }
+
+        // Then, add the obstacle nodes to the set of obstacle nodes
+        Eigen::Index added_nodes = 0;
+        std::vector<ObstaclePoint<dim>> obstacle_nodes_vec;
+
+
+        Eigen::array<Eigen::Index, dim> grid_positions;
+        Eigen::array<Eigen::Index, dim> extensions_eigen = extensions;
+        Eigen::array<Eigen::Index, dim> origin_eigen = origin.coords;
+
+        util::MultiDimensionalLoop<std::vector<ObstaclePoint<dim>>, ObstaclePoint<dim>, dim>::assign_grid_positions_with_offset(obstacle_nodes_vec, extensions_eigen, grid_positions, origin_eigen);
+        std::move(obstacle_nodes_vec.begin(), obstacle_nodes_vec.end(), std::inserter(obstacle_nodes, obstacle_nodes.end()));
+        // remove the all 0 point
+        ObstaclePoint<dim> zero_point;
+
+        zero_point.coords.fill(0);
+
+
+        obstacle_nodes.erase(ObstaclePoint<dim>(zero_point));
+        added_nodes = obstacle_nodes_vec.size();
+
+        return added_nodes;
+    }
+
+    Eigen::Index add_obstacle_hyper_square(const Point<dim>& origin, const Eigen::Index& extension)
+    {
+        l.error("Not implemented yet");
+        return 0;
+    }
     
     // ========================================================================================= 
     //                                      GETTERS AND SETTERS
@@ -295,9 +352,9 @@ public:
     /**
      * @brief Returns the dimensions of the computational domain.
      * 
-     * @return Eigen::array<Eigen::Index, dim> 
+     * @return std::array<Eigen::Index, dim> 
      */
-    Eigen::array<Eigen::Index, dim> get_domain_dimensions() const
+    std::array<Eigen::Index, dim> get_domain_dimensions() const
     {
         return domain_dimensions;
     }
@@ -337,7 +394,7 @@ public:
      * 
      * @return std::set<BoundaryPoint<dim>> 
      */
-    std::set<BoundaryPoint<dim>> get_obstacle_nodes() const
+    std::set<ObstaclePoint<dim>> get_obstacle_nodes() const
     {
         return obstacle_nodes;
     }
@@ -418,6 +475,23 @@ private:
     }
 
     /**
+     * @brief Checks whether the provided coordinate are within the computational domain.
+     * 
+     * @returns True or false whether based on the check.
+     */
+    bool check_obstacle_domain_bounds(const Point<dim>& point) const
+    {
+        for (unsigned int i = 0; i < dim; i++)
+        {
+            if(point.coords[i] <= 0 || point.coords[i] >= domain_dimensions[i] - 1)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * @brief Checks whether the provided coordinates overlap with others that are registered as non-generic fluid nodes. Even though this method
      * is not necessarily vital for the correct construction because overlaps are solved by picking the last caller, it's still useful 
      * to log the presence of overlaps.
@@ -427,7 +501,8 @@ private:
      * 
      * @returns Whether an ovelap is present.
      */
-    bool check_possible_overlap(const BoundaryPoint<dim>& point, const std::set<BoundaryPoint<dim>>& to_check) const
+    template<typename ObjectType>
+    bool check_possible_overlap(const ObjectType& point, const std::set<ObjectType>& to_check) const
     {
         const auto it = to_check.find(point);
         if (it != to_check.end())
@@ -452,10 +527,6 @@ private:
         else if (type == NonFluidNodeType::OUTLET)
         {
             outlet_nodes.insert(point);
-        }
-        else if (type == NonFluidNodeType::OBSTACLE)
-        {
-            obstacle_nodes.insert(point);
         }
         else if (type == NonFluidNodeType::BOUNDARY)
         {

@@ -17,5 +17,6 @@ add_test_executable(LidFromGeneration.out "unit/LidFromGeneration.cpp")
 add_test_executable(PerimeterGeneration.out "unit/PerimeterGeneration.cpp")
 add_test_executable(BGKParameterTest.out "unit/BGKParameterTest.cpp")
 add_test_executable(TRTLidDrivenTest.out "unit/TRTLidDrivenTest.cpp")
+add_test_executable(ObstacleGenerationTest.out "unit/ObstacleGeneration.cpp")
 
 

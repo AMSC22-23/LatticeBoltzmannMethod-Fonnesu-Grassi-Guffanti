@@ -102,7 +102,7 @@ namespace llalbm::util::reader
             std::vector<BoundaryPoint<ranks>>& boundary_coord,
             std::vector<BoundaryPoint<ranks>>& inlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& outlet_nodes_coord,
-            std::vector<BoundaryPoint<ranks>>& obstacle_nodes_coord,
+            std::vector<ObstaclePoint<ranks>>& obstacle_nodes_coord,
             Eigen::array<Eigen::Index, ranks>& indices,
             std::array<std::size_t, 5>& occupations
         )
@@ -157,7 +157,7 @@ namespace llalbm::util::reader
             std::vector<BoundaryPoint<ranks>>& boundary_coord,
             std::vector<BoundaryPoint<ranks>>& inlet_nodes_coord,
             std::vector<BoundaryPoint<ranks>>& outlet_nodes_coord,
-            std::vector<BoundaryPoint<ranks>>& obstacle_nodes_coord,
+            std::vector<ObstaclePoint<ranks>>& obstacle_nodes_coord,
             Eigen::array<Eigen::Index, ranks>& indices,
             std::array<std::size_t, 5>& occupations
         )
@@ -194,7 +194,9 @@ namespace llalbm::util::reader
                     occupations[3]++;
                     break;
                 case InputNodeType::OBSTACLE:
-                    obstacle_nodes_coord.at(occupations[4]) = bp;
+                    ObstaclePoint<ranks> op;
+                    std::copy(bp.coords.begin(), bp.coords.end(), op.coords.begin());
+                    obstacle_nodes_coord.at(occupations[4]) = op;
                     occupations[4]++;
                     break;
             }
@@ -369,7 +371,7 @@ namespace llalbm::util::reader
         std::vector<BoundaryPoint<dim>>& boundary_coord,
         std::vector<BoundaryPoint<dim>>& inlet_nodes_coord,
         std::vector<BoundaryPoint<dim>>& outlet_nodes_coord,
-        std::vector<BoundaryPoint<dim>>& obstacle_nodes_coord,
+        std::vector<ObstaclePoint<dim>>& obstacle_nodes_coord,
         std::array<Eigen::Index, dim>& lattice_dimensions)
     {
         // In order to read the file, instantiate an input file stream.
@@ -513,6 +515,7 @@ namespace llalbm::util::reader
         // Identify the type of inlet and outlet nodes
         identify_node_type(lattice_dimensions, inlet_nodes_coord);
         identify_node_type(lattice_dimensions, outlet_nodes_coord);
+        identify_obstacle_propagation(lattice_dimensions, obstacle_nodes_coord, fluid_nodes_coord, inlet_nodes_coord, outlet_nodes_coord);
         logger.info("==Nodes identified properly==");
         logger.info("LATTICE READING COMPLETED");
     }

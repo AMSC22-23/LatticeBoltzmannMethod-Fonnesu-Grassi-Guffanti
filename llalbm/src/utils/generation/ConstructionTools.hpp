@@ -100,7 +100,7 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
     std::vector<BoundaryPoint<dim>> boundary_nodes;
     std::vector<BoundaryPoint<dim>> inlet_nodes;
     std::vector<BoundaryPoint<dim>> outlet_nodes;
-    std::vector<BoundaryPoint<dim>> obstacle_nodes;
+    std::vector<ObstaclePoint<dim>> obstacle_nodes;
 
 
     logger.info("There are " + std::to_string(boundary_nodes_set.size()) + " boundary nodes");
@@ -131,7 +131,6 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
     
     logger.info("Computing fluid nodes coordinates");
     llalbm::util::MultiDimensionalLoop<std::vector<Point<dim>>, Point<dim>, dim>::assign_grid_positions(fluid_nodes, dimensions, grid_positions);
-    
 
     // Remove any duplicates from fluid nodes to be sure
     std::sort(fluid_nodes.begin(), fluid_nodes.end());
@@ -180,8 +179,22 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
     }
     // Last but not least, identify the inlet and outlet nodes
     logger.info("Identifying inlet and outlet nodes");
-    identify_node_type(info.get_domain_dimensions(), inlet_nodes);
-    identify_node_type(info.get_domain_dimensions(), outlet_nodes);
+    identify_node_type<dim>(info.get_domain_dimensions(), inlet_nodes);
+    identify_node_type<dim>(info.get_domain_dimensions(), outlet_nodes);
+    identify_obstacle_propagation<dim>(info.get_domain_dimensions(), obstacle_nodes, fluid_nodes, inlet_nodes, outlet_nodes);
+
+    // Eliminate from the obstacle nodes those that have all directions set to false
+    for (const auto& node : obstacle_nodes)
+    {
+        if (node.directions.none())
+        {
+            auto it = std::find(obstacle_nodes.begin(), obstacle_nodes.end(), node);
+            if (it != obstacle_nodes.end())
+            {
+                obstacle_nodes.erase(it);
+            }
+        }
+    }
 
     // Finally, reinitialize the lattice.
     auto domain = info.get_domain_dimensions();
