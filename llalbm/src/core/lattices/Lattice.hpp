@@ -273,6 +273,9 @@ namespace llalbm::core
             #endif
 
             logger.info("Will do " + std::to_string(n_steps) + " steps");
+            #ifdef TIMER
+            auto start =std::chrono::high_resolution_clock::now();
+            #endif
             for (std::size_t i = 0; i < n_steps; i++)
             {
                 #ifndef LLALBM_VERBOSE
@@ -356,6 +359,11 @@ namespace llalbm::core
                 #endif
 
             }
+            #ifdef TIMER
+            auto end =std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> duration = end-start; 
+            std::cout << std::endl << "Time: " << duration.count() << std::endl;
+            #endif
             logger.info("\n");
             logger.info("Done!");
         }

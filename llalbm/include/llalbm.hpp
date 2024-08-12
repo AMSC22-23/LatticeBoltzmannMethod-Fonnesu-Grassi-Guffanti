@@ -12,6 +12,7 @@
 #include "../src/core/equilibriums/DefaultEquilibrium.hpp"
 #include "../src/core/PolicyTypes.hpp"
 #include "../src/core/parallelization/SerialPolicy.hpp"
+#include "../src/core/parallelization/OMPPolicy.hpp"
 
 // Utils - Logger utility
 #include "../src/utils/loggers/Logger.hpp"

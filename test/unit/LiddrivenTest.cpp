@@ -8,10 +8,10 @@ int main()
     using Config = LatticeConfiguration<
         2,
         collisions::BGKCollisionPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::BounceBackPolicy<2>,
-        boundaries::ZouHePolicy<2>,
-        boundaries::ZouHePolicy<2>, 
+                            boundaries::BounceBackPolicy<2>,
+                            boundaries::BounceBackPolicy<2>,
+                            boundaries::ZouHePolicy<2>,
+                            boundaries::ZouHePolicy<2>, 
         initializers::VelocityInitializer<2>,
         equilibrium::DefaultEquilibrium<2>
     >;   

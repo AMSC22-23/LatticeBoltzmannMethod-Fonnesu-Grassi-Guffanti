@@ -25,7 +25,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import seaborn as sns
+#import seaborn as sns
 import os
 import sys
 import re

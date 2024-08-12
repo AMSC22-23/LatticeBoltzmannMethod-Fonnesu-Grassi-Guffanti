@@ -16,7 +16,7 @@ find_package(OpenMP REQUIRED)
 # find Eigen3
 find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
 
-add_compile_options(-Wno-deprecated-enum-enum-conversion)
+add_compile_options(-Wno-deprecated-enum-enum-conversion -fopenmp)
 
 # Include llalbm library
 add_subdirectory(llalbm)
