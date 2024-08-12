@@ -159,7 +159,7 @@ namespace llalbm::core::boundaries
 
                 auto n_rows = populations.dimensions()[0];
                 auto n_cols = populations.dimensions()[1];
-                #pragma omp parallel for 
+                #pragma omp parallel for private(i,j,p0,p1,p2,p3,p4,p5,p6,p7,p8)
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
                     i = boundary_coord[bnode].coords[0];

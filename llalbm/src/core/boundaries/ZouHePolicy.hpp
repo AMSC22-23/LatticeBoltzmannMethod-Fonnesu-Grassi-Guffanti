@@ -160,7 +160,7 @@ namespace llalbm::core::boundaries
                 Eigen::Index i, j;
                 double rho, ru, rv;
                 
-                #pragma omp parallel for
+                #pragma omp parallel for private(i,j)
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++)
                 {
                     i = boundary_coord[bnode].coords[0];
