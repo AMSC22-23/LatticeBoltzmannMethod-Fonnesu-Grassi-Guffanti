@@ -85,7 +85,7 @@ namespace llalbm::core
         std::vector<BoundaryPoint<dim>> outlet_nodes_coord;
 
         /// @brief List of coordinates of the edges of obstacle nodes.
-        std::vector<BoundaryPoint<dim>> obstacle_nodes;
+        std::vector<ObstaclePoint<dim>> obstacle_nodes;
 
         /// @brief Number of velocities in the velocity set
         std::size_t q;
@@ -388,7 +388,7 @@ namespace llalbm::core
             const std::vector<BoundaryPoint<dim>>& boundary_coord_,
             const std::vector<BoundaryPoint<dim>>& inlet_nodes_coord_,
             const std::vector<BoundaryPoint<dim>>& outlet_nodes_coord_,
-            const std::vector<BoundaryPoint<dim>>& obstacle_nodes_
+            const std::vector<ObstaclePoint<dim>>& obstacle_nodes_
         )
         {
             logger.info("Reinitializing lattice");
@@ -467,9 +467,9 @@ namespace llalbm::core
         /**
          * @brief Get the obstacle nodes object
          * 
-         * @return std::vector<BoundaryPoint<dim>>& 
+         * @return std::vector<ObstaclePoint<dim>>& 
          */
-        std::vector<BoundaryPoint<dim>>& get_obstacle_nodes(){ return obstacle_nodes; }
+        std::vector<ObstaclePoint<dim>>& get_obstacle_nodes(){ return obstacle_nodes; }
 
         /**
          * @brief Prints the lattice non-fluid structure to an output stream
@@ -483,19 +483,19 @@ namespace llalbm::core
 
             out << "Lattice Information" << std::endl;
             out << "-> List of obstacle nodes: " << std::endl;
-            for (auto obstacle : obstacle_nodes)
+            for (const auto& obstacle : obstacle_nodes)
             {
                 for (unsigned int i = 0; i < dim; ++i)
                 {
                     out << obstacle.coords[i] << " ";
                 }
-                out << "type " << obstacle.type;
+                out << "propagation direction " << obstacle.directions.to_string();
                 out << std::endl;
                 n_nodes++;
             }
 
             out << "-> List of inlet nodes: " << std::endl;
-            for (auto inlet : inlet_nodes_coord)
+            for (const auto& inlet : inlet_nodes_coord)
             {
                 for (unsigned int i = 0; i < dim; ++i)
                 {
@@ -507,7 +507,7 @@ namespace llalbm::core
             }
 
             out << "-> List of outlet nodes: " << std::endl;
-            for (auto outlet : outlet_nodes_coord)
+            for (const auto& outlet : outlet_nodes_coord)
             {
                 for (unsigned int i = 0; i < dim; ++i)
                 {
@@ -519,7 +519,7 @@ namespace llalbm::core
             }
 
             out << "-> List of boundary nodes: " << std::endl;
-            for (auto boundary : boundary_coord)
+            for (const auto& boundary : boundary_coord)
             {
                 for (unsigned int i = 0; i < dim; ++i)
                 {
@@ -537,7 +537,7 @@ namespace llalbm::core
             if (print_fluid)
             {
                 out << "List of fluid nodes: " << std::endl;
-                for (auto fluid : fluid_nodes)
+                for (const auto& fluid : fluid_nodes)
                 {
                     for (unsigned int i = 0; i < dim; ++i)
                     {

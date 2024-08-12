@@ -1,6 +1,6 @@
 
 /**
- * @file LidFromGeneration.cpp
+ * @file TRTLidDrivenTest.cpp
  * @author Luca Guffanti
  * @brief Lid driven cavity test made using the lattice construction infrastructure and the new TRT collision policy.
  * 
@@ -62,7 +62,7 @@ int main()
 
     info.attach_domain_dimensions({100, 100});
 
-    // Add a right inlet
+    // Add a top inlet
     info.add_perimeter_nodes(generation::NonFluidNodeType::BOUNDARY);
     info.add_nodes_interval({0,1}, {0,98}, generation::NonFluidNodeType::INLET);
 

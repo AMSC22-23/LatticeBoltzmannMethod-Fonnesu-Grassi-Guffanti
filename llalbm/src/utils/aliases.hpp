@@ -5,6 +5,7 @@
 #include <vector>
 #include <array>
 #include <cassert>
+#include <bitset>
 // ======================================
 
 // =========== EIGEN INCLUDES ===========
@@ -39,11 +40,11 @@ enum btypes {
 /// @brief Type of nodes
 enum InputNodeType {
     FLUID = 0,
-    SOLID = 1, 
-    BOUNDARY = 2, 
-    INLET = 3, 
-    OUTLET = 4, 
-    OBSTACLE = 5
+    SOLID,
+    BOUNDARY, 
+    INLET, 
+    OUTLET, 
+    OBSTACLE
 };
 
 /**
@@ -229,6 +230,104 @@ bool operator==(const Point<d>& p, const BoundaryPoint<d>& bp)
     return true;
 }
 
+
+/**
+ * @brief Point in the lattice describing an obstacle.
+ * 
+ * @tparam d number of the dimensions of the domain.
+ */
+template <std::size_t d>
+struct ObstaclePoint {};
+
+/**
+ * @brief Specialization of the obstacle point for a 2D domain.
+ * LLALBM natively supports the D2Q9 velocity set for 2D domains, so there
+ * are 9 possible propagation directions for each obstacle point.  
+ */
+template <>
+struct ObstaclePoint<2> {
+
+    /// @brief Coordinates of the point.
+    Eigen::array<Eigen::Index, 2> coords;
+    /**
+     * @brief Directions along which propagation is required. Notice that the directions are stored in the bitset 
+     * in a linearized way, and the position in the bitset corresponds exactly to the direction in the velocity set.
+     * 
+     * I.E. bitset 010100110 means that propagation will be allowed along directions 1,2,5,7.
+     */
+    std::bitset<9> directions;
+    /**
+     * @brief Construct a new Obstacle Point object.
+     * @note This is the default constructor.
+     */
+    ObstaclePoint() = default;
+
+    /**
+     * @brief Construct a new Obstacle Point object accepting an array of coordinates.
+     * 
+     * @param coords_ array of coordinates.
+     */
+    ObstaclePoint(const Eigen::array<Eigen::Index, 2>& coords_) : coords(coords_) {}
+
+    /**
+     * @brief Construct a new Obstacle Point object accepting a Point object.
+     * 
+     * @param p point object whose coordinates are copied.
+     */
+    ObstaclePoint(const Point<2>& p) {
+        for(std::size_t i = 0; i < 2; ++i)
+            coords[i] = p.coords[i];
+    }
+
+    /**
+     * @brief Construct a new Obstacle Point object accepting an initializer list of Eigen::Index values.
+     * This method allows fast construction by passing initalizer lists, especially in tests.
+     * 
+     * @param init_list initializer list of Eigen::Index values.
+     */
+    ObstaclePoint(const std::initializer_list<Eigen::Index>& init_list)
+    {
+        assert(init_list.size() == 2 && "The number of coordinates must match the number of dimensions");
+        std::copy(init_list.begin(), init_list.end(), coords.begin());
+    }
+
+    /**
+     * @brief Operator overloading for comparison with another ObstaclePoint object.
+     * 
+     * @param other other obstacle point object.
+     * @return true if coordinates and type match.
+     * @return false if coordinates or type are not equal.
+     */
+    bool operator==(const ObstaclePoint<2>& other) const
+    {
+        for(std::size_t i = 0; i < 2; ++i)
+        {
+            if (coords[i] != other.coords[i])
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @brief Operator overloading for comparison with another ObstaclePoint object. It is just needed to place ObstaclePoint objects in a set,
+     * so it isn't really important.
+     * 
+     * @param other 
+     * @return true 
+     * @return false 
+     */
+    bool operator<(const ObstaclePoint<2>& other) const 
+    {
+        for(std::size_t i = 0; i < 2; ++i)
+        {
+            if (coords[i] < other.coords[i])
+                return true;
+            else if (coords[i] > other.coords[i])
+                return false;
+        }
+        return false;
+    }
+};
 // =======================================================================================================
 // =======================================================================================================
 // =======================================================================================================

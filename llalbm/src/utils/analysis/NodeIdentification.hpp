@@ -5,7 +5,9 @@
 #include <vector>
 #include <array>
 #include <cassert>
+#include <functional>
 #include <fstream>
+#include <map>
 // ====================================
 // =========== EIGEN INCLUDES ==========
 #include <unsupported/Eigen/CXX11/Tensor>
@@ -20,6 +22,19 @@
 namespace llalbm::util
 {
     /**
+     * @brief Identifies the boundary type of each node in the most general d-dimensional computational domain.
+     * 
+     * @tparam d 
+     * @param lattice_dimensions 
+     * @param nodes 
+     */
+    template<std::size_t d>
+    void identify_node_type(const std::array<Eigen::Index, d>& lattice_dimensions, std::vector<BoundaryPoint<d>>& nodes)
+    {
+        return;
+    }
+
+    /**
      * @brief Identifies the boundary type of each node based on its coordinates in a 2D lattice
      * @note The method is used after the vectors have been fully populated, with the boundary type of 
      * node being the only thing that is to be identified.
@@ -27,6 +42,7 @@ namespace llalbm::util
      * @param lattice_dimensions Extension of each lattice dimension
      * @param nodes Vector of nodes to be checked
      */
+    template<>
     void identify_node_type(const std::array<Eigen::Index, 2>& lattice_dimensions, std::vector<BoundaryPoint<2>>& nodes)
     {
         // For each node, check the position of the node and assign the type accordingly. 
@@ -90,6 +106,101 @@ namespace llalbm::util
         }    
     }
 
+    /**
+     * @brief Identifies the propagation direction of each obstacle node based in the general d-dimensional computational domain. Although being
+     * a general method, it is not implemented for the general case, as the propagation direction strictly depends on the chosen lattice configuration.
+     * @tparam d dimensions of the computational domain
+     * @param lattice_dimensions extension of each dimension of the lattice
+     * @param nodes obstacle nodes
+     */
+    template<std::size_t d>
+    void identify_obstacle_propagation(const std::array<Eigen::Index, d>& lattice_dimensions,
+        std::vector<ObstaclePoint<d>>& nodes,
+        const std::vector<Point<d>>& fluids,
+        const std::vector<BoundaryPoint<d>>& inlets,
+        const std::vector<BoundaryPoint<d>>& outlets)
+    {
+        return;
+    }
+
+    /**
+     * @brief Identifies the propagation direction of each obstacle node based on the 2D computational domain. Although being computationally 
+     * expensive, the method is used to identify the propagation direction of each obstacle node in the lattice and is needed only once in the generation
+     * of lattice, when the directions are identified. Each obstacle node is checked for the presence of fluid nodes in its vicinity, and the propagation direction is set accordingly 
+     * by acting on the bitfield of each node.
+     * @param lattice_dimensions extension of each dimension of the lattice
+     * @param nodes obstacle nodes
+     */
+    template<>
+    void identify_obstacle_propagation(const std::array<Eigen::Index, 2>& lattice_dimensions,
+        std::vector<ObstaclePoint<2>>& nodes,
+        const std::vector<Point<2>>& fluids,
+        const std::vector<BoundaryPoint<2>>& inlets,
+        const std::vector<BoundaryPoint<2>>& outlets)
+    {
+
+        std::map<std::size_t, std::size_t> d2q9_to_linearized_map{
+            {0, 6},
+            {1, 2},
+            {2, 5},
+            {3, 3},
+            {4, 0},
+            {5, 1},
+            {6, 7},
+            {7, 4},
+            {8, 8}
+        };
+
+        for (auto& node : nodes)
+        {
+            // We know that an obstacle cannot be set at the boundary of the lattice, so we can safely assume that the node is not at the boundary.
+            // Thus, we can check the presence of fluid nodes in the direct vicinity of the obstacle with a for loop.
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0)
+                    {
+                        node.directions.set(0, true);
+                        continue;
+                    }
+                    else
+                    {
+                        // Now if we find that the coordinates of the fluid node match a node that is either in the fluid, inlets, or outlets, we can set the 
+                        // corresponding propagation direction to true.
+                        const Eigen::Index i_node = node.coords[0] + i;
+                        const Eigen::Index j_node = node.coords[1] + j;
+
+                        Point<2> reference_node = {i_node, j_node};
+                        const auto fluid_it = std::find(fluids.begin(), fluids.end(), reference_node);
+                        std::size_t idx = d2q9_to_linearized_map.at((i+1)*3 + (j+1));
+                        if (fluid_it != fluids.end())
+                        {
+                            node.directions.set(idx, true);
+                        }
+                        else
+                        {
+                            const auto inlet_it = std::find(inlets.begin(), inlets.end(), reference_node);
+                            if (inlet_it != inlets.end())
+                            {
+                                node.directions.set(idx, true);
+                            }
+                            else
+                            {
+                                const auto outlet_it = std::find(outlets.begin(), outlets.end(), reference_node);
+                                if (outlet_it != outlets.end())
+                                {
+                                    node.directions.set(idx, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
 }
 
 

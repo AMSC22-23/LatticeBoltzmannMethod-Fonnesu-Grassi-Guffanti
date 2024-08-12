@@ -129,6 +129,11 @@ namespace llalbm::core::boundaries
                     }
                 }
             }
+
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                std::cout << "Not yet implemented" << std::endl;
+            }
     };
 
 

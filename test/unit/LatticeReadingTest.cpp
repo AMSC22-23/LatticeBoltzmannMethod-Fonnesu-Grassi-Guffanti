@@ -9,7 +9,7 @@ int main()
     std::vector<BoundaryPoint<2>> boundary_coord;
     std::vector<BoundaryPoint<2>> inlet_nodes_coord;
     std::vector<BoundaryPoint<2>> outlet_nodes_coord;
-    std::vector<BoundaryPoint<2>> obstacle_nodes;
+    std::vector<ObstaclePoint<2>> obstacle_nodes;
     std::array<Eigen::Index, 2> lattice_dimensions;
 
 
