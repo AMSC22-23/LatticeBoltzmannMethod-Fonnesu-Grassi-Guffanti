@@ -23,7 +23,8 @@ int main()
 
     info.attach_domain_dimensions({10, 10});
     info.add_perimeter_nodes(generation::NonFluidNodeType::BOUNDARY);
-    info.add_obstacle_hyper_rectangle({2,2}, {2,2});
+    info.add_obstacle_hyper_rectangle({2,2}, {3,2});
+    info.add_obstacle_hyper_square({6,6}, 2);
 
     generation::build_lattice<2, Config>(lattice, 9, info);
 

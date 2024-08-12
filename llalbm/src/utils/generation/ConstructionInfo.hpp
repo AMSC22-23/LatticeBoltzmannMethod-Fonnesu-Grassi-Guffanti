@@ -341,8 +341,13 @@ public:
 
     Eigen::Index add_obstacle_hyper_square(const Point<dim>& origin, const Eigen::Index& extension)
     {
-        l.error("Not implemented yet");
-        return 0;
+        
+        // We can simply call the hyper rectangle generation with the extensions
+        // being an array with all constants
+        std::array<Eigen::Index, dim> ext;
+        std::fill(ext.begin(), ext.end(), extension);
+
+        return add_obstacle_hyper_rectangle(origin, ext);
     }
     
     // ========================================================================================= 
