@@ -256,7 +256,7 @@ template<std::size_t dim>
             double rho, rhoinv;
             double ux, uy;
 
-            #pragma omp parallel for //SIMD
+            #pragma omp parallel for private(i, j, p0, p1, p2, p3, p4, p5, p6, p7, p8, rho, rhoinv, ux, uy)
             for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
             {
                 i = fluid_nodes[fnode].coords[0];
@@ -298,7 +298,7 @@ template<std::size_t dim>
             // calling the update function for each dimension
             Eigen::array<Eigen::Index, dim+1> coordinates;
 
-            #pragma omp parallel for
+            #pragma omp parallel for private(coordinates)
             for (std::size_t i = 0; i < inlet_size; ++i)
             {
                 for (std::size_t k = 0; k < dim; ++k)

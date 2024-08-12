@@ -99,7 +99,7 @@ namespace llalbm::core::equilibrium
         constexpr double one18 = (1.0/18.0);
         constexpr double one36 = (1.0/36.0);
         
-        #pragma omp parallel for //SIMD
+        #pragma omp parallel for private(rho,ux,uy,u2)
         for (size_t k = 0; k < fluid_nodes.size(); k++)
         {
             size_t i = fluid_nodes[k].coords[0];
@@ -126,7 +126,7 @@ namespace llalbm::core::equilibrium
         constexpr double one18 = (1.0/18.0);
         constexpr double one36 = (1.0/36.0);
         
-        #pragma omp parallel for //SIMD
+        #pragma omp parallel for private(rho,ux,uy,u2)
         for (size_t k = 0; k < fluid_nodes.size(); k++)
         {
             size_t i = fluid_nodes[k].coords[0];
