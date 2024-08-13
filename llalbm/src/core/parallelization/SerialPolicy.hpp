@@ -52,7 +52,6 @@ namespace llalbm::core
         // ========================================================================================= 
         //  UPDATE OF THE BOUNDARIES 
         // ========================================================================================= 
-
         static void update_inlet_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
         {
             InletPolicy::update_boundaries(populations, boundary_coord, global_rho, global_u);

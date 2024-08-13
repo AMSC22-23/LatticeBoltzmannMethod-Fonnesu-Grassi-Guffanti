@@ -23,4 +23,4 @@ add_test_executable(BGKParameterTest.out "unit/BGKParameterTest.cpp")
 add_test_executable(TRTLidDrivenTest.out "unit/TRTLidDrivenTest.cpp")
 add_test_executable(ObstacleGenerationTest.out "unit/ObstacleGeneration.cpp")
 add_test_executable(OMPTRTLidDrivenTest.out "unit/OMPTRTLidDrivenTest.cpp")
-
+add_test_executable(LidWithObstacle.out "unit/LidWithObstacle.cpp")

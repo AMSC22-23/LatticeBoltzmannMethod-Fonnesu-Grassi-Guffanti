@@ -77,7 +77,7 @@ namespace llalbm::core::boundaries
                     p7 = populations(i, j, 7);
                     p8 = populations(i, j, 8);
 
-                    populations(i,j,0) = p0;
+                    // populations(i,j,0) = p0;
 
                     // Compute the bounce back populations
                     /*
@@ -132,7 +132,48 @@ namespace llalbm::core::boundaries
 
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
-                std::cout << "Not yet implemented" << std::endl;
+                const std::size_t obstacles = boundary_coord.size();
+                for (std::size_t o_node = 0; o_node < obstacles; ++o_node)
+                {
+                    const Eigen::Index i = boundary_coord[o_node].coords[0];
+                    const Eigen::Index j = boundary_coord[o_node].coords[1];
+
+                    const std::bitset<9> bb_mask = boundary_coord[o_node].directions;
+
+                    if (bb_mask.test(1))
+                    {
+                        populations(i, j+1, 1) = populations(i, j, 3);
+                    }
+                    if (bb_mask.test(2))
+                    {
+                        populations(i-1, j, 2) = populations(i, j, 4);
+                    }
+                    if (bb_mask.test(3))
+                    {
+                        populations(i, j-1, 3) = populations(i, j, 1);
+                    }
+                    if (bb_mask.test(4))
+                    {
+                        populations(i+1, j, 4) = populations(i, j, 2);
+                    }
+                    if (bb_mask.test(5))
+                    {
+                        populations(i-1, j+1, 5) = populations(i, j, 7);
+                    }
+                    if (bb_mask.test(6))
+                    {
+                        populations(i-1, j-1, 6) = populations(i, j, 8);
+                    }
+                    if (bb_mask.test(7))
+                    {
+                        populations(i+1, j-1, 7) = populations(i, j, 5);
+                    }
+                    if (bb_mask.test(8))
+                    {
+                        populations(i+1, j+1, 8) = populations(i, j, 6);
+                    }
+                    
+                }
             }
     };
 
@@ -164,6 +205,7 @@ namespace llalbm::core::boundaries
 
                 auto n_rows = populations.dimensions()[0];
                 auto n_cols = populations.dimensions()[1];
+                
                 #pragma omp parallel for private(i,j,p0,p1,p2,p3,p4,p5,p6,p7,p8)
                 for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++) // * per castare il pointer????
                 {
@@ -230,6 +272,54 @@ namespace llalbm::core::boundaries
                     {
                         populations(i-1, j-1, 6) = p8;
                     }
+                }
+            }
+
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                const std::size_t obstacles = boundary_coord.size();
+                
+                #pragma omp parallel for firstprivate(obstacles)
+                for (std::size_t o_node = 0; o_node < obstacles; ++o_node)
+                {
+                    const Eigen::Index i = boundary_coord[o_node].coords[0];
+                    const Eigen::Index j = boundary_coord[o_node].coords[1];
+
+                    const std::bitset<9> bb_mask = boundary_coord[o_node].directions;
+
+                    if (bb_mask.test(1))
+                    {
+                        populations(i, j+1, 1) = populations(i, j, 3);
+                    }
+                    if (bb_mask.test(2))
+                    {
+                        populations(i-1, j, 2) = populations(i, j, 4);
+                    }
+                    if (bb_mask.test(3))
+                    {
+                        populations(i, j-1, 3) = populations(i, j, 1);
+                    }
+                    if (bb_mask.test(4))
+                    {
+                        populations(i+1, j, 4) = populations(i, j, 2);
+                    }
+                    if (bb_mask.test(5))
+                    {
+                        populations(i-1, j+1, 5) = populations(i, j, 7);
+                    }
+                    if (bb_mask.test(6))
+                    {
+                        populations(i-1, j-1, 6) = populations(i, j, 8);
+                    }
+                    if (bb_mask.test(7))
+                    {
+                        populations(i+1, j-1, 7) = populations(i, j, 5);
+                    }
+                    if (bb_mask.test(8))
+                    {
+                        populations(i+1, j+1, 8) = populations(i, j, 6);
+                    }
+                    
                 }
             }
     };
