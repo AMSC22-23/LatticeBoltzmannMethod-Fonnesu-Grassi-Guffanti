@@ -247,6 +247,7 @@ public:
         for (std::size_t i = 0; i < dim; i++)
         {
             Eigen::Index current_domain_dimension = domain_dimensions[i];
+            std::cout << "Current domain dimension: " << current_domain_dimension << std::endl;
             
             // Starting with the coordinates set to 0
             for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
@@ -259,11 +260,14 @@ public:
                 added_nodes++;
             }
 
+            std::array<Eigen::Index, dim> extensions;
+            std::copy(domain_dimensions.begin(), domain_dimensions.end(), extensions.begin());
+            std::for_each(extensions.begin(), extensions.end(), [](Eigen::Index& val){val = val-1;});
             // Then, with the coordinates set to the domain dimensions
             for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)
             {
                 std::array<Eigen::Index, dim> coords;
-                coords.fill(current_domain_dimension - 1);
+                std::copy(extensions.begin(), extensions.end(), coords.begin());
                 coords[i] = idx;
                 BoundaryPoint<dim> point(coords);
                 insert_in_correct_set(point, type);

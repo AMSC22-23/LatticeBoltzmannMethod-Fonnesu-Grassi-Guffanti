@@ -53,7 +53,10 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
             print(self.usage_message)
             exit(1)
         
-        
+        if (self.arg_num == 4 and "norm" == sys.argv[3]):
+            self.only_norm      :bool           = True
+        else:
+            self.only_norm      :bool           = False
         self.save_imgs      :bool           = False
 
         if self.arg_num == 5 and sys.argv[3] == "save":
@@ -82,7 +85,8 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
         self.vmax           :float          = 0.2
         self.interpolation  :str            = "spline16"
         self.frame_index    :int            = 0
-        self.frame_number   :int            = 0
+        self.frame_number   :int            = 300
+
 
     def check_input_data(self) -> bool:
         """
@@ -147,7 +151,7 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
         print("Finished")
 
 
-    def update_u_frame_2D(self, frame):
+    def update_u_frame_2D_all(self, frame):
         print(f"Frame {self.frame_index} out of {self.frame_number}")
 
         if self.save_imgs:
@@ -163,49 +167,86 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
         self.im_y.set_array(self.matrix_y)
         self.im_n.set_array(self.matrix_norm)
         return self.im_x, self.im_y, self.im_n
+    
+    def update_u_frame_2D_norm(self, frame):
+        print(f"Frame {self.frame_index} out of {self.frame_number}")
 
-    def render_and_animate_u_2D(self):
-        self.figure, (self.ax_x, self.ax_y, self.ax_n) = plt.subplots(1, 3)
+        if self.save_imgs:
+            plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
+        if self.frame_index < self.frame_number:
+            self.frame_index += 1
+        
         self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
         self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
         self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
 
-
-        self.ax_x.set_title("x velocity", fontsize=10)
-        self.ax_y.set_title("y velocity", fontsize=10)
-        self.ax_n.set_title("velocity norm", fontsize=10)        
-
-        self.im_x = self.ax_x.imshow(self.matrix_x,
-            cmap='RdBu_r',
-            vmin=-self.vmax,
-            vmax=self.vmax,
-            interpolation=self.interpolation)  
         
-        self.c_x = plt.colorbar(self.im_x, ax=self.ax_x, shrink=0.3)
-        self.c_x.ax.tick_params(labelsize=8)
+        self.im_n.set_array(self.matrix_norm)
+        return self.im_n
 
-        self.im_y = self.ax_y.imshow(self.matrix_y,
-            cmap='RdBu_r',
-            vmin=-self.vmax,
-            vmax=self.vmax,
-            interpolation=self.interpolation)
-        
-        self.c_y = plt.colorbar(self.im_y, ax=self.ax_y, shrink=0.3)
-        self.c_y.ax.tick_params(labelsize=8)
+    def render_and_animate_u_2D(self):
 
-        self.im_n = self.ax_n.imshow(self.matrix_norm,
-            cmap='RdBu_r',
-            vmin=self.vmin,
-            vmax=self.vmax,
-            interpolation=self.interpolation)
-        
-        self.c_n = plt.colorbar(self.im_n, ax=self.ax_n, shrink=0.3)
-        self.c_n.ax.tick_params(labelsize=8)
-        plt.tight_layout()
+        self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
+        self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
+        self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
 
-        self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D, frames=self.frame_number, interval=self.interval_ms)
-        self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
-        print("Finished")
+        if self.only_norm:
+            self.figure, self.ax_n = plt.subplots(figsize=(15, 5), ncols=1, nrows=1)
+            self.ax_n.set_title("velocity norm", fontsize=10)        
+
+            self.im_n = self.ax_n.imshow(self.matrix_norm,
+                cmap='RdBu_r',
+                vmin=self.vmin,
+                vmax=self.vmax,
+                interpolation=self.interpolation)
+            
+            self.c_n = plt.colorbar(self.im_n, ax=self.ax_n, shrink=0.3)
+            self.c_n.ax.tick_params(labelsize=8)
+            plt.tight_layout()
+
+            self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_norm, frames=self.frame_number, interval=self.interval_ms)
+            self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
+            print("Finished")
+
+        else:
+            self.figure, (self.ax_x, self.ax_y, self.ax_n) = plt.subplots(figsize=(15, 5), ncols=3, nrows=1)
+            self.ax_x.set_title("x velocity", fontsize=10)
+            self.ax_y.set_title("y velocity", fontsize=10)
+            self.ax_n.set_title("velocity norm", fontsize=10)        
+
+            self.im_x = self.ax_x.imshow(self.matrix_x,
+                cmap='RdBu_r',
+                vmin=-self.vmax,
+                vmax=self.vmax,
+                interpolation=self.interpolation)  
+            
+            # add a colorbar
+            self.c_x = plt.colorbar(self.im_x, ax=self.ax_x, shrink=0.3)
+            self.c_x.ax.tick_params(labelsize=8)
+
+            self.im_y = self.ax_y.imshow(self.matrix_y,
+                cmap='RdBu_r',
+                vmin=-self.vmax,
+                vmax=self.vmax,
+                interpolation=self.interpolation)
+            
+            self.c_y = plt.colorbar(self.im_y, ax=self.ax_y, shrink=0.3)
+            self.c_y.ax.tick_params(labelsize=8)
+
+            self.im_n = self.ax_n.imshow(self.matrix_norm,
+                cmap='RdBu_r',
+                vmin=self.vmin,
+                vmax=self.vmax,
+                interpolation=self.interpolation)
+            
+            self.c_n = plt.colorbar(self.im_n, ax=self.ax_n, shrink=0.3)
+            self.c_n.ax.tick_params(labelsize=8)
+            plt.tight_layout()
+
+            self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_all, frames=self.frame_number, interval=self.interval_ms)
+            self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
+            print("Finished")
+
 
     def update_u_frame_3D(self, frame):
         pass
@@ -237,7 +278,6 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
             elif self.quantity == self.quantity_u:
                 self.dimensions = 2
                 print("Velocity field is two dimensional")
-            self.frame_number = len([file.endswith(".txt") for file in self.all_files])//3 - 1
             print(f"Animation will have {self.frame_number + 1} frames")
             # now onto the rendering and animating of inputs
             if self.quantity == self.quantity_rho:
