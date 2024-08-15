@@ -51,6 +51,9 @@ namespace llalbm::util
         //  - The second dimension is the column index
 
         std::size_t size = nodes.size();
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif
         for (std::size_t i = 0; i < size; ++i)
         {
             // The node is at the upper boundary if the row index is 0
@@ -150,7 +153,10 @@ namespace llalbm::util
             {7, 4},
             {8, 8}
         };
-
+        
+#ifdef _OPENMP
+        #pragma omp parallel for
+#endif    
         for (auto& node : nodes)
         {
             // We know that an obstacle cannot be set at the boundary of the lattice, so we can safely assume that the node is not at the boundary.

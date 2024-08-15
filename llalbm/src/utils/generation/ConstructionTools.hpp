@@ -162,8 +162,6 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
         auto it = std::find(fluid_nodes.begin(), fluid_nodes.end(), outlet_node);
         if (it != fluid_nodes.end())
         {
-            std::cout << std::endl;
-
             fluid_nodes.erase(it);
         }
     }

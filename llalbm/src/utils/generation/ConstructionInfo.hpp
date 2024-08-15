@@ -247,7 +247,6 @@ public:
         for (std::size_t i = 0; i < dim; i++)
         {
             Eigen::Index current_domain_dimension = domain_dimensions[i];
-            std::cout << "Current domain dimension: " << current_domain_dimension << std::endl;
             
             // Starting with the coordinates set to 0
             for (Eigen::Index idx = 0; idx < current_domain_dimension; idx++)

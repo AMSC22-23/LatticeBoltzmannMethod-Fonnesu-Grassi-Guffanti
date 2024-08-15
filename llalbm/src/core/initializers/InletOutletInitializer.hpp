@@ -150,6 +150,22 @@ namespace llalbm::core::initializers
                     velocity_tensor(coordinates) = val;
                 }
             }
+
+            // And also update the outlet nodes
+            for (std::size_t i = 0; i < outlet_size; ++i)
+            {
+                for (std::size_t k = 0; k < dim; ++k)
+                {
+                    coordinates[k] = outlet_nodes[i].coords[k];
+                }
+
+                for (std::size_t j = 0; j < dim; ++j)
+                {
+                    coordinates[dim] = j;
+                    double val = outlet_update_function[j](time_step, outlet_nodes[i]);
+                    velocity_tensor(coordinates) = val;
+                }
+            }
         }
 
         static void print_data()
@@ -310,6 +326,23 @@ template<std::size_t dim>
                 {
                     coordinates[dim] = j;
                     double val = inlet_update_function[j](time_step, inlet_nodes[i]);
+                    velocity_tensor(coordinates) = val;
+                }
+            }
+
+            // And also update the outlet nodes
+            #pragma omp parallel for private(coordinates)
+            for (std::size_t i = 0; i < outlet_size; ++i)
+            {
+                for (std::size_t k = 0; k < dim; ++k)
+                {
+                    coordinates[k] = outlet_nodes[i].coords[k];
+                }
+
+                for (std::size_t j = 0; j < dim; ++j)
+                {
+                    coordinates[dim] = j;
+                    double val = outlet_update_function[j](time_step, outlet_nodes[i]);
                     velocity_tensor(coordinates) = val;
                 }
             }
