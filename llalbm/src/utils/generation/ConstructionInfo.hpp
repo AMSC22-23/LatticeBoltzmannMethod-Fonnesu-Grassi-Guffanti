@@ -342,6 +342,13 @@ public:
         return added_nodes;
     }
 
+    /**
+     * @brief Adds a square obstacle to the computational domain, defined by an origin point and the extension of the solid along each dimension.
+     * 
+     * @param origin Origin point of the hyper square. Considered to be the top left corner.
+     * @param extension Size of the square along a dimension.
+     * @return Eigen::Index Number of added nodes.
+     */
     Eigen::Index add_obstacle_hyper_square(const Point<dim>& origin, const Eigen::Index& extension)
     {
         
@@ -352,6 +359,93 @@ public:
 
         return add_obstacle_hyper_rectangle(origin, ext);
     }
+
+    /**
+     * @brief Adds a sphere to the computational domain. The sphere is defined by its center and its radius.
+     * 
+     * @param origin Center of the sphere.
+     * @param radius Radius of the sphere.
+     * @return Eigen::Index Number of added nodes.
+     */
+    Eigen::Index add_obstacle_hyper_sphere(const Point<dim>& origin, const Eigen::Index& radius)
+    {
+        // First verify that the domain has been constructed and that the point is inside the domain
+        if (!dimensions_provided)
+        {
+            l.error("Dimensions of the computational domain have not been provided.");
+            return 0;
+        }
+
+        if (!check_domain_bounds(origin))
+        {
+            l.error("Provided point is not inside the domain");
+            return 0;
+        }
+
+        // Then verify that the sphere would be built inside the domain.
+        for (std::size_t i = 0; i < dim; i++) 
+        {
+            Point<dim> end_increased;
+            Point<dim> end_decreased;
+            std::copy(origin.coords.begin(), origin.coords.end(), end_increased.coords.begin());
+            std::copy(origin.coords.begin(), origin.coords.end(), end_decreased.coords.begin());
+            end_increased.coords[i] += radius;
+            end_decreased.coords[i] -= radius;
+            if (!check_obstacle_domain_bounds(end_increased) || !check_obstacle_domain_bounds(end_decreased))
+            {
+                l.error("The sphere would get outside the domain");
+                return 0;
+            }
+        }
+
+        // In order to add the obstacle nodes, the simplest thing is to build an hypersquare around the sphere,
+        // and then remove the nodes that are outside the sphere by checking the euclidean distanc from the center.
+        Eigen::Index added_nodes = 0;
+        std::vector<ObstaclePoint<dim>> obstacle_nodes_vec;
+        Eigen::array<Eigen::Index, dim> extensions;
+        Eigen::array<Eigen::Index, dim> origin_eigen = origin.coords;
+        Eigen::array<Eigen::Index, dim> grid_positions;
+
+        std::fill(extensions.begin(), extensions.end(), radius);
+        std::copy(origin.coords.begin(), origin.coords.end(), origin_eigen.begin());
+
+        // But as the multidimensional loop works starting from the top left corner, we just need to translate the origin and adjust the extensions.
+        std::transform(origin_eigen.begin(), origin_eigen.end(), extensions.begin(), origin_eigen.begin(), std::minus<Eigen::Index>());
+        std::transform(extensions.begin(), extensions.end(), extensions.begin(), extensions.begin(), std::plus<Eigen::Index>());
+        std::for_each(extensions.begin(), extensions.end(), [](Eigen::Index& val){val++;});
+
+
+        util::MultiDimensionalLoop<std::vector<ObstaclePoint<dim>>, ObstaclePoint<dim>, dim>::assign_grid_positions_with_offset(obstacle_nodes_vec, extensions, grid_positions, origin_eigen);
+        // For now simply add all the nodes to the set of obstacle nodes
+        
+        // Now we remove the nodes that are outside the sphere by iterating over the generated vector.
+        const Eigen::Index radius_squared = radius*radius;
+        std::vector<ObstaclePoint<dim>> to_remove;
+
+        for (const auto& node : obstacle_nodes_vec)
+        {  
+            Eigen::array<Eigen::Index, dim> tmp;
+            std::copy(node.coords.begin(), node.coords.end(), tmp.begin());
+            std::transform(tmp.begin(), tmp.end(), origin.coords.begin(), tmp.begin(), std::minus<Eigen::Index>());
+            const std::size_t distance_squared = std::inner_product(tmp.begin(), tmp.end(), tmp.begin(), 0);
+            if (distance_squared > radius_squared)
+            {
+                to_remove.push_back(node);
+            }
+        }
+
+        // And finally remove the elements that are outside the sphere
+        for (const auto& node : to_remove)
+        {
+            obstacle_nodes_vec.erase(std::remove(obstacle_nodes_vec.begin(), obstacle_nodes_vec.end(), node), obstacle_nodes_vec.end());
+        }
+
+
+        added_nodes = obstacle_nodes_vec.size();
+        std::move(obstacle_nodes_vec.begin(), obstacle_nodes_vec.end(), std::inserter(obstacle_nodes, obstacle_nodes.end()));
+        return added_nodes;
+    }
+
     
     // ========================================================================================= 
     //                                      GETTERS AND SETTERS
