@@ -1,7 +1,7 @@
 /**
  * @file CUDAPolicy.hpp
  * @author Lorenzo Fonnesu, Grassi Andrea
- * @brief Contains the CUDA parallelization policy
+ * @brief Contains the CUDA parallelization policy, which is the easiest parallelization type
  *  * 
  */
 
@@ -63,7 +63,7 @@ namespace llalbm::core
             return;
         }
 
-        static void update_obstacle_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+        static void update_obstacle_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
         {
             ObstaclePolicy::update_boundaries(populations, boundary_coord, global_rho, global_u);
             return;

@@ -14,6 +14,7 @@
 // ========== LLALBM INCLUDES =========
 #include "../PolicyTypes.hpp" // for std::size_t
 #include "../parallelization/SerialPolicy.hpp" // for serial execution
+#include "../parallelization/CUDAPolicy.hpp"
 // ====================================
 namespace llalbm::core {
 
