@@ -19,6 +19,7 @@
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
 #include "../PolicyTypes.hpp"
+#include "update_macro.hpp"
 // =======================================
 
 
@@ -446,37 +447,7 @@ template<std::size_t dim>
          */
         static void update_macro(const Tensor<double, 3> &populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u)
         {
-            Eigen::Index j, i;
-            double p0, p1, p2, p3, p4, p5, p6, p7, p8;
-            double rho, rhoinv;
-            double ux, uy;
-
-            #pragma omp parallel for private(i, j, p0, p1, p2, p3, p4, p5, p6, p7, p8, rho, rhoinv, ux, uy)
-            for(size_t fnode = 0; fnode < fluid_nodes.size(); fnode++)
-            {
-                i = fluid_nodes[fnode].coords[0];
-                j = fluid_nodes[fnode].coords[1];
-
-                p0 = populations(i,j,0);
-                p1 = populations(i,j,1);
-                p2 = populations(i,j,2);
-                p3 = populations(i,j,3);
-                p4 = populations(i,j,4);
-                p5 = populations(i,j,5);
-                p6 = populations(i,j,6);
-                p7 = populations(i,j,7);
-                p8 = populations(i,j,8);
-
-                rho = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
-                rhoinv = 1.0/rho;
-
-                ux = rhoinv * (p1 + p5 + p8 - (p3 + p6 + p7));
-                uy = rhoinv * (p2 + p5 + p6 - (p4 + p7 + p8));
-
-                global_rho(i,j) = rho;  
-                global_u(i,j,0) = ux;
-                global_u(i,j,1) = uy;
-            }
+            update_macro(populations, fluid_nodes, global_rho, global_u);
         }
 
         /**

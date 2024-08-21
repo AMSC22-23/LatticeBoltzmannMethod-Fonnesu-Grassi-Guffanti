@@ -7,6 +7,7 @@ macro(add_test_executable TARGET_NAME SOURCE_FILE)
     if(OpenMP_CXX_FOUND)
         target_link_libraries(${TARGET_NAME} PUBLIC OpenMP::OpenMP_CXX)
     endif()
+    find_package(CUDA)
 endmacro()
 
 

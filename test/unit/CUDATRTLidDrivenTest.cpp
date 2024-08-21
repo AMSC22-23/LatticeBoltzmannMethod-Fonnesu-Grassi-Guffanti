@@ -11,7 +11,6 @@
 
 #include "llalbm.hpp"
 #include "iostream"
-#include <omp.h>
 
 int main()
 {
