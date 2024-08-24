@@ -250,6 +250,10 @@ struct ObstaclePoint<2> {
     /// @brief Coordinates of the point.
     Eigen::array<Eigen::Index, 2> coords;
     /**
+     * @brief Constant used in partially saturated BB to indicate "how much" the obstacle node is solid
+     */
+    double b = 1.0;
+    /**
      * @brief Directions along which propagation is required. Notice that the directions are stored in the bitset 
      * in a linearized way, and the position in the bitset corresponds exactly to the direction in the velocity set.
      * 
@@ -326,6 +330,16 @@ struct ObstaclePoint<2> {
                 return false;
         }
         return false;
+    }
+
+    double get_b() const
+    {
+        return b;
+    }
+
+    void set_b(double new_b)
+    {
+        b = new_b;
     }
 };
 // =======================================================================================================

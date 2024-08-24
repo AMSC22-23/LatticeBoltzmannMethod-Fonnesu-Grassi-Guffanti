@@ -6,6 +6,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <map>
 // ======================================
 
 // =========== EIGEN INCLUDES ===========
@@ -29,6 +30,9 @@ namespace llalbm::core
 {
     //using namespace Eigen;
     using namespace llalbm::util::logger;
+
+    using BlockCoord = std::pair<int, int>;
+    using PointList = std::vector<ObstaclePoint<2>>;
 
     // TODO: partial specialization for a distributed lattice
     /**
@@ -235,6 +239,45 @@ namespace llalbm::core
             logger.info("Lattice is ready.");
         }
 
+        /**
+         * @brief Method called before starting the simulation when the partially saturated BB is used.
+         * It computes weight parameters for each obstacle node.
+         */
+        void compute_obstacle_weight()
+        {
+            const std::size_t obstacles = obstacle_nodes.size();
+            // Map that groups points in the same 5x5 square
+            std::map<BlockCoord, PointList> blocks;
+
+            for (std::size_t o_node = 0; o_node < obstacles; ++o_node)
+            {
+                const Eigen::Index i = obstacle_nodes[o_node].coords[0];
+                const Eigen::Index j = obstacle_nodes[o_node].coords[1];
+
+                // Define at which block the point is part of and push it in
+                int block_x = i / 5;
+                int block_y = j / 5;
+
+                blocks[{block_x, block_y}].push_back(obstacle_nodes[o_node]);
+            }
+
+            // Let's calculate the weight b for each block
+            for (auto &block : blocks)
+            {
+                const BlockCoord &block_coord = block.first;
+                PointList &points_in_block = block.second;
+
+                double num_elements = points_in_block.size();
+
+                double b_value = num_elements / 25.0;
+
+                for (auto &point : points_in_block)
+                {
+                    point.set_b(b_value);
+                }
+            }
+        }
+
         void perform_lbm(const double time, const double time_step = 1, const std::size_t save_step = 1, const bool should_save = true)
         {
             assert(time_step > 0 && "ERROR: time step must be greater than 0");
@@ -305,8 +348,6 @@ namespace llalbm::core
                 ParallelizationPolicy::calc_equilibrium(inlet_nodes_coord, equilibrium_populations,global_u,global_rho);
                 ParallelizationPolicy::calc_equilibrium(outlet_nodes_coord, equilibrium_populations,global_u,global_rho);
 
-
-                
                 // 3) Save ux and uy on files
                 if(save)
                 {

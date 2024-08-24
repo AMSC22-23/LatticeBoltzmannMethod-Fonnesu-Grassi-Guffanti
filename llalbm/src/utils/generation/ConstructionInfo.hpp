@@ -422,7 +422,7 @@ public:
         const Eigen::Index radius_squared = radius*radius;
         std::vector<ObstaclePoint<dim>> to_remove;
 
-        for (const auto& node : obstacle_nodes_vec)
+        for (auto& node : obstacle_nodes_vec)
         {  
             Eigen::array<Eigen::Index, dim> tmp;
             std::copy(node.coords.begin(), node.coords.end(), tmp.begin());

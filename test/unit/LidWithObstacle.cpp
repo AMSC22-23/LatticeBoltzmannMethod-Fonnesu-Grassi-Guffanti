@@ -21,16 +21,16 @@ int main()
 
     using Config = LatticeConfiguration<
         2,
-        collisions::OMPTRTCollisionPolicy<2>,
-        boundaries::OMPBounceBackPolicy<2>,
-        boundaries::OMPBounceBackPolicy<2>,
-        boundaries::OMPZouHePolicy<2>,
-        boundaries::OMPZouHePolicy<2>, 
-        initializers::OMPVelocityInitializer<2>,
-        equilibrium::OMPDefaultEquilibrium<2>
+        collisions::TRTCollisionPolicy<2>,
+        boundaries::PSBounceBackPolicy<2>,
+        boundaries::PSBounceBackPolicy<2>,
+        boundaries::ZouHePolicy<2>,
+        boundaries::ZouHePolicy<2>, 
+        initializers::VelocityInitializer<2>,
+        equilibrium::DefaultEquilibrium<2>
     >;   
 
-    using Parallel = OMPPolicy<2, Config>;
+    using Parallel = SerialPolicy<2, Config>;
 
     llalbm::core::Lattice<Config, Parallel> Lid;
 
@@ -53,11 +53,11 @@ int main()
         return 0.0;
             };
     
-    initializers::OMPVelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
+    initializers::VelocityInitializer<2>::attach_update_functions(VelocityFunctions,Outlets);
 
-    collisions::OMPTRTCollisionPolicy<2>::initialize(0.9, 0.01, 1./std::sqrt(3.0));
-    collisions::OMPTRTCollisionPolicy<2>::compute_magic_parameter();
-    collisions::OMPTRTCollisionPolicy<2>::enforce_magic_parameter(1.0/4.0);
+    collisions::TRTCollisionPolicy<2>::initialize(0.9, 0.01, 1./std::sqrt(3.0));
+    collisions::TRTCollisionPolicy<2>::compute_magic_parameter();
+    collisions::TRTCollisionPolicy<2>::enforce_magic_parameter(1.0/4.0);
 
     generation::ConstructionInfo<2> info;
 
@@ -66,13 +66,19 @@ int main()
     // Add a right inlet
     info.add_perimeter_nodes(generation::NonFluidNodeType::BOUNDARY);
     info.add_nodes_interval({0,1}, {0,98}, generation::NonFluidNodeType::INLET);
-    info.add_obstacle_hyper_rectangle({20, 70}, {20, 20});
+    //info.add_obstacle_hyper_rectangle({20, 70}, {20, 20});
+    info.add_obstacle_hyper_sphere({50, 50}, 20);
 
     generation::build_lattice<2, Config>(Lid, 9, info);
+
+    // Necessary for PSBB
+    boundaries::PSBounceBackPolicy<2>::initialize(0.51, 0.01);
+    boundaries::PSBounceBackPolicy<2>::allowed_tau(0.02, 10);
+    Lid.compute_obstacle_weight();
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out, true);
 
-    Lid.perform_lbm(1000, 1, 10);
+    Lid.perform_lbm(3000, 1, 10);
 
 }
