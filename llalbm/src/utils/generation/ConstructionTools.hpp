@@ -137,6 +137,9 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
     fluid_nodes.erase(std::unique(fluid_nodes.begin(), fluid_nodes.end()), fluid_nodes.end());
 
     logger.info("Removing boundary nodes from fluid nodes");
+
+    
+    // Identify all the nodes that should be eliminated from the fluid nodes
     for (auto boundary_node : boundary_nodes)
     {
         auto it = std::find(fluid_nodes.begin(), fluid_nodes.end(), boundary_node);
@@ -182,17 +185,8 @@ void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, cons
     identify_obstacle_propagation<dim>(info.get_domain_dimensions(), obstacle_nodes, fluid_nodes, inlet_nodes, outlet_nodes);
 
     // Eliminate from the obstacle nodes those that have all directions set to false
-    for (const auto& node : obstacle_nodes)
-    {
-        if (node.directions.none())
-        {
-            auto it = std::find(obstacle_nodes.begin(), obstacle_nodes.end(), node);
-            if (it != obstacle_nodes.end())
-            {
-                obstacle_nodes.erase(it);
-            }
-        }
-    }
+    eliminate_non_wet_nodes<dim>(obstacle_nodes);
+    
 
     // Finally, reinitialize the lattice.
     auto domain = info.get_domain_dimensions();

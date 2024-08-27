@@ -22,5 +22,6 @@
 #include "../src/utils/generation/ConstructionInfo.hpp"
 #include "../src/utils/generation/ConstructionTools.hpp"
 #include "../src/utils/MultiDimensionalLoop.hpp"
+#include "../src/utils/analysis/FlowAnalyzer.hpp"
 
 #endif // LLALBM_HPP

@@ -167,7 +167,7 @@ namespace llalbm::util
                 {
                     if (i == 0 && j == 0)
                     {
-                        node.directions.set(0, true);
+                        node.directions.set(0, false);
                         continue;
                     }
                     else
@@ -180,34 +180,67 @@ namespace llalbm::util
                         Point<2> reference_node = {i_node, j_node};
                         const auto fluid_it = std::find(fluids.begin(), fluids.end(), reference_node);
                         std::size_t idx = d2q9_to_linearized_map.at((i+1)*3 + (j+1));
-                        if (fluid_it != fluids.end())
+                        
+                        if (idx != 0)
                         {
-                            node.directions.set(idx, true);
-                        }
-                        else
-                        {
-                            const auto inlet_it = std::find(inlets.begin(), inlets.end(), reference_node);
-                            if (inlet_it != inlets.end())
+                            if (fluid_it != fluids.end())
                             {
                                 node.directions.set(idx, true);
                             }
                             else
                             {
-                                const auto outlet_it = std::find(outlets.begin(), outlets.end(), reference_node);
-                                if (outlet_it != outlets.end())
+                                const auto inlet_it = std::find(inlets.begin(), inlets.end(), reference_node);
+                                if (inlet_it != inlets.end())
                                 {
                                     node.directions.set(idx, true);
+                                }
+                                else
+                                {
+                                    const auto outlet_it = std::find(outlets.begin(), outlets.end(), reference_node);
+                                    if (outlet_it != outlets.end())
+                                    {
+                                        node.directions.set(idx, true);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
-
         }
     }
-}
 
+    /**
+     * @brief Eliminates the nodes that are not wet from the list of obstacle nodes. This is done to reduce the computational cost of the simulation.
+     * @tparam d dimensions of the computational domain
+     * @param nodes obstacle nodes
+     */
+    template<std::size_t d>
+    void eliminate_non_wet_nodes(std::vector<ObstaclePoint<d>>& nodes)
+    {
+        return;
+    }
+
+
+    /**
+     * @brief Eliminates the nodes that are not wet from the list of obstacle nodes in a 2D computational domain. This is done to reduce the computational cost of the simulation.
+     * @param nodes obstacle nodes
+     */
+    template<>
+    void eliminate_non_wet_nodes(std::vector<ObstaclePoint<2>>& nodes)
+    {
+        std::vector<ObstaclePoint<2>> new_nodes;
+        for (auto& it: nodes)
+        {
+            if (!it.directions.none())
+            {
+                new_nodes.push_back(it);
+            }
+        }
+        nodes.clear();
+        nodes = new_nodes;
+    }
+    
+}
 
 #endif
