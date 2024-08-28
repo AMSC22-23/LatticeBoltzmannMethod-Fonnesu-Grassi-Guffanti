@@ -1,7 +1,9 @@
 /**
  * @file FlowAnalyzer.hpp
  * @author Luca GUffanti
- * @brief Contains the FlowAnalyzer class, used to compute the total lift of the obstacle nodes
+ * @brief Contains the FlowAnalyzer class, used to compute the total lift of the obstacle nodes.
+ * 
+ * 
  * 
  * 
  */
@@ -38,6 +40,8 @@ using namespace llalbm::util::logger;
  * @brief Class used to compute the lift and drag acting on the obstacle nodes, using the momentum exchange approach.
  * 
  * The class is templated on the dimension of the problem, with specialization for 2 dimensions.
+ * Specialization is required because the way lift and drag are computed depends on the choice of velocity set for the problem,
+ * so the non-specialized version of the class is not implemented.
  * 
  * @tparam dim dimension of the problem
  */
@@ -99,7 +103,26 @@ public:
 };
 
 /**
- * @brief Template specialization for the 2D case.
+ * @brief Template specialization for the 2D case. 
+ * The FlowAnalyzer manages the computation, saving and output of the lift and drag forces exerted on obstacle nodes.
+ * Such obstacles are passed by the user directly to the FlowAnalyzer object, which can be used in two ways:
+ * 
+ * 1. To perform analysis at the end of simulations: in this case it is enough to call the compute_flow_properties method
+ * as the simulation ends passing the population tensor. The method will return the total lift and drag forces, eventually saving
+ * the results to two ouptut files.
+ * 
+ * 2. To perform analysis at regular intervals during the simulation: in this case the FlowAnalyzer must be attached to the lattice object 
+ * by wrapping it inside a shared pointer. The lattice object will then take care of computation and saving of the results.
+ * 
+ * It is to be noted that there are also many ways of passing obstacle nodes to the LiftAnalyzer:
+ * 
+ * 1. By adding them one by one using the add_point method
+ * 
+ * 2. By adding a list of them using the add_point_vec method
+ * 
+ * 3. By allowing the FlowAnalyzer to automatically compute the obstacle nodes linked to a given origin point using the recognize_nearby_obstacle method.
+ * In this last case, it is then fundamental to call the match_wet_nodes method to filter out the obstacle nodes that are not linked to fluid nodes, if the
+ * list of nodes passed to recognize_nearby_obstacle is not already filtered.
  * 
  */
 template<>
@@ -175,6 +198,13 @@ public:
         initialize();
     }
 
+    /**
+     * @brief Factory method to create a shared pointer to a FlowAnalyzer object.
+     * 
+     * @param considered_points_ considered points vector (must not be temporary)
+     * @param iterations_between_save_ iterations between save value.
+     * @return std::shared_ptr<FlowAnalyzer<2>> 
+     */
     static std::shared_ptr<FlowAnalyzer<2>> create(std::vector<ObstaclePoint<2>>& considered_points_,
         const std::size_t& iterations_between_save_) 
     {
@@ -183,7 +213,8 @@ public:
 
     /**
      * @brief Initializes the lift analyzer by constructing the empty output directory.
-     * and opening the output file. 
+     * The initialization function is performed only once, at the beginning of the simulation, and 
+     * has been separated from the constructor to allow for more flexibility (i.e. direct calling from the lattice object).
      */
     void initialize()
     {
@@ -209,6 +240,11 @@ public:
         }
     }
 
+    /**
+     * @brief Saves the global lift and drag results vector in a csv file. This approach has been selected to avoid keeping
+     * the output file open during the entirety of the simulation, as this affects performance.
+     * 
+     */
     void save_global_results() const 
     {
         std::ofstream total_lift_drag_out;
@@ -250,7 +286,7 @@ public:
     }
 
     /**
-     * @brief Set the iterations between save object
+     * @brief Set the iterations between save to file.
      * 
      * @param iterations_between_save_ How many lattice boltzmann iterations should pass between each save of the contributions.
      */
