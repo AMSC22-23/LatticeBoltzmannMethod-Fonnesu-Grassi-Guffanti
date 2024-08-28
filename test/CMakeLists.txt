@@ -7,6 +7,7 @@ macro(add_test_executable TARGET_NAME SOURCE_FILE)
     if(OpenMP_CXX_FOUND)
         target_link_libraries(${TARGET_NAME} PUBLIC OpenMP::OpenMP_CXX)
     endif()
+    find_package(CUDA)
 endmacro()
 
 
@@ -28,3 +29,4 @@ add_test_executable(LidWithPSObstacle.out "unit/LidWithPSObstacle.cpp")
 add_test_executable(LidWithOMPPSobstacle.out "unit/LidWithOMPPSobstacle.cpp")
 add_test_executable(OpenBoundaryOutlet.out "unit/OpenBoundaryOutlet.cpp")
 add_test_executable(SphereGenerationTest.out "unit/SphereGenerationTest.cpp")
+add_test_executable(CUDATRTLidDrivenTest.out "unit/CUDATRTLidDrivenTest.cpp")

@@ -4,10 +4,14 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 # Create llalbm target
 add_library(LLALBM INTERFACE)
 
-# Find dependencies: MPI, OpenMP, and Eigen
+# Find dependencies: MPI, OpenMP, CUDA and Eigen
 find_package(MPI REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
+find_package(CUDA REQUIRED)
+if(CUDA_FOUND)
+	file(GLOB_RECURSE SOURCES "src/*.cu")
+endif()
 
 # Link libraries to the llalbm target
 target_include_directories(LLALBM INTERFACE 

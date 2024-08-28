@@ -86,6 +86,33 @@ namespace llalbm::core::boundaries
                 return;
             }
     };
+
+
+    template<std::size_t dim>
+    class CUDAOpenBoundaryPolicy : public BoundaryPolicyTag, public CUDATag
+    {
+    private:
+        /* data */
+        Logger log;
+    public:
+        CUDAOpenBoundaryPolicy(/* args */)
+        : log("Generic Open Boundary" , std::cout)
+        {
+            log.error("Generic Open Boundary not implemented");
+            assert(false);
+        }
+    };
+
+    template<>
+    class CUDAOpenBoundaryPolicy<2> : public BoundaryPolicyTag, public CUDATag
+    {       
+        public: 
+
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                return;
+            }
+    };
     
 } // namespace llalbm::core::boundaries
 

@@ -41,6 +41,7 @@ namespace llalbm::core
     class OMPTag {};
     class SequentialTag {};
     class MPITag {};
+    class CUDATag {};
 
     // =========== POLICY CONCEPTS ===========
     template<typename T>
@@ -57,6 +58,9 @@ namespace llalbm::core
 
     template<typename T>
     concept IsMPI = std::is_base_of_v<MPITag, T>;
+
+    template<typename T>
+    concept IsCUDA = std::is_base_of_v<CUDATag, T>;
 
     template <typename T>
     concept IsInitializationPolicy = std::is_base_of_v<InitializationPolicyTag, T>;
@@ -93,6 +97,17 @@ namespace llalbm::core
         std::is_base_of<MPITag, typename Configuration::outlet_policy_t>,
         std::is_base_of<MPITag, typename Configuration::initialization_policy_t>,
         std::is_base_of<MPITag, typename Configuration::equilibrium_policy_t>>;
+
+    template<
+        typename Configuration>
+    concept IsGloballyCUDA = std::conjunction_v<
+        std::is_base_of<CUDATag, typename Configuration::collision_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::wall_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::obstacle_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::inlet_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::outlet_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::initialization_policy_t>,
+        std::is_base_of<CUDATag, typename Configuration::equilibrium_policy_t>>;
 
 }; // llalbm::core
 

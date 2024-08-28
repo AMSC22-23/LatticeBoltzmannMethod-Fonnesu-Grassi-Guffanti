@@ -13,6 +13,12 @@ find_package(MPI REQUIRED)
 # find OpenMP
 cmake_policy(SET CMP0074 NEW)
 find_package(OpenMP REQUIRED)
+# find CUDA
+find_package(CUDA REQUIRED)
+if(CUDA_FOUND)
+    # Enable CUDA language
+    enable_language(CUDA) #enable NVCC compiler
+endif()
 # find Eigen3
 find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
 
