@@ -6,6 +6,7 @@
 #include <array>
 #include <cassert>
 #include <cmath>
+#include <memory>
 // ======================================
 
 // =========== EIGEN INCLUDES ===========
@@ -19,6 +20,7 @@
 #include "../../utils/aliases.hpp"
 #include "../../utils/writers/LatticeWriter.hpp"
 #include "../../utils/readers/LatticeReader.hpp"
+#include "../../utils/analysis/FlowAnalyzer.hpp"
 // =======================================
 
 //6 2 5
@@ -27,10 +29,9 @@
 
 namespace llalbm::core
 {
-    //using namespace Eigen;
     using namespace llalbm::util::logger;
+    using namespace llalbm::analysis;
 
-    // TODO: partial specialization for a distributed lattice
     /**
      * The lattice class represents one of the most important components of a Lattice-Bolzmann simulation: the computational domain
      * onto which the simulation is performed. The class makes extensive use of the Eigen Linear Algebra library: the grid of points as
@@ -89,6 +90,9 @@ namespace llalbm::core
 
         /// @brief Number of velocities in the velocity set
         std::size_t q;
+
+        // ========= POINTER TO THE FLOW ANALYZER =========
+        std::shared_ptr<FlowAnalyzer<dim>> flow_analyzer = nullptr;
 
         // ========= MISCELLANEOUS =========
 
@@ -187,8 +191,6 @@ namespace llalbm::core
             build_tensors();
 
             logger.info("Velocity Sets initialized");
-            //TODO: once collisions/boundary etc have been defined, attach relevant data.
-            //TODO: understand how to handle output directory creation (if here or in another class)
 
             // Attach the nodes vectors to the initialization policy
             ParallelizationPolicy::attach_nodes(
@@ -253,6 +255,15 @@ namespace llalbm::core
             else
             {
                 logger.info("Results will not be saved");
+            }
+            
+            if (flow_analyzer != nullptr)
+            {
+                flow_analyzer->initialize();
+            }
+            else
+            {
+                logger.info("Flow analyzer not attached");
             }
             
             // Compute the total number of iterations
@@ -322,6 +333,10 @@ namespace llalbm::core
                 ParallelizationPolicy::collide_open_inlet_boundary(populations, equilibrium_populations, after_collision_populations, inlet_nodes_coord, global_rho, global_u, time_step);
                 ParallelizationPolicy::collide_open_outlet_boundary(populations, equilibrium_populations, after_collision_populations, outlet_nodes_coord, global_rho, global_u, time_step);
 
+                if (flow_analyzer != nullptr && i > 0 && i % flow_analyzer->get_iterations_between_save() == 0)
+                {
+                    flow_analyzer->compute_flow_properties(after_collision_populations, true);
+                }
 
                 // 5) Propagate after collision populations, also to not fluid nodes
                 #ifdef LLALBM_VERBOSE
@@ -364,6 +379,12 @@ namespace llalbm::core
             std::chrono::duration<double> duration = end-start; 
             std::cout << std::endl << "Time: " << duration.count() << std::endl;
             #endif
+            if (flow_analyzer != nullptr)
+            {
+                flow_analyzer->save_global_results();
+            }
+
+
             logger.info("\n");
             logger.info("Done!");
         }
@@ -414,6 +435,13 @@ namespace llalbm::core
         // ========================================================================================= 
         //                                     GETTERS AND SETTERS     
         // ========================================================================================= 
+
+        /**
+         * @brief Get the populations object
+         * 
+         * @return Eigen::Tensor<double, dim + 1>& 
+         */
+        Eigen::Tensor<double, dim + 1>& get_populations() { return populations; }
 
         /**
          * @brief Get the global u object
@@ -548,6 +576,14 @@ namespace llalbm::core
             
             }
 
+        }
+
+        void attach_flow_analyzer(std::shared_ptr<FlowAnalyzer<dim>> flow_analyzer_)
+        {
+            auto points = flow_analyzer_->get_points();
+            flow_analyzer = FlowAnalyzer<dim>::create(
+                points,
+                flow_analyzer_->get_iterations_between_save());
         }
         // ========================================================================================= 
         // ========================================================================================= 

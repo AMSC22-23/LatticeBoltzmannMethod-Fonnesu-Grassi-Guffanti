@@ -23,7 +23,7 @@ namespace llalbm::util::writer
     using namespace llalbm::util::logger;
 
     static Logger logger("LatticeWriter", std::cout);
-    static std::string output_dir_path = "../results/";
+    static std::string output_dir_path = "./results/";
 
     
     void create_output_directory()

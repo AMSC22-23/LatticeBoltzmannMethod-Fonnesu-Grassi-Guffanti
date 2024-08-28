@@ -22,22 +22,22 @@ namespace llalbm::util::logger
         ,   out_stream (out_stream_)
         {}
 
-        inline void info_no_return(const std::string& msg)
+        inline void info_no_return(const std::string& msg) const
         {
             out_stream << "["<<name<<"-INFO] "<< msg;
         }
 
-        inline void info(const std::string& msg)
+        inline void info(const std::string& msg) const
         {
             out_stream << "["<<name<<"-INFO] "<< msg << std::endl;
         }
 
-        inline void warn(const std::string& msg)
+        inline void warn(const std::string& msg) const 
         {
             out_stream << "["<<name<<"-WARNING] "<< msg << std::endl;
         }
 
-        inline void error(const std::string& msg)
+        inline void error(const std::string& msg) const
         {
             out_stream << "["<<name<<"-ERROR] "<< msg << std::endl;
         }

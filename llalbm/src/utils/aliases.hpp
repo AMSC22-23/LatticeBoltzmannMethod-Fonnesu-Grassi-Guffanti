@@ -237,7 +237,9 @@ bool operator==(const Point<d>& p, const BoundaryPoint<d>& bp)
  * @tparam d number of the dimensions of the domain.
  */
 template <std::size_t d>
-struct ObstaclePoint {};
+struct ObstaclePoint {
+    Eigen::array<Eigen::Index, d> coords;
+};
 
 /**
  * @brief Specialization of the obstacle point for a 2D domain.
@@ -256,10 +258,19 @@ struct ObstaclePoint<2> {
      * I.E. bitset 010100110 means that propagation will be allowed along directions 1,2,5,7.
      */
     std::bitset<9> directions;
+
+    /**
+     * @brief Reduced wall location for interpolated bounce back
+     * @note Supported by Spheric Obstacles
+     * @note Supported by Rectangular and Square obstacles
+     */
+    std::array<double, 9> reduced_wall_location; 
+
     /**
      * @brief Construct a new Obstacle Point object.
      * @note This is the default constructor.
      */
+    
     ObstaclePoint() = default;
 
     /**
