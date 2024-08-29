@@ -13,6 +13,7 @@
 #include <array>
 #include <algorithm>
 #include <set>
+#include <random>
 // ======================================
 
 // =========== EIGEN INCLUDES ===========
@@ -446,6 +447,40 @@ public:
         return added_nodes;
     }
 
+    /**
+     * @brief Randomly adds a number of spheres to the computational domain. The spheres are defined by their center and their radius.
+     * 
+     * @param spheres Number of sphere that the sampler tries to add
+     * @param max_radius maximum radius
+     * @param min_radius minimum radius
+     * @param seed seed of the random number generator
+     * @return Eigen::Index 
+     */
+    Eigen::Index add_obstacle_random_spheres(const Eigen::Index& spheres = 10, const Eigen::Index& max_radius = 10, const Eigen::Index& min_radius = 1, const Eigen::Index& seed = 42)
+    {
+        // Set the seed
+        std::mt19937 gen(seed);
+        std::array<std::uniform_int_distribution<Eigen::Index>, dim> dists;
+        for(Eigen::Index i = 0; i < dim; i++)
+        {
+            dists[i] = std::uniform_int_distribution<Eigen::Index>(0, domain_dimensions[i]);
+        }
+        std::uniform_int_distribution<Eigen::Index> dist_radius(min_radius, max_radius);
+        Eigen::Index added_nodes = 0;
+
+
+        for (Eigen::Index i = 0; i < spheres; i++)
+        {
+            std::array<Eigen::Index, dim> coords;
+            for (Eigen::Index j = 0; j < dim; j++)
+            {
+                coords[j] = dists[j](gen);
+            }
+            Eigen::Index radius = dist_radius(gen);
+            added_nodes += add_obstacle_hyper_sphere(coords, radius);
+        }
+        return added_nodes;
+    }
     
     // ========================================================================================= 
     //                                      GETTERS AND SETTERS
