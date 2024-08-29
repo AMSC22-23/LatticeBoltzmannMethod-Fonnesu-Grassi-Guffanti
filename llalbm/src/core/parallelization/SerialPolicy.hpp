@@ -137,7 +137,7 @@ namespace llalbm::core
 
         static void update_macro(const Tensor<double, 3> &populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u)
         {
-            InitializationPolicy::update_macro(populations, fluid_nodes, global_rho, global_u);
+            EquilibriumPolicy::update_macro(populations, fluid_nodes, global_rho, global_u);
             return;
         }
 

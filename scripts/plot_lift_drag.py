@@ -41,6 +41,7 @@ ax.set_ylabel('Force')
 ax.set_title('Total Lift and Drag per Iteration')
 ax.legend()
 plt.savefig(os.path.join('flow_analysis_plots', 'total_lift_drag.pdf'), format="pdf")
+plt.close()
 
 # Order the contributions files by iteration
 files.sort(key=lambda x: int(x.split('_')[1].split('.')[0]))
@@ -107,3 +108,4 @@ for file in files:
     fig.colorbar(sc_abs_Drag, ax=axes[1])
     # Save the Drag and |Drag| plot to a file
     plt.savefig(os.path.join('flow_analysis_plots', file.split('.')[0] + '_drag.png'), format="png")
+    plt.close(fig)
