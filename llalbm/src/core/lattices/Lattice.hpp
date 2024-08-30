@@ -44,16 +44,15 @@ namespace llalbm::core
      * is first instantiated. Templating allows for great versatility: with just a few limitations (mainly when using a GPU) the user is able to 
      * decide which policies to use or is free to implement other policies for the specific use-case.
      * 
-     * @tparam LatticeConfiguration Configuration of the lattice in terms of dimensions and policies.
+     * @tparam ParallelizationPolicy Intermediary for calls to parallellized methods.
     */
     template<
-        typename LatticeConfiguration,
         typename ParallelizationPolicy
     >
     class Lattice
     {
     private:
-        static constexpr std::size_t dim = LatticeConfiguration::dimensions;
+        static constexpr std::size_t dim = ParallelizationPolicy::dims;
         
         // ========= TENSORS OF THE LATTICE =========
 

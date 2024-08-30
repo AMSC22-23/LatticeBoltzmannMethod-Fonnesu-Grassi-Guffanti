@@ -19,7 +19,7 @@ int main()
     
     using Parallel = SerialPolicy<2, Config>;
 
-    Lattice<Config, Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    Lattice<Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
     
     std::array<std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
     std::array<std::function<double(double,BoundaryPoint<2>)>,2> Outlets;

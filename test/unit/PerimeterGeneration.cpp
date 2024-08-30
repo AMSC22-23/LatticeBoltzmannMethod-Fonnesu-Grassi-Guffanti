@@ -18,13 +18,13 @@ int main()
 
     using Parallel = SerialPolicy<2, Config>;
 
-    llalbm::core::Lattice<Config, Parallel> lattice;
+    llalbm::core::Lattice<Parallel> lattice;
     generation::ConstructionInfo<2> info;
 
     info.attach_domain_dimensions({100, 100});
     info.add_perimeter_nodes(generation::NonFluidNodeType::BOUNDARY);
 
-    generation::build_lattice<2, Config>(lattice, 9, info);
+    generation::build_lattice<2, Parallel>(lattice, 9, info);
 
     std::ofstream file("lattice.txt");
     lattice.print_lattice_structure(file);

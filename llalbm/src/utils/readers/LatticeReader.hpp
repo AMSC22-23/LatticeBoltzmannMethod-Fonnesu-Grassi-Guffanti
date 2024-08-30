@@ -218,7 +218,7 @@ namespace llalbm::util::reader
     {
         /**
          * @brief Loads a tensor from an input file stream. Each line of the file (after the header)
-         * should contain the appropriate number coordinates and the value of the tensor correspondnting to those
+         * should contain the appropriate number coordinates and the value of the tensor corresponding to those
          * coordinates
          * 
          * @param in Input file stream
@@ -332,7 +332,7 @@ namespace llalbm::util::reader
      * 1 10 30
      * ...
      * 
-     * is not valid has the total number of points does not reach the product
+     * is not valid as the total number of points does not reach the product
      * of the extensions of the dimensions.
      * 
      * While a file
@@ -516,6 +516,7 @@ namespace llalbm::util::reader
         identify_node_type(lattice_dimensions, inlet_nodes_coord);
         identify_node_type(lattice_dimensions, outlet_nodes_coord);
         identify_obstacle_propagation(lattice_dimensions, obstacle_nodes_coord, fluid_nodes_coord, inlet_nodes_coord, outlet_nodes_coord);
+        eliminate_non_wet_nodes(obstacle_nodes_coord);
         logger.info("==Nodes identified properly==");
         logger.info("LATTICE READING COMPLETED");
     }

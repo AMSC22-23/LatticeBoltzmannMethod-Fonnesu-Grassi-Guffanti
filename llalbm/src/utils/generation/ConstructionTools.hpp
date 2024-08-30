@@ -53,10 +53,9 @@ using namespace llalbm::util;
  */
 template<
     std::size_t dim,
-    typename LatticeConfiguration,
     typename Parallelization      
 >
-void build_lattice(Lattice<LatticeConfiguration, Parallelization>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
+void build_lattice(Lattice<Parallelization>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
 {
     // Traduce ConstructionInfo sets into vectors
     Logger logger("ConstructionTools", std::cout);

@@ -18,7 +18,7 @@ int main()
 
     using Parallel = SerialPolicy<2, Config>;
 
-    llalbm::core::Lattice<Config, Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    llalbm::core::Lattice<Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     
     std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;

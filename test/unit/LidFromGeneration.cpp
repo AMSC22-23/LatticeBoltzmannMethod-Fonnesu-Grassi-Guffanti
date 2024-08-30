@@ -29,7 +29,7 @@ int main()
 
     using Parallel = SerialPolicy<2, Config>;
 
-    llalbm::core::Lattice<Config, Parallel> Lid;
+    llalbm::core::Lattice<Parallel> Lid;
 
     
     std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
@@ -61,7 +61,7 @@ int main()
     info.add_perimeter_nodes(generation::NonFluidNodeType::BOUNDARY);
     info.add_nodes_interval({0,1}, {0,98}, generation::NonFluidNodeType::INLET);
 
-    generation::build_lattice<2, Config>(Lid, 9, info);
+    generation::build_lattice<2, Parallel>(Lid, 9, info);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out, true);

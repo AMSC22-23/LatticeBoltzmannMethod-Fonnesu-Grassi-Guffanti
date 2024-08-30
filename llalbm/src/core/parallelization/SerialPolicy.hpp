@@ -30,6 +30,7 @@ namespace llalbm::core
     requires IsGloballySerial<Configuration>
     class SerialPolicy : public SequentialTag {
     public:
+        static constexpr std::size_t dims = Configuration::dimensions;
         SerialPolicy() {
             std::cout << "Generic Serial Policy is not implemented" << std::endl;
         }
@@ -39,7 +40,7 @@ namespace llalbm::core
     template < typename Configuration >
     class SerialPolicy<2, Configuration> : public SequentialTag {
     public:
-
+        static constexpr std::size_t dims = Configuration::dimensions;
         using CollisionPolicy = typename Configuration::collision_policy_t;
         using WallPolicy = typename Configuration::wall_policy_t;
         using ObstaclePolicy = typename Configuration::obstacle_policy_t;

@@ -32,7 +32,7 @@ int main()
 
     using Parallel = SerialPolicy<2, Config>;
 
-    llalbm::core::Lattice<Config, Parallel> Lid;
+    llalbm::core::Lattice<Parallel> Lid;
 
     
     std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
@@ -68,7 +68,7 @@ int main()
     info.add_nodes_interval({0,1}, {0,98}, generation::NonFluidNodeType::INLET);
     info.add_obstacle_hyper_sphere({50, 50}, 20);
 
-    generation::build_lattice<2, Config>(Lid, 9, info);
+    generation::build_lattice<2, Parallel>(Lid, 9, info);
 
     // Necessary for PSBB
     boundaries::PSBounceBackPolicy<2>::initialize(0.51, 0.01);

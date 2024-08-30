@@ -32,7 +32,7 @@ int main()
 
     using Parallel = OMPPolicy<2, Config>;
 
-    llalbm::core::Lattice<Config, Parallel> Lid;
+    llalbm::core::Lattice<Parallel> Lid;
 
     
     std::array< std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
@@ -68,7 +68,7 @@ int main()
     info.add_nodes_interval({0,1}, {0,98}, generation::NonFluidNodeType::INLET);
     info.add_obstacle_hyper_rectangle({20, 70}, {20, 20});
 
-    generation::build_lattice<2, Config>(Lid, 9, info);
+    generation::build_lattice<2, Parallel>(Lid, 9, info);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out, true);

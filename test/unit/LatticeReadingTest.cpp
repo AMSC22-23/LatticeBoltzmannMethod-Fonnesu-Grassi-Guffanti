@@ -38,7 +38,7 @@ int main()
 
     using Parallel = SerialPolicy<2, Config>;
 
-    Lattice<Config, Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    Lattice<Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out);
