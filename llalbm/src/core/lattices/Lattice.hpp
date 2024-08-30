@@ -379,7 +379,7 @@ namespace llalbm::core
 
                 if (flow_analyzer != nullptr && i > 0 && i % flow_analyzer->get_iterations_between_save() == 0)
                 {
-                    flow_analyzer->compute_flow_properties(after_collision_populations, true);
+                    flow_analyzer->compute_flow_properties(after_collision_populations);
                 }
 
                 // 5) Propagate after collision populations, also to not fluid nodes
@@ -624,10 +624,7 @@ namespace llalbm::core
 
         void attach_flow_analyzer(std::shared_ptr<FlowAnalyzer<dim>> flow_analyzer_)
         {
-            auto points = flow_analyzer_->get_points();
-            flow_analyzer = FlowAnalyzer<dim>::create(
-                points,
-                flow_analyzer_->get_iterations_between_save());
+            flow_analyzer = flow_analyzer_->shared_from_this();
         }
         // ========================================================================================= 
         // ========================================================================================= 

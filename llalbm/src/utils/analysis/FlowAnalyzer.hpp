@@ -76,7 +76,7 @@ public:
         throw std::runtime_error("FlowAnalyzer is not implemented for this dimension");
     }
 
-    std::pair<double,double> compute_flow_properties(const Eigen::Tensor<double, dim+1>& densities, const bool& save_contribution=false)
+    std::pair<double,double> compute_flow_properties(const Eigen::Tensor<double, dim+1>& densities, const bool& should_save=false)
     {
         throw std::runtime_error("FlowAnalyzer is not implemented for this dimension");
     }
@@ -167,6 +167,13 @@ private:
      */
     int save_counter;
 
+
+    /**
+     * @brief Whether or not data from the analysis should be saved, default is true.
+     * 
+     */
+    bool should_save = true;
+
     /**
      * @brief Output file stream object for total lift and drag contributions.
      * 
@@ -177,6 +184,7 @@ private:
      * @brief Vector containing pairs of total lift and drag for each iteration.
      */
     std::vector<std::pair<double,double>> lift_drag_per_iteration;
+
 public: 
 
     FlowAnalyzer(const std::size_t& iterations_between_save_=10) :
@@ -188,11 +196,12 @@ public:
         initialize();
     }
 
-    FlowAnalyzer(std::vector<ObstaclePoint<2>>& considered_points_, const std::size_t& iterations_between_save_=10) :
+    FlowAnalyzer(std::vector<ObstaclePoint<2>>& considered_points_, const std::size_t& iterations_between_save_=10, const bool& should_save_=true) :
     l ("FlowAnalyzer", std::cout),
     considered_points(considered_points_),
     total_lift(0.),
     total_drag(0.),
+    should_save(should_save_),
     iterations_between_save(iterations_between_save_)
     {
         initialize();
@@ -206,9 +215,10 @@ public:
      * @return std::shared_ptr<FlowAnalyzer<2>> 
      */
     static std::shared_ptr<FlowAnalyzer<2>> create(std::vector<ObstaclePoint<2>>& considered_points_,
-        const std::size_t& iterations_between_save_) 
+        const std::size_t& iterations_between_save_,
+        const bool& should_save_) 
     {
-        return std::make_shared<FlowAnalyzer<2>>(considered_points_, iterations_between_save_);
+        return std::make_shared<FlowAnalyzer<2>>(considered_points_, iterations_between_save_, should_save_);
     }
 
     /**
@@ -295,6 +305,11 @@ public:
         iterations_between_save = iterations_between_save_;
     }
 
+    void set_should_save(const bool& should_save_)
+    {
+        should_save = should_save_;
+    }
+
     std::size_t get_iterations_between_save() const
     {
         return iterations_between_save;
@@ -326,18 +341,17 @@ public:
      * Lift is the total vertical force acting on the obstacle, while drag is the total horizontal force acting on the obstacle.
      * 
      * @param densities populations tensor
-     * @param save_contribution flag to save the contribution of each node to lift and drag in a csv file
      * 
      * @returns a pair containing the total lift and the total drag
      */
-    std::pair<double,double> compute_flow_properties(const Eigen::Tensor<double, 3>& densities, const bool& save_contribution=false)
+    std::pair<double,double> compute_flow_properties(const Eigen::Tensor<double, 3>& densities)
     {
 #ifdef LLALBM_VERBOSE
         l.info("Computing flow properties");
 #endif 
         std::ofstream out_stream;
 
-        if (save_contribution)
+        if (should_save)
         {
 #ifdef LLALBM_VERBOSE
             l.info("Saving contributions to lift and drag");
@@ -414,7 +428,7 @@ public:
                 local_lift += (densities(i+1, j+1, 6) + densities(i+1, j+1, 8)) * std::sqrt(2)/2.0;
             }
 
-            if (save_contribution)
+            if (should_save)
             {
                 out_stream << i << "," << j << "," << local_lift << "," << local_drag << std::endl;
             }
@@ -423,7 +437,7 @@ public:
             total_lift += local_lift;
         }
 
-        if (save_contribution)
+        if (should_save)
         {
             total_lift_drag_out << save_counter << "," << total_lift << "," << total_drag << std::endl;
 #ifdef LLALBM_VERBOSE
@@ -513,6 +527,16 @@ public:
             }
             l.info("Obstacle layout saved in obstacle_layout.csv");
         }
+    }
+
+    /**
+     * @brief Get all the global lift and drag results for each iteration.
+     * 
+     * @return std::vector<std::pair<double,double>> 
+     */
+    std::vector<std::pair<double,double>> get_all_results() const
+    {
+        return lift_drag_per_iteration;
     }
 
 private: 
