@@ -17,6 +17,18 @@
 // ====================================
 namespace llalbm::core {
 
+/**
+ * @brief Lattice configuration static object used to group policies used during LBM simulations.
+ * 
+ * @tparam dim Physical dimensions of the lattice.
+ * @tparam CollisionPolicy Policy managing the interaction between nodes.
+ * @tparam WallPolicy Policy managing the interaction between a fluid node and a wall node.
+ * @tparam ObstaclePolicy Policy managing the interaction between a fluid node and an internal obstacle.
+ * @tparam InletPolicy Policy managing the evaluation of open boundary conditions for inlets.
+ * @tparam OutletPolicy Policy managing the evaluation of open boundary conditions for outlets.
+ * @tparam InitializationPolicy Policy managing the initialization of the inlets and outlets.
+ * @tparam EquilibriumPolicy Policy managing the computation of the equilibrium distributions.
+ */
 template<
     std::size_t dim,                  // Spatial dimensions of the simulation.
     typename CollisionPolicy,         // Policy managing the interaction between two fluid nodes.

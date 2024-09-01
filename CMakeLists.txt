@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and version
 project(LBM_PROJECT VERSION 1.0)
 
+# add the should_Test option
+option(should_Test "Build all tests." OFF)
+
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -22,4 +26,8 @@ add_compile_options(-Wno-deprecated-enum-enum-conversion -fopenmp)
 add_subdirectory(llalbm)
 
 # Include tests directory
-add_subdirectory(test)
+if(should_Test)
+    add_subdirectory(test)
+endif()
+    # Include the tutorial directory
+add_subdirectory(examples)

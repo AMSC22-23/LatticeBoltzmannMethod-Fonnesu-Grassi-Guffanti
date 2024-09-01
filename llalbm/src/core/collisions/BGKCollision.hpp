@@ -585,6 +585,7 @@ namespace llalbm::core::collisions
 
     // initialization of the relaxation constant in the 2-D BGK collision operator.
     double BGKCollisionPolicy<2>::tau = 0.0;
+    double OMPBGKCollisionPolicy<2>::tau = 0.0;
 
 }; // namespace llalbm::core::collisions
 
