@@ -16,6 +16,7 @@
 #include <map>
 #include <array>
 #include <cassert>
+#include <execution>
 // =========== EIGEN INCLUDES ===========
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <Eigen/Dense>
@@ -87,6 +88,31 @@ namespace llalbm::core::boundaries
             }
     };
     
+    template<std::size_t dim>
+    class STDExecOpenBoundaryPolicy : public BoundaryPolicyTag, public STDExecTag
+    {
+    private:
+        /* data */
+        Logger log;
+    public:
+        STDExecOpenBoundaryPolicy(/* args */)
+        : log("Generic Open Boundary" , std::cout)
+        {
+            log.error("Generic Open Boundary not implemented");
+            assert(false);
+        }
+    };
+    
+    template<>
+    class STDExecOpenBoundaryPolicy<2> : public BoundaryPolicyTag, public STDExecTag
+    {       
+        public: 
+
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                return;
+            }
+    };
 } // namespace llalbm::core::boundaries
 
 #endif // LLALBM_OpenBoundaryPolicy_HPP
