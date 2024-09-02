@@ -9,23 +9,33 @@ import numpy as np
 # Read the first argument as the data file
 data_file = sys.argv[1]
 
-# Read the file as a CSV
-data = pd.read_csv(data_file)
+try:
+    # Read the file as a CSV
+    data = pd.read_csv(data_file)
 
-# Extract X, Y from the data
-X = data.iloc[:, 1]
-Y = data.iloc[:, 0]
+    # Extract X, Y from the data
+    X = data.iloc[:, 1]
+    Y = data.iloc[:, 0]
 
-# Print the read points
-print(X,Y)
+    maxX = np.max(X)
+    maxY = np.max(Y)
 
-# Create a new figure for the obstacle layout
-fig, ax = plt.subplots(figsize=(7, 6))
+    normX = maxX / maxX
+    normY = maxY / maxX
 
-# Plot the obstacle layout as a scatter plot
-sc_obstacle = ax.scatter(X, Y, c='black', marker='s')
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_title('Obstacle Layout')
-plt.savefig('plot_obstacle_layout.png')
-plt.close(fig) 
+    # Create a new figure for the obstacle layout
+
+    fig, ax = plt.subplots(figsize=(normX * 20, normY * 20))
+    plt.tight_layout()
+
+    # Plot the obstacle layout as a scatter plot
+    sc_obstacle = ax.scatter(X, Y, c='black', marker='s')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_title('Obstacle Layout')
+    plt.savefig('plot_obstacle_layout.png')
+    plt.close(fig) 
+    print("Plot stored in plot_obstacle_layout.png")
+except:
+    print("Error: Could not read the data file")
+    sys.exit(1)
