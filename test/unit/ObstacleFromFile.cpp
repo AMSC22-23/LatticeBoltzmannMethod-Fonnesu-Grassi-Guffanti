@@ -13,7 +13,7 @@ int main(){
     
     using Config = LatticeConfiguration<
         2,
-        collisions::OMPBGKCollisionPolicy<2>,
+        collisions::OMPTRTCollisionPolicy<2>,
         boundaries::OMPBounceBackPolicy<2>,
         boundaries::OMPBounceBackPolicy<2>,
         boundaries::OMPZouHePolicy<2>,
@@ -30,14 +30,15 @@ int main(){
     info.add_perimeter_nodes(NonFluidNodeType::BOUNDARY);
     info.add_nodes_interval({1,0}, {198, 0}, NonFluidNodeType::INLET);
     info.add_nodes_interval({1,599}, {198, 599}, NonFluidNodeType::OUTLET);
-    info.read_obstacle_from_file("black_pixel_coords.txt");
+    info.read_obstacle_from_file("your_file_name.txt");
 
     build_lattice<2, Parallelization>(lattice, 9, info);
 
-    collisions::OMPBGKCollisionPolicy<2>::initialize(0.6, 10);
+    collisions::OMPTRTCollisionPolicy<2>::initialize(0.8, 1.4, 1.0/std::sqrt(3.0));
+    collisions::OMPTRTCollisionPolicy<2>::enforce_magic_parameter();
 
     std::array<std::function<double(double, BoundaryPoint<2>)>, 2> inlets = {
-        [](double t, BoundaryPoint<2> p) { return 0.15*(1.0 - std::exp(-t * (0.001))); },
+        [](double t, BoundaryPoint<2> p) { return 0.2*(1.0 - std::exp(-t * (0.001))); },
         [](double t, BoundaryPoint<2> p) { return 0.0; }
     };
 
