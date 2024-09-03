@@ -187,6 +187,7 @@ private:
 
 public: 
 
+
     FlowAnalyzer(const std::size_t& iterations_between_save_=10) :
     l ("FlowAnalyzer", std::cout),
     total_lift(0.),

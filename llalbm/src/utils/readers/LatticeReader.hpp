@@ -323,7 +323,7 @@ namespace llalbm::util::reader
      * SPACE SEPARATED COORDINATES OF THE NODES AND TYPE, PROCEEDING AS FOLLOWS (JUST LIKE WHEN POPULATING A MATRIX):
      * - first number  : row index 
      * - second number : column index
-     * - third number  : depth index
+     * - third number  : depth index    
      * ... and so on
      * 
      * For instance, considering only three types of nodes, a file
@@ -521,11 +521,54 @@ namespace llalbm::util::reader
         logger.info("LATTICE READING COMPLETED");
     }
 
-// =======================================================================================================
-// =======================================================================================================
-// =======================================================================================================
-    
+    template<std::size_t dim>
+    void read_obstacle_file(
+        const std::string& path,
+        std::vector<ObstaclePoint<dim>>& obstacle_nodes_coord,
+        std::array<Eigen::Index, dim>& lattice_dimensions
+    )
+    {
+        // Start by opening an input file stream
+        std::ifstream in(path);
+        assert(in.is_open() && "ERROR: The input file could not be opened.");
 
+        // Read the header of the file which contains the number of obstacle nodes
+        std::string header;
+        std::getline(in, header);
+        std::size_t total_elems;
+        std::stringstream string_stream;
+
+        string_stream << header;
+        string_stream >> total_elems;
+        string_stream.clear();
+
+        // As the obstacle node vector may already have some nodes, it's better to store data in a new vector
+        // that will then be merged
+        std::vector<ObstaclePoint<dim>> nodes_from_file(total_elems);
+        for (std::size_t i = 0; i < total_elems; ++i)
+        {
+            std::getline(in, header);
+            std::vector<std::string> splitted = split_file_line(header, " ");
+            ObstaclePoint<dim> op;
+            for (std::size_t j = 0; j < dim; ++j)
+            {
+                string_stream << splitted[j];
+                string_stream >> op.coords[j];
+                if (op.coords[j] < 0 || op.coords[j] >= lattice_dimensions[j])
+                {
+                    logger.error("ERROR: Obstacle node is not within the lattice bounds.");
+                    assert(false);
+                }
+                string_stream.clear();
+            }
+            nodes_from_file[i] = ObstaclePoint<dim>(op);
+        }
+        obstacle_nodes_coord.insert(obstacle_nodes_coord.end(), nodes_from_file.begin(), nodes_from_file.end());
+    }
+
+// =======================================================================================================
+// =======================================================================================================
+// =======================================================================================================
 };
 
 #endif // LLALBM_LATTICEREADER_HPP

@@ -83,9 +83,9 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
 
         self.vmin           :float          = 0.0
         self.vmax           :float          = 0.2
-        self.interpolation  :str            = "spline16"
+        self.interpolation  :str            = "none"
         self.frame_index    :int            = 0
-        self.frame_number   :int            = 300
+        self.frame_number   :int            = 360
 
 
     def check_input_data(self) -> bool:

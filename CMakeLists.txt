@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 # Project name and version
 project(LBM_PROJECT VERSION 1.0)
 
-# add the should_Test option
+# add the should_Test variable
 option(should_Test "Build all tests." OFF)
 
 

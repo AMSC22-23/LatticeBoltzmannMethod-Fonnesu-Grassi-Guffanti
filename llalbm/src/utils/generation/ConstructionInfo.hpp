@@ -26,12 +26,15 @@
 #include "../../utils/loggers/Logger.hpp"
 #include "../../utils/aliases.hpp" 
 #include "../../utils/MultiDimensionalLoop.hpp"
+#include "../../utils/readers/LatticeReader.hpp"
+
 // =======================================
 
 namespace llalbm::util::generation
 {
 using namespace llalbm::util::logger;
 using namespace llalbm::util;
+using namespace llalbm::util::reader;
 
 enum NonFluidNodeType
 {
@@ -482,6 +485,22 @@ public:
         return added_nodes;
     }
     
+    /**
+     * @brief Reads obstacle data from a file, calling the lattice reading infrastructure
+     * 
+     * @param file_path path to the obstacle file
+     */
+    void read_obstacle_from_file(const std::string& file_path)
+    {
+        if (!dimensions_provided)
+        {
+            l.error("Dimensions of the computational domain have not been provided.");
+            return;
+        }
+        std::vector<ObstaclePoint<dim>> obstacle_nodes_vec;
+        read_obstacle_file<dim>(file_path, obstacle_nodes_vec, domain_dimensions);
+        std::move(obstacle_nodes_vec.begin(), obstacle_nodes_vec.end(), std::inserter(obstacle_nodes, obstacle_nodes.end()));
+    }
     // ========================================================================================= 
     //                                      GETTERS AND SETTERS
     // ========================================================================================= 
