@@ -5,7 +5,7 @@
 
 
 /**
- * @brief In this second example we are going to show how to simulate a Pouseille flow. Here we 
+ * @brief In this second example we are going to show how to simulate a parabolic flow. Here we 
  * want to simulate horizontal flow in a channel with an imposed a parabolic profile. An outlet is on the right and
  * imposes the same profile to the outgoing flow.
  * 

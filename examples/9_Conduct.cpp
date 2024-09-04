@@ -40,8 +40,9 @@ int main()
     info.add_nodes_interval({1, 0}, {198, 0}, NonFluidNodeType::INLET);
     // And an outlet on the right
     info.add_nodes_interval({1, 599}, {198, 599}, NonFluidNodeType::OUTLET);
-    // To add random spheres we just need to call the add_obstacle_random_spheres function
-    info.read_obstacle_from_file("duct2.txt");
+    // To add random spheres we just need to call the add_obstacle_random_spheres function.
+    // The path assumes that the executable is being called from the build/ folder
+    info.read_obstacle_from_file("../examples/duct2.txt");
     // The lattice is ready to be built, and to do that we just need to call build_lattice!
     build_lattice<2, Parallelization>(lattice, 9, info);
 
@@ -50,7 +51,7 @@ int main()
     lattice.print_lattice_structure(out);
 
     // Setting up the collider and initializer
-    collisions::OMPTRTCollisionPolicy<2>::initialize(0.7,0, 1.0/std::sqrt(3.0));
+    collisions::OMPTRTCollisionPolicy<2>::initialize(0.7, 0, 1.0/std::sqrt(3.0));
     collisions::OMPTRTCollisionPolicy<2>::enforce_magic_parameter();
     
 
