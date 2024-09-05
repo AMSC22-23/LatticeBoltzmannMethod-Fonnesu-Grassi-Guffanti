@@ -1068,8 +1068,86 @@ namespace llalbm::core::collisions
          */
         static void collide(const Tensor<double, 3> &populations, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes, Tensor<double, 2> &global_rho, Tensor<double, 3> &global_u, const double time_step)
         {
+            Eigen::Index i;
+            Eigen::Index j;
 
-            Eigen::Index j, i;
+            auto n_rows = populations.dimensions()[0];
+            auto n_cols = populations.dimensions()[1];
+            auto n_dirs = populations.dimensions()[2]; 
+
+            double* populations_buffer = new double[n_rows * n_cols * n_dirs];
+            double* equilibrium_populations_buffer = new double[n_rows * n_cols * n_dirs];
+            double* after_collision_populations_buffer = new double[n_rows * n_cols * n_dirs];
+
+            for (size_t i = 0; i < n_rows; ++i) {
+                for (size_t j = 0; j < n_cols; ++j) {
+                    for (size_t d = 0; d < n_dirs; ++d) {
+                        populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = populations(i, j, d);
+                        equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = equilibrium_populations(i, j, d);
+                        after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = after_collision_populations(i, j, d);
+                    }
+                }
+            }
+
+            #pragma acc data copy(after_collision_populations_buffer[n_rows * n_cols * n_dirs]) copyin(equilibrium_populations_buffer[n_rows * n_cols * n_dirs], populations_buffer[n_rows * n_cols * n_dirs])
+            #pragma acc cache(populations_buffer[n_rows * n_cols * n_dirs], equilibrium_populations_buffer[n_rows * n_cols * n_dirs], after_collision_populations_buffer[n_rows * n_cols * n_dirs])
+            {
+                #pragma acc parallel loop
+                for (size_t fnode = 0; fnode < fluid_nodes.size(); ++fnode) {
+                    i = fluid_nodes[fnode].coords[0];
+                    j = fluid_nodes[fnode].coords[1];
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] - 
+                        (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5]);
+
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - 
+                        0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6]) -
+                        0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6]);
+                }
+
+                for (size_t i = 0; i < n_rows; ++i) {
+                    for (size_t j = 0; j < n_cols; ++j) {
+                        for (size_t d = 0; d < n_dirs; ++d) {
+                            after_collision_populations(i, j, d) = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d];
+                        }
+                    }
+                }
+            }
+
+            delete[] populations_buffer;
+            delete[] after_collision_populations_buffer;
+            delete[] equilibrium_populations_buffer;
+
+
+            /*Eigen::Index j, i;
             
             #pragma acc parallel loop
             //for(const auto& fluid_node : fluid_nodes)
@@ -1112,7 +1190,7 @@ namespace llalbm::core::collisions
                     0.5 * (1.0/tau_even) * (populations(i,j,8) + populations(i,j,6) - equilibrium_populations(i,j,8) - equilibrium_populations(i,j,6)) -
                     0.5 * (1.0/tau_odd) * (populations(i,j,8) - populations(i,j,6) - equilibrium_populations(i,j,8) + equilibrium_populations(i,j,6));
                 
-            }
+            }*/
         }
 
         /**
@@ -1126,8 +1204,46 @@ namespace llalbm::core::collisions
         {
 
             Eigen::Index j, i;
+            auto n_rows = populations.dimensions()[0];
+            auto n_cols = populations.dimensions()[1];
+            auto num_directions = populations.dimensions()[2];
+            double* populations_buffer = new double[n_rows * n_cols * num_directions];
+            double* after_collision_populations_buffer = new double[n_rows * n_cols * num_directions];
 
-            #pragma acc parallel loop
+            // Copia i dati da after_collision_populations al buffer after_collision_populations_buffer
+            for (Eigen::Index i = 0; i < n_rows; ++i) {
+                for (Eigen::Index j = 0; j < n_cols; ++j) {
+                    for (std::size_t d = 0; d < num_directions; ++d) {
+                        after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + d] = after_collision_populations(i, j, d);
+                    }
+                }
+            }
+
+            // Loop parallelo per aggiornare populations
+            #pragma acc data copy(populations_buffer[0:n_rows*n_cols*num_directions])
+            {
+                #pragma acc parallel loop
+                for (size_t fnode = 0; fnode < fluid_nodes.size(); fnode++) {
+                    size_t i = fluid_nodes[fnode].coords[0];
+                    size_t j = fluid_nodes[fnode].coords[1];
+
+                    // Aggiorna il buffer di populations
+                    populations_buffer[i * n_cols * num_directions + j * num_directions + 0] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 0];
+                    populations_buffer[i * n_cols * num_directions + (j + 1) * num_directions + 1] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 1];
+                    populations_buffer[(i - 1) * n_cols * num_directions + j * num_directions + 2] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 2];
+                    populations_buffer[i * n_cols * num_directions + (j - 1) * num_directions + 3] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 3];
+                    populations_buffer[(i + 1) * n_cols * num_directions + j * num_directions + 4] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 4];
+                    populations_buffer[(i - 1) * n_cols * num_directions + (j + 1) * num_directions + 5] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 5];
+                    populations_buffer[(i - 1) * n_cols * num_directions + (j - 1) * num_directions + 6] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 6];
+                    populations_buffer[(i + 1) * n_cols * num_directions + (j - 1) * num_directions + 7] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 7];
+                    populations_buffer[(i + 1) * n_cols * num_directions + (j + 1) * num_directions + 8] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 8];
+                }
+            }
+            // Libera la memoria allocata dinamicamente
+            delete[] populations_buffer;
+            delete[] after_collision_populations_buffer;
+
+            /*#pragma acc parallel loop
             //for(const auto& fluid_node : fluid_nodes)
             for(size_t fnode=0; fnode < fluid_nodes.size(); fnode++)
             {
@@ -1143,7 +1259,7 @@ namespace llalbm::core::collisions
                 populations(i-1, j-1, 6) = after_collision_populations(i,j,6);
                 populations(i+1, j-1, 7) = after_collision_populations(i,j,7);
                 populations(i+1, j+1, 8) = after_collision_populations(i,j,8);
-            }
+            }*/
         }
 
     /**
@@ -1161,7 +1277,81 @@ namespace llalbm::core::collisions
 
         Eigen::Index j, i;
 
-        #pragma acc parallel loop
+        auto n_rows = populations.dimensions()[0];
+        auto n_cols = populations.dimensions()[1];
+        auto n_dirs = populations.dimensions()[2]; 
+
+        double* populations_buffer = new double[n_rows * n_cols * n_dirs];
+        double* equilibrium_populations_buffer = new double[n_rows * n_cols * n_dirs];
+        double* after_collision_populations_buffer = new double[n_rows * n_cols * n_dirs];
+
+        for (size_t i = 0; i < n_rows; ++i) {
+            for (size_t j = 0; j < n_cols; ++j) {
+                for (size_t d = 0; d < n_dirs; ++d) {
+                    populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = populations(i, j, d);
+                    equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = equilibrium_populations(i, j, d);
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = after_collision_populations(i, j, d);
+                }
+            }
+        }
+
+        #pragma acc data copy(after_collision_populations_buffer[n_rows * n_cols * n_dirs]) copyin(equilibrium_populations_buffer[n_rows * n_cols * n_dirs], populations_buffer[n_rows * n_cols * n_dirs])
+        #pragma acc cache(populations_buffer[n_rows * n_cols * n_dirs], equilibrium_populations_buffer[n_rows * n_cols * n_dirs], after_collision_populations_buffer[n_rows * n_cols * n_dirs])
+        {
+            #pragma acc parallel loop
+            for (size_t onode = 0; onode < open_boundary_nodes.size(); ++onode) {
+                Eigen::Index i = open_boundary_nodes[onode].coords[0];
+                Eigen::Index j = open_boundary_nodes[onode].coords[1];
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] - 
+                    (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5]);
+
+                after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] = populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - 
+                    0.5 * (1.0 / tau_even) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] + populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6]) -
+                    0.5 * (1.0 / tau_odd) * (populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] - populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6] - equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8] + equilibrium_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6]);
+            }
+
+            for (size_t i = 0; i < n_rows; ++i) {
+                    for (size_t j = 0; j < n_cols; ++j) {
+                        for (size_t d = 0; d < n_dirs; ++d) {
+                            after_collision_populations(i, j, d) = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d];
+                        }
+                    }
+                }
+            }
+
+        delete[] populations_buffer;
+        delete[] after_collision_populations_buffer;
+        delete[] equilibrium_populations_buffer;
+        /*#pragma acc parallel loop
         //for(const auto& open_boundary : open_boundary_nodes)
         for(size_t onode=0; onode < open_boundary_nodes.size(); onode++)
         {
@@ -1202,7 +1392,7 @@ namespace llalbm::core::collisions
                 0.5 * (1.0/tau_even) * (populations(i,j,8) + populations(i,j,6) - equilibrium_populations(i,j,8) - equilibrium_populations(i,j,6)) -
                 0.5 * (1.0/tau_odd) * (populations(i,j,8) - populations(i,j,6) - equilibrium_populations(i,j,8) + equilibrium_populations(i,j,6));
             
-        }
+        }*/
     }
 
     /**
@@ -1218,6 +1408,72 @@ namespace llalbm::core::collisions
         Eigen::Index j, i;
 
         auto n_rows = populations.dimensions()[0];
+        auto n_cols = populations.dimensions()[1];
+        auto n_dirs = populations.dimensions()[2]; // Presumendo che le direzioni siano la terza dimensione
+
+        
+        double* populations_buffer = new double[n_rows * n_cols * n_dirs];
+        double* after_collision_populations_buffer= new double[n_rows * n_cols * n_dirs];
+
+        
+        for (size_t i = 0; i < n_rows; ++i) {
+            for (size_t j = 0; j < n_cols; ++j) {
+                for (size_t d = 0; d < n_dirs; ++d) {
+                    populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = populations(i, j, d);
+                    after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d] = after_collision_populations(i, j, d);
+                }
+            }
+        }
+
+        // Uso dei buffer
+        #pragma acc data copy(populations_buffer[n_rows * n_cols * n_dirs], after_collision_populations_buffer[n_rows * n_cols * n_dirs])
+        {
+            #pragma acc parallel loop
+            for (size_t onode = 0; onode < open_boundary_nodes.size(); ++onode) {
+                size_t i = open_boundary_nodes[onode].coords[0];
+                size_t j = open_boundary_nodes[onode].coords[1];
+
+                populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 0];
+
+                if (j != 0) {
+                    populations_buffer[i * n_cols * n_dirs + (j - 1) * n_dirs + 3] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 3];
+                }
+                if (i != n_rows - 1) {
+                    populations_buffer[(i + 1) * n_cols * n_dirs + j * n_dirs + 4] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 4];
+                }
+                if (j != n_cols - 1) {
+                    populations_buffer[i * n_cols * n_dirs + (j + 1) * n_dirs + 1] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 1];
+                }
+                if (i != 0) {
+                    populations_buffer[(i - 1) * n_cols * n_dirs + j * n_dirs + 2] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 2];
+                }
+                if (i != n_rows - 1 && j != 0) {
+                    populations_buffer[(i + 1) * n_cols * n_dirs + (j - 1) * n_dirs + 7] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 7];
+                }
+                if (i != n_rows - 1 && j != n_cols - 1) {
+                    populations_buffer[(i + 1) * n_cols * n_dirs + (j + 1) * n_dirs + 8] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 8];
+                }
+                if (i != 0 && j != n_cols - 1) {
+                    populations_buffer[(i - 1) * n_cols * n_dirs + (j + 1) * n_dirs + 5] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 5];
+                }
+                if (i != 0 && j != 0) {
+                    populations_buffer[(i - 1) * n_cols * n_dirs + (j - 1) * n_dirs + 6] = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + 6];
+                }
+            }
+        }
+
+        for (size_t i = 0; i < n_rows; ++i) {
+            for (size_t j = 0; j < n_cols; ++j) {
+                for (size_t d = 0; d < n_dirs; ++d) {
+                    populations(i, j, d) = populations_buffer[i * n_cols * n_dirs + j * n_dirs + d];
+                    after_collision_populations(i, j, d) = after_collision_populations_buffer[i * n_cols * n_dirs + j * n_dirs + d];
+                }
+            }
+        }
+        delete[] populations_buffer;
+        delete[] after_collision_populations_buffer;
+
+        /*auto n_rows = populations.dimensions()[0];
         auto n_cols = populations.dimensions()[1];
 
         #pragma acc parallel loop
@@ -1269,7 +1525,7 @@ namespace llalbm::core::collisions
             {
                 populations(i-1, j-1, 6) = after_collision_populations(i, j, 6);
             }
-        }
+        }*/
     }
 
     };

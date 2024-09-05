@@ -351,8 +351,130 @@ namespace llalbm::core::boundaries
 
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
-                
-                Eigen::Index i, j;
+                // Supponiamo che le dimensioni siano note
+                auto n_rows = populations.dimensions()[0];
+                auto n_cols = populations.dimensions()[1];
+                const std::size_t num_directions = 9;
+
+                // Crea il buffer per populations
+                double* populations_buffer = new double[n_rows * n_cols * num_directions];
+
+                // Copia i dati da populations al buffer
+                for (Eigen::Index i = 0; i < n_rows; ++i) {
+                    for (Eigen::Index j = 0; j < n_cols; ++j) {
+                        for (std::size_t d = 0; d < num_directions; ++d) {
+                            populations_buffer[i * n_cols * num_directions + j * num_directions + d] = populations(i, j, d);
+                        }
+                    }
+                }
+
+                // Mappa il buffer nella GPU
+                #pragma acc data copy(populations_buffer[0:n_rows * n_cols * num_directions])
+                #pragma acc cache(populations_buffer[0:n_rows * n_cols * num_directions])
+                {
+                    #pragma acc parallel loop
+                    for (std::size_t bnode = 0; bnode < boundary_coord.size(); ++bnode)
+                    {
+                        Eigen::Index i = boundary_coord[bnode].coords[0];
+                        Eigen::Index j = boundary_coord[bnode].coords[1];
+                        double rho, ru, rv;
+
+                        // Calcola l'indice lineare del buffer per l'accesso diretto
+                        std::size_t base_idx = i * n_cols * num_directions + j * num_directions;
+
+                        switch (boundary_coord[bnode].type)
+                        {
+                            case TOP_WALL:
+                                rho = (populations_buffer[base_idx + 0] +
+                                    populations_buffer[base_idx + 1] +
+                                    populations_buffer[base_idx + 3] +
+                                    2.0 * (populations_buffer[base_idx + 2] +
+                                            populations_buffer[base_idx + 5] +
+                                            populations_buffer[base_idx + 6])) /
+                                    (1.0 + global_u(i,j,1));
+                                global_rho(i,j) = rho;
+                                ru = rho * global_u(i,j,0);
+                                rv = rho * global_u(i,j,1);
+
+                                populations_buffer[base_idx + 4] = populations_buffer[base_idx + 2] - two_thirds * rv;
+                                populations_buffer[base_idx + 7] = populations_buffer[base_idx + 5] - one_sixth * rv - one_half * ru + one_half * (populations_buffer[base_idx + 1] - populations_buffer[base_idx + 3]);
+                                populations_buffer[base_idx + 8] = populations_buffer[base_idx + 6] - one_sixth * rv + one_half * ru - one_half * (populations_buffer[base_idx + 1] - populations_buffer[base_idx + 3]);
+
+                                break;
+
+                            case BOTTOM_WALL:
+                                rho = (populations_buffer[base_idx + 0] +
+                                    populations_buffer[base_idx + 1] +
+                                    populations_buffer[base_idx + 3] +
+                                    2.0 * (populations_buffer[base_idx + 4] +
+                                            populations_buffer[base_idx + 7] +
+                                            populations_buffer[base_idx + 8])) /
+                                    (1.0 - global_u(i,j,1));
+                                global_rho(i,j) = rho;
+                                ru = rho * global_u(i,j,0);
+                                rv = rho * global_u(i,j,1);
+
+                                populations_buffer[base_idx + 2] = populations_buffer[base_idx + 4] + two_thirds * rv;
+                                populations_buffer[base_idx + 5] = populations_buffer[base_idx + 7] + one_sixth * rv + one_half * ru - one_half * (populations_buffer[base_idx + 1] - populations_buffer[base_idx + 3]);
+                                populations_buffer[base_idx + 6] = populations_buffer[base_idx + 8] + one_sixth * rv - one_half * ru + one_half * (populations_buffer[base_idx + 1] - populations_buffer[base_idx + 3]);
+
+                                break;
+
+                            case LEFT_WALL:
+                                rho = (populations_buffer[base_idx + 0] +
+                                    populations_buffer[base_idx + 2] +
+                                    populations_buffer[base_idx + 4] +
+                                    2.0 * (populations_buffer[base_idx + 3] +
+                                            populations_buffer[base_idx + 7] +
+                                            populations_buffer[base_idx + 6])) /
+                                    (1.0 - global_u(i,j,0));
+                                global_rho(i,j) = rho;
+                                ru = rho * global_u(i,j,0);
+                                rv = rho * global_u(i,j,1);
+
+                                populations_buffer[base_idx + 1] = populations_buffer[base_idx + 3] + two_thirds * ru;
+                                populations_buffer[base_idx + 5] = populations_buffer[base_idx + 7] + one_sixth * ru + one_half * rv - one_half * (populations_buffer[base_idx + 2] - populations_buffer[base_idx + 4]);
+                                populations_buffer[base_idx + 8] = populations_buffer[base_idx + 6] + one_sixth * ru - one_half * rv + one_half * (populations_buffer[base_idx + 2] - populations_buffer[base_idx + 4]);
+
+                                break;
+
+                            case RIGHT_WALL:
+                                rho = (populations_buffer[base_idx + 0] +
+                                    populations_buffer[base_idx + 2] +
+                                    populations_buffer[base_idx + 4] +
+                                    2.0 * (populations_buffer[base_idx + 1] +
+                                            populations_buffer[base_idx + 5] +
+                                            populations_buffer[base_idx + 8])) /
+                                    (1.0 + global_u(i,j,0));
+                                global_rho(i,j) = rho;
+                                ru = rho * global_u(i,j,0);
+                                rv = rho * global_u(i,j,1);
+
+                                populations_buffer[base_idx + 3] = populations_buffer[base_idx + 1] - two_thirds * ru;
+                                populations_buffer[base_idx + 7] = populations_buffer[base_idx + 5] - one_sixth * ru - one_half * rv + one_half * (populations_buffer[base_idx + 2] - populations_buffer[base_idx + 4]);
+                                populations_buffer[base_idx + 6] = populations_buffer[base_idx + 8] - one_sixth * ru + one_half * rv - one_half * (populations_buffer[base_idx + 2] - populations_buffer[base_idx + 4]);
+
+                                break;
+
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+                // Copia i dati modificati indietro in populations
+                for (Eigen::Index i = 0; i < n_rows; ++i) {
+                    for (Eigen::Index j = 0; j < n_cols; ++j) {
+                        for (std::size_t d = 0; d < num_directions; ++d) {
+                            populations(i, j, d) = populations_buffer[i * n_cols * num_directions + j * num_directions + d];
+                        }
+                    }
+                }
+
+                delete[] populations_buffer;
+
+
+                /*Eigen::Index i, j;
                 double rho, ru, rv;
                 
                 #pragma acc parallel loop
@@ -414,7 +536,7 @@ namespace llalbm::core::boundaries
                     default:
                         break;
                     }
-                }
+                }*/
             }
     };
     
