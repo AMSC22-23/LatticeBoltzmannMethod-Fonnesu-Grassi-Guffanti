@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(LBM_PROJECT VERSION 1.0)
 
 # add the should_Test variable
-option(should_Test "Build all tests." OFF)
+option(should_Test "Build all tests." ON)
 
 
 # Set C++ standard
@@ -17,10 +17,12 @@ find_package(MPI REQUIRED)
 # find OpenMP
 cmake_policy(SET CMP0074 NEW)
 find_package(OpenMP REQUIRED)
+
+find_package(OpenACC REQUIRED)
 # find Eigen3
 find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
 
-add_compile_options(-Wno-deprecated-enum-enum-conversion -fopenmp)
+add_compile_options(-Wno-deprecated-enum-enum-conversion -fopenmp -fopenacc)
 
 # Include llalbm library
 add_subdirectory(llalbm)

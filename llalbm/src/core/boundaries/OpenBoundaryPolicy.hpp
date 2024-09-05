@@ -17,6 +17,7 @@
 #include <array>
 #include <cassert>
 #include <execution>
+#include <openacc.h>
 // =========== EIGEN INCLUDES ===========
 #include <unsupported/Eigen/CXX11/Tensor>
 #include <Eigen/Dense>
@@ -113,6 +114,33 @@ namespace llalbm::core::boundaries
                 return;
             }
     };
+
+    template<std::size_t dim>
+    class OpenACCOpenBoundaryPolicy : public BoundaryPolicyTag, public OpenACCTag
+    {
+    private:
+        /* data */
+        Logger log;
+    public:
+        OpenACCOpenBoundaryPolicy(/* args */)
+        : log("Generic OpenBoundary" , std::cout)
+        {
+            log.error("Generic OpenBoundary not implemented");
+            assert(false);
+        }
+    };
+    
+    template<>
+    class OpenACCOpenBoundaryPolicy<2> : public BoundaryPolicyTag, public OpenACCTag
+    {       
+        public: 
+            static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
+            {
+                return;
+            }
+    };
+    
+
 } // namespace llalbm::core::boundaries
 
 #endif // LLALBM_OpenBoundaryPolicy_HPP

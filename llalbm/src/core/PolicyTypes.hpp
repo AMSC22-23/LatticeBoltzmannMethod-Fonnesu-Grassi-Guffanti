@@ -42,6 +42,7 @@ namespace llalbm::core
     class SequentialTag {};
     class MPITag {};
     class STDExecTag{};
+    class OpenACCTag{};
 
     // =========== POLICY CONCEPTS ===========
     template<typename T>
@@ -58,6 +59,12 @@ namespace llalbm::core
 
     template<typename T>
     concept IsMPI = std::is_base_of_v<MPITag, T>;
+
+    template<typename T>
+    concept IsSTDExec = std::is_base_of_v<STDExecTag, T>;
+
+    template<typename T>
+    concept IsOpenACC = std::is_base_of_v<OpenACCTag, T>;
 
     template <typename T>
     concept IsInitializationPolicy = std::is_base_of_v<InitializationPolicyTag, T>;
@@ -106,6 +113,16 @@ namespace llalbm::core
         std::is_base_of<STDExecTag, typename Configuration::initialization_policy_t>,
         std::is_base_of<STDExecTag, typename Configuration::equilibrium_policy_t>>;
 
+    template<
+        typename Configuration>
+    concept IsGloballyOpenACC = std::conjunction_v<
+        std::is_base_of<OpenACCTag, typename Configuration::collision_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::wall_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::obstacle_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::inlet_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::outlet_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::initialization_policy_t>,
+        std::is_base_of<OpenACCTag, typename Configuration::equilibrium_policy_t>>;
 }; // llalbm::core
 
 #endif // LLALBM_POLICYTYPES_HPP

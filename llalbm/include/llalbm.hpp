@@ -16,6 +16,7 @@
 #include "../src/core/parallelization/SerialPolicy.hpp"
 #include "../src/core/parallelization/OMPPolicy.hpp"
 #include "../src/core/parallelization/STDExecPolicy.hpp"
+#include "../src/core/parallelization/OpenACCPolicy.hpp"
 
 // Utils - Logger utility
 #include "../src/utils/loggers/Logger.hpp"
