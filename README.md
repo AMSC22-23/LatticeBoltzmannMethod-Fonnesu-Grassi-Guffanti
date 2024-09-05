@@ -170,14 +170,28 @@ In this repository, in the [scripts](/scripts) folder, you find a few scripts th
 to generate lattices and obstacles, render animations, and plot the flow analysis.
 
 -`translate.py path_to_image lattice|rho path_to_output_dir outputfilename` can be used to generate lattices.
--`produce_video.py path_to_input_dir u (norm)` can be used to generate animations starting from velocity fields.  
+
+
+-`produce_video.py path_to_input_dir u (norm)` can be used to generate animations starting from velocity fields.
+
+
 -`plot_obstacle_layout_2d.py path_to_file` is used to plot an obstacle layout from a .csv file generated from FlowAnalyzer. 
+
+
 -`plot_lift_drag.py path_to_dir` is used to plot single nodal contributions as well as the global flow and lift. 
+
+
 -`plot_data_x.py file_path_x file_path_y line` is used to plot velocities on a horizontal line.
+
+
 -`plot_data_y.py file_path_x file_path_y line` is used to plot velocities on a vertical line.
+
+
 -`build_obstacle_file.py input_file output_file` is used to traduce a .png image representing an obstacle into a .txt
 file comprehensible by LLALBM.
 
+
+#Acknowledgements
 Implemented by
 - [Lorenzo Fonnesu](mailto:lorenzo.fonnesu@mail.polimi.it)
 - [Andrea Grassi](mailto:andrea10.grassi@mail.polimi.it)
