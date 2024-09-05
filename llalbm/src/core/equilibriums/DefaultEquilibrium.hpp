@@ -361,8 +361,61 @@ namespace llalbm::core::equilibrium
             constexpr double two9 = (2.0/9.0);
             constexpr double one18 = (1.0/18.0);
             constexpr double one36 = (1.0/36.0);
-            
-            #pragma acc parallel loop
+
+            auto n_rows = equilibrium_populations.dimensions()[0];
+            auto n_cols = equilibrium_populations.dimensions()[1];
+            const std::size_t num_directions = 9;
+
+            double* equilibrium_populations_buffer = new double[n_rows * n_cols * num_directions];
+
+            for (Eigen::Index i = 0; i < n_rows; ++i) {
+                for (Eigen::Index j = 0; j < n_cols; ++j) {
+                    for (std::size_t d = 0; d < num_directions; ++d) {
+                        equilibrium_populations_buffer[i * n_cols * num_directions + j * num_directions + d] = equilibrium_populations(i, j, d);
+                    }
+                }
+            }
+
+            #pragma acc data copy(equilibrium_populations_buffer[0:n_rows * n_cols * num_directions])
+            #pragma acc cache(equilibrium_populations_buffer[0:n_rows * n_cols * num_directions])
+            {
+                #pragma acc parallel loop
+                for (std::size_t k = 0; k < fluid_nodes.size(); k++)
+                {
+                    Eigen::Index i = fluid_nodes[k].coords[0];
+                    Eigen::Index j = fluid_nodes[k].coords[1];
+                    double rho = global_rho(i, j);
+                    double ux = global_u(i, j, 0);
+                    double uy = global_u(i, j, 1);
+                    double u2 = ux * ux + uy * uy;
+
+                    std::size_t base_idx = i * n_cols * num_directions + j * num_directions;
+
+                    equilibrium_populations_buffer[base_idx + 0] =  two9 * rho * (2 - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 1] =  one18 * rho * (2 + 6 * ux + 9 * ux * ux - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 2] =  one18 * rho * (2 + 6 * uy + 9 * uy * uy - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 3] =  one18 * rho * (2 - 6 * ux + 9 * ux * ux - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 4] =  one18 * rho * (2 - 6 * uy + 9 * uy * uy - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 5] = one36 * rho * (1 + 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 6] = one36 * rho * (1 - 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 7] = one36 * rho * (1 - 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 8] = one36 * rho * (1 + 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
+                }
+            }
+
+            for (Eigen::Index i = 0; i < n_rows; ++i) {
+                for (Eigen::Index j = 0; j < n_cols; ++j) {
+                    for (std::size_t d = 0; d < num_directions; ++d) {
+                        equilibrium_populations(i, j, d) = equilibrium_populations_buffer[i * n_cols * num_directions + j * num_directions + d];
+                    }
+                }
+            }
+
+            delete[] equilibrium_populations_buffer;
+
+
+
+            /*#pragma acc parallel loop
             for (size_t k = 0; k < fluid_nodes.size(); k++)
             {
                 size_t i = fluid_nodes[k].coords[0];
@@ -380,7 +433,7 @@ namespace llalbm::core::equilibrium
                 equilibrium_populations(i,j,6) = one36 * rho * (1 - 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
                 equilibrium_populations(i,j,7) = one36 * rho * (1 - 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
                 equilibrium_populations(i,j,8) = one36 * rho * (1 + 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
-            }            
+            }*/            
         }
 
         static void calc_equilibrium(std::vector<BoundaryPoint<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
@@ -389,7 +442,58 @@ namespace llalbm::core::equilibrium
             constexpr double one18 = (1.0/18.0);
             constexpr double one36 = (1.0/36.0);
             
-            #pragma acc parallel loop
+            auto n_rows = equilibrium_populations.dimensions()[0];
+            auto n_cols = equilibrium_populations.dimensions()[1];
+            const std::size_t num_directions = 9;
+
+            double* equilibrium_populations_buffer = new double[n_rows * n_cols * num_directions];
+
+            for (Eigen::Index i = 0; i < n_rows; ++i) {
+                for (Eigen::Index j = 0; j < n_cols; ++j) {
+                    for (std::size_t d = 0; d < num_directions; ++d) {
+                        equilibrium_populations_buffer[i * n_cols * num_directions + j * num_directions + d] = equilibrium_populations(i, j, d);
+                    }
+                }
+            }
+
+            #pragma acc data copy(equilibrium_populations_buffer[0:n_rows * n_cols * num_directions])
+            #pragma acc cache(equilibrium_populations_buffer[0:n_rows * n_cols * num_directions])
+            {
+                #pragma acc parallel loop
+                for (std::size_t k = 0; k < fluid_nodes.size(); k++)
+                {
+                    Eigen::Index i = fluid_nodes[k].coords[0];
+                    Eigen::Index j = fluid_nodes[k].coords[1];
+                    double rho = global_rho(i, j);
+                    double ux = global_u(i, j, 0);
+                    double uy = global_u(i, j, 1);
+                    double u2 = ux * ux + uy * uy;
+
+                    std::size_t base_idx = i * n_cols * num_directions + j * num_directions;
+
+                    equilibrium_populations_buffer[base_idx + 0] =  two9 * rho * (2 - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 1] =  one18 * rho * (2 + 6 * ux + 9 * ux * ux - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 2] =  one18 * rho * (2 + 6 * uy + 9 * uy * uy - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 3] =  one18 * rho * (2 - 6 * ux + 9 * ux * ux - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 4] =  one18 * rho * (2 - 6 * uy + 9 * uy * uy - 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 5] = one36 * rho * (1 + 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 6] = one36 * rho * (1 - 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 7] = one36 * rho * (1 - 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
+                    equilibrium_populations_buffer[base_idx + 8] = one36 * rho * (1 + 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
+                }
+            }
+
+            for (Eigen::Index i = 0; i < n_rows; ++i) {
+                for (Eigen::Index j = 0; j < n_cols; ++j) {
+                    for (std::size_t d = 0; d < num_directions; ++d) {
+                        equilibrium_populations(i, j, d) = equilibrium_populations_buffer[i * n_cols * num_directions + j * num_directions + d];
+                    }
+                }
+            }
+
+            delete[] equilibrium_populations_buffer;
+
+            /*#pragma acc parallel loop
             for (size_t k = 0; k < fluid_nodes.size(); k++)
             {
                 size_t i = fluid_nodes[k].coords[0];
@@ -407,7 +511,7 @@ namespace llalbm::core::equilibrium
                 equilibrium_populations(i,j,6) = one36 * rho * (1 - 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
                 equilibrium_populations(i,j,7) = one36 * rho * (1 - 3 * (ux + uy) + 9 * ux * uy + 3 * u2);
                 equilibrium_populations(i,j,8) = one36 * rho * (1 + 3 * (ux - uy) - 9 * ux * uy + 3 * u2);
-            }            
+            }  */          
         }
 
 
