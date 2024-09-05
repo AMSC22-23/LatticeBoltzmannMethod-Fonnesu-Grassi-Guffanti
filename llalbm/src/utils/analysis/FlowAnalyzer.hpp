@@ -393,40 +393,40 @@ public:
 
             if (node.directions.test(1))
             {
-                local_drag -= densities(i, j+1, 1) + densities(i, j+1, 3);
+                local_drag -= densities(i, j+1, 3);
             }
             if (node.directions.test(2)) 
             {
-                local_lift -= densities(i-1, j, 4) + densities(i-1, j, 2);
+                local_lift -= densities(i-1, j, 4);
             }
             if (node.directions.test(3))
             {
-                local_drag += densities(i, j-1, 1) + densities(i, j-1, 3);
+                local_drag += densities(i, j-1, 1);
             }
             if (node.directions.test(4)) 
             {
-                local_lift += densities(i+1, j, 2) + densities(i+1, j, 4);
+                local_lift += densities(i+1, j, 2);
             }
             if (node.directions.test(5)) 
             {
-                local_drag -= (densities(i-1, j+1, 7) + densities(i-1, j+1, 5)) * std::sqrt(2)/2.0;
-                local_lift -= (densities(i-1, j+1, 7) + densities(i-1, j+1, 5)) * std::sqrt(2)/2.0;
+                local_drag -= (densities(i-1, j+1, 7)) * std::sqrt(2)/2.0;
+                local_lift -= (densities(i-1, j+1, 7)) * std::sqrt(2)/2.0;
 
             }
             if (node.directions.test(6)) 
             {
-                local_drag += (densities(i-1, j-1, 8) + densities(i-1, j-1, 6)) * std::sqrt(2)/2.0;
-                local_lift -= (densities(i-1, j-1, 8) + densities(i-1, j-1, 6)) * std::sqrt(2)/2.0;   
+                local_drag += (densities(i-1, j-1, 8)) * std::sqrt(2)/2.0;
+                local_lift -= (densities(i-1, j-1, 8)) * std::sqrt(2)/2.0;   
             }
             if (node.directions.test(7)) 
             {
-                local_drag += (densities(i+1, j-1, 5) + densities(i+1, j-1, 7)) * std::sqrt(2)/2.0;
-                local_lift += (densities(i+1, j-1, 5) + densities(i+1, j-1, 7)) * std::sqrt(2)/2.0;
+                local_drag += (densities(i+1, j-1, 5)) * std::sqrt(2)/2.0;
+                local_lift += (densities(i+1, j-1, 5)) * std::sqrt(2)/2.0;
             }
             if (node.directions.test(8)) 
             {
-                local_drag -= (densities(i+1, j+1, 6) + densities(i+1, j+1, 8)) * std::sqrt(2)/2.0;
-                local_lift += (densities(i+1, j+1, 6) + densities(i+1, j+1, 8)) * std::sqrt(2)/2.0;
+                local_drag -= (densities(i+1, j+1, 6)) * std::sqrt(2)/2.0;
+                local_lift += (densities(i+1, j+1, 6)) * std::sqrt(2)/2.0;
             }
 
             if (should_save)

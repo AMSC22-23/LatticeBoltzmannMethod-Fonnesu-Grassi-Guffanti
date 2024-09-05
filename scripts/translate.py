@@ -2,7 +2,7 @@
 #   python script used to convert input images (.png extension) that either describe
 #       1. a computational domain that represents the structure of the lattice
 #       2. a density field over that domain
-#   into a .mtx file with values based on colors.
+#   into a .txt file with values based on colors.
 #   
 #   More specifically the following scheme is adopted
 #   + For case number 1 
@@ -19,7 +19,7 @@
 #   To produce the velocity field the command to call is the following
 #   python translate.py path_to_image ux|uy path_to_output_dir [open]
 #      
-#   1 S 0 Fluido 2 Boundary 3 Inlet 4 Outlet 5 Obstacle
+#   1 S 0 Fluid 2 Boundary 3 Inlet 4 Outlet 5 Obstacle
 #
 
 import sys
