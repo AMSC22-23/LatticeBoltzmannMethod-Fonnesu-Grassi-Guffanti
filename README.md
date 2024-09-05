@@ -1,4 +1,4 @@
-# LLALBM
+# LLALBM, A Ligthweight, Lightspeed and Adaptable LBM implementation.
 In this repository we present __LLALBM__, a templated and header only C++ library implementing the Lattice Boltzmann Method for computational fluid dynamics
 
 <blockquote style="color: red;">
@@ -191,7 +191,7 @@ to generate lattices and obstacles, render animations, and plot the flow analysi
 file comprehensible by LLALBM.
 
 
-#Acknowledgements
+## Acknowledgements
 Implemented by
 - [Lorenzo Fonnesu](mailto:lorenzo.fonnesu@mail.polimi.it)
 - [Andrea Grassi](mailto:andrea10.grassi@mail.polimi.it)
