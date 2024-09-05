@@ -49,11 +49,20 @@ struct MultiDimensionalLoop;
 template<typename ContainerObject, typename DataObject, std::size_t dims, std::size_t current_dim>
 struct MultiDimensionalLoop<ContainerObject, DataObject, dims, current_dim, typename std::enable_if<current_dim == dims - 1>::type>
 {
-    static void assign_grid_positions(ContainerObject& container, Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions)
+    static void assign_grid_positions(ContainerObject& container, const Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions)
     {
         for (Eigen::Index i = 0; i < extensions[dims-1]; ++i)
         {
             grid_positions[dims-1] = i;
+            container.push_back(DataObject(grid_positions));
+        }
+    }
+
+    static void assign_grid_positions_with_offset(ContainerObject& container, const Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions, Eigen::array<Eigen::Index, dims>& offset)
+    {
+        for (Eigen::Index i = 0; i < extensions[dims-1]; ++i)
+        {
+            grid_positions[dims-1] = i + offset[dims-1];
             container.push_back(DataObject(grid_positions));
         }
     }
@@ -73,12 +82,21 @@ struct MultiDimensionalLoop<ContainerObject, DataObject, dims, current_dim, type
 template<typename ContainerObject, typename DataObject, std::size_t dims, std::size_t current_dim>
 struct MultiDimensionalLoop <ContainerObject, DataObject, dims, current_dim, typename std::enable_if<current_dim < dims - 1>::type>
 {
-    static void assign_grid_positions(ContainerObject& container, Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions)
+    static void assign_grid_positions(ContainerObject& container, const Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions)
     {
         for (Eigen::Index i = 0; i < extensions[current_dim]; ++i)
         {
             grid_positions[current_dim] = i;
             MultiDimensionalLoop<ContainerObject, DataObject, dims, current_dim + 1>::assign_grid_positions(container, extensions, grid_positions);
+        }
+    }
+
+    static void assign_grid_positions_with_offset(ContainerObject& container, const Eigen::array<Eigen::Index, dims>& extensions, Eigen::array<Eigen::Index, dims>& grid_positions, Eigen::array<Eigen::Index, dims>& offset)
+    {
+        for (Eigen::Index i = 0; i < extensions[current_dim]; ++i)
+        {
+            grid_positions[current_dim] = i + offset[current_dim];
+            MultiDimensionalLoop<ContainerObject, DataObject, dims, current_dim + 1>::assign_grid_positions_with_offset(container, extensions, grid_positions, offset);
         }
     }
 };

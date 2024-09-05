@@ -4,17 +4,22 @@
 int main()
 {
     using namespace llalbm::core;
-    using Configuration = LatticeConfiguration<
+
+
+    using Config = LatticeConfiguration<
         2,
         collisions::BGKCollisionPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::BounceBackPolicy<2>,
         boundaries::ZouHePolicy<2>,
         boundaries::ZouHePolicy<2>, 
-        initializers::VelocityInitializer<2>
-    >;
+        initializers::VelocityInitializer<2>,
+        equilibrium::DefaultEquilibrium<2>
+    >;   
+    
+    using Parallel = SerialPolicy<2, Config>;
 
-    Lattice<Configuration> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    Lattice<Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
     
     std::array<std::function<double(double,BoundaryPoint<2>)>,2> VelocityFunctions;
     std::array<std::function<double(double,BoundaryPoint<2>)>,2> Outlets;

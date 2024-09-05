@@ -9,7 +9,7 @@ int main()
     std::vector<BoundaryPoint<2>> boundary_coord;
     std::vector<BoundaryPoint<2>> inlet_nodes_coord;
     std::vector<BoundaryPoint<2>> outlet_nodes_coord;
-    std::vector<BoundaryPoint<2>> obstacle_nodes;
+    std::vector<ObstaclePoint<2>> obstacle_nodes;
     std::array<Eigen::Index, 2> lattice_dimensions;
 
 
@@ -24,15 +24,21 @@ int main()
     );
 
     using namespace llalbm::core;
-    using Config = LatticeConfiguration<2,
-                        collisions::BGKCollisionPolicy<2>,
-                        boundaries::BounceBackPolicy<2>,
-                        boundaries::BounceBackPolicy<2>,
-                        boundaries::ZouHePolicy<2>,
-                        boundaries::ZouHePolicy<2>, 
-                        initializers::VelocityInitializer<2>>;
+    
+    using Config = LatticeConfiguration<
+        2,
+        collisions::BGKCollisionPolicy<2>,
+        boundaries::BounceBackPolicy<2>,
+        boundaries::BounceBackPolicy<2>,
+        boundaries::ZouHePolicy<2>,
+        boundaries::ZouHePolicy<2>, 
+        initializers::VelocityInitializer<2>,
+        equilibrium::DefaultEquilibrium<2>
+    >;   
 
-    Lattice<Config> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
+    using Parallel = SerialPolicy<2, Config>;
+
+    Lattice<Parallel> Lid("../test/assets/lid-lattice.txt", 9,std::cout);
 
     std::ofstream out("file.txt");
     Lid.print_lattice_structure(out);

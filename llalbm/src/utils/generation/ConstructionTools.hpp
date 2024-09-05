@@ -53,9 +53,9 @@ using namespace llalbm::util;
  */
 template<
     std::size_t dim,
-    typename LatticeConfiguration       
+    typename Parallelization      
 >
-void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
+void build_lattice(Lattice<Parallelization>& lattice, const std::size_t q, const ConstructionInfo<dim>& info)
 {
     // Traduce ConstructionInfo sets into vectors
     Logger logger("ConstructionTools", std::cout);
@@ -99,7 +99,7 @@ void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, 
     std::vector<BoundaryPoint<dim>> boundary_nodes;
     std::vector<BoundaryPoint<dim>> inlet_nodes;
     std::vector<BoundaryPoint<dim>> outlet_nodes;
-    std::vector<BoundaryPoint<dim>> obstacle_nodes;
+    std::vector<ObstaclePoint<dim>> obstacle_nodes;
 
 
     logger.info("There are " + std::to_string(boundary_nodes_set.size()) + " boundary nodes");
@@ -130,13 +130,15 @@ void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, 
     
     logger.info("Computing fluid nodes coordinates");
     llalbm::util::MultiDimensionalLoop<std::vector<Point<dim>>, Point<dim>, dim>::assign_grid_positions(fluid_nodes, dimensions, grid_positions);
-    
 
     // Remove any duplicates from fluid nodes to be sure
     std::sort(fluid_nodes.begin(), fluid_nodes.end());
     fluid_nodes.erase(std::unique(fluid_nodes.begin(), fluid_nodes.end()), fluid_nodes.end());
 
     logger.info("Removing boundary nodes from fluid nodes");
+
+    
+    // Identify all the nodes that should be eliminated from the fluid nodes
     for (auto boundary_node : boundary_nodes)
     {
         auto it = std::find(fluid_nodes.begin(), fluid_nodes.end(), boundary_node);
@@ -162,8 +164,6 @@ void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, 
         auto it = std::find(fluid_nodes.begin(), fluid_nodes.end(), outlet_node);
         if (it != fluid_nodes.end())
         {
-            std::cout << std::endl;
-
             fluid_nodes.erase(it);
         }
     }
@@ -179,8 +179,13 @@ void build_lattice(Lattice<LatticeConfiguration>& lattice, const std::size_t q, 
     }
     // Last but not least, identify the inlet and outlet nodes
     logger.info("Identifying inlet and outlet nodes");
-    identify_node_type(info.get_domain_dimensions(), inlet_nodes);
-    identify_node_type(info.get_domain_dimensions(), outlet_nodes);
+    identify_node_type<dim>(info.get_domain_dimensions(), inlet_nodes);
+    identify_node_type<dim>(info.get_domain_dimensions(), outlet_nodes);
+    identify_obstacle_propagation<dim>(info.get_domain_dimensions(), obstacle_nodes, fluid_nodes, inlet_nodes, outlet_nodes);
+
+    // Eliminate from the obstacle nodes those that have all directions set to false
+    eliminate_non_wet_nodes<dim>(obstacle_nodes);
+    
 
     // Finally, reinitialize the lattice.
     auto domain = info.get_domain_dimensions();
