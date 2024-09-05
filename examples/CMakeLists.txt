@@ -13,6 +13,7 @@ endmacro()
 
 # Adding reading executable
 add_tutorial(1_LidDrivenCavity.out "1_LidDrivenCavity.cpp")
+add_tutorial(1_LidDrivenCavity129.out "1_LidDrivenCavity129.cpp")
 add_tutorial(2_Parabolic.out "2_Parabolic.cpp")
 add_tutorial(3_Vortex.out "3_Vortex.cpp")
 add_tutorial(4_ComplexGeometry.out "4_ComplexGeometry.cpp")
