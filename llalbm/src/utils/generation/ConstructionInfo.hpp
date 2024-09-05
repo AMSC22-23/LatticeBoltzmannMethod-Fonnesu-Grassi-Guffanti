@@ -457,7 +457,7 @@ public:
      * @param max_radius maximum radius
      * @param min_radius minimum radius
      * @param seed seed of the random number generator
-     * @return Eigen::Index 
+     * @return Eigen::Index the number of added nodes 
      */
     Eigen::Index add_obstacle_random_spheres(const Eigen::Index& spheres = 10, const Eigen::Index& max_radius = 10, const Eigen::Index& min_radius = 1, const Eigen::Index& seed = 42)
     {

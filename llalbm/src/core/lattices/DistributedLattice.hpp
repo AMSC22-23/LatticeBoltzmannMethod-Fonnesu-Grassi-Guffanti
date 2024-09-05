@@ -1,4 +1,6 @@
 #ifndef LLALBM_DISTRIBUTED_LATTICE_HPP
 #define LLALBM_DISTRIBUTED_LATTICE_HPP
 
+// This will be used... Eventually!
+
 #endif // LLALBM_DISTRIBUTED_LATTICE_HPP

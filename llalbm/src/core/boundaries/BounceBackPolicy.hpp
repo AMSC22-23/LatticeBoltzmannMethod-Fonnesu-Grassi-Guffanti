@@ -1,13 +1,4 @@
-/**
- * @file BounceBackPolicy.hpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2024-02-20
- * 
- * @copyright Copyright (c) 2024
- * 
- */
+
 
 #ifndef LLALBM_BOUNCEBACKPOLICY_HPP
 #define LLALBM_BOUNCEBACKPOLICY_HPP
@@ -38,9 +29,9 @@ namespace llalbm::core::boundaries
 
 
     /**
-     * @brief Generic bounce back
+     * @brief Generic bounce back policy
      * 
-     * @tparam dim 
+     * @tparam dim number of phyical dimensions
      */
     template<
         std::size_t dim>
@@ -60,12 +51,20 @@ namespace llalbm::core::boundaries
     /**
      * @brief Specialization for sequantial on 2 dimensions
      * 
-     * @tparam  
+     * 
      */
     template<>
     class BounceBackPolicy<2> : public BoundaryPolicyTag, public SequentialTag{
             
         public: 
+            /**
+             * @brief Evaluates the bounce back boundary condition on boundary nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of boundary nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
 
@@ -133,6 +132,14 @@ namespace llalbm::core::boundaries
                 }
             }
 
+            /**
+             * @brief Evaluates the bounce back boundary condition on obstacle nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of boundary nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 const std::size_t obstacles = boundary_coord.size();
@@ -208,6 +215,14 @@ namespace llalbm::core::boundaries
     class OMPBounceBackPolicy<2> : public BoundaryPolicyTag, public OMPTag{
             
         public: 
+            /**
+             * @brief Evaluates the bounce back boundary condition on boundary nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of boundary nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
 
@@ -282,6 +297,15 @@ namespace llalbm::core::boundaries
                 }
             }
 
+            
+            /**
+             * @brief Evaluates the bounce back boundary condition on obstacle nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of obstacle nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 const std::size_t obstacles = boundary_coord.size();
@@ -359,6 +383,15 @@ namespace llalbm::core::boundaries
     class STDExecBounceBackPolicy<2> : public BoundaryPolicyTag, public STDExecTag{
             
         public: 
+            
+            /**
+             * @brief Evaluates the bounce back boundary condition on boundary nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of boundary nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
 
@@ -429,6 +462,14 @@ namespace llalbm::core::boundaries
                 });
             }
 
+            /**
+             * @brief Evaluates the bounce back boundary condition on obstacle nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of obstacle nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 std::for_each(std::execution::par,boundary_coord.begin(),boundary_coord.end(),[&](const auto o_node)
@@ -505,6 +546,15 @@ namespace llalbm::core::boundaries
     class OpenACCBounceBackPolicy<2> : public BoundaryPolicyTag, public OpenACCTag{
             
         public: 
+
+            /**
+             * @brief Evaluates the bounce back boundary condition on boundary nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of boundary nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
 
@@ -567,7 +617,15 @@ namespace llalbm::core::boundaries
                 delete[] populations_buffer;
 
             }
-
+            
+            /**
+             * @brief Evaluates the bounce back boundary condition on obstacle nodes
+             * 
+             * @param populations population tensor
+             * @param boundary_coord vector of coordinates of obstacle nodes
+             * @param global_rho global density tensor
+             * @param global_u global velocity
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<ObstaclePoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 const std::size_t obstacles = boundary_coord.size();

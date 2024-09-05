@@ -109,7 +109,7 @@ public:
  * 
  * 1. To perform analysis at the end of simulations: in this case it is enough to call the compute_flow_properties method
  * as the simulation ends passing the population tensor. The method will return the total lift and drag forces, eventually saving
- * the results to two ouptut files.
+ * the results to ouptut files.
  * 
  * 2. To perform analysis at regular intervals during the simulation: in this case the FlowAnalyzer must be attached to the lattice object 
  * by wrapping it inside a shared pointer. The lattice object will then take care of computation and saving of the results.
@@ -223,7 +223,7 @@ public:
     }
 
     /**
-     * @brief Initializes the lift analyzer by constructing the empty output directory.
+     * @brief Initializes the flow analyzer by constructing the empty output directory.
      * The initialization function is performed only once, at the beginning of the simulation, and 
      * has been separated from the constructor to allow for more flexibility (i.e. direct calling from the lattice object).
      */

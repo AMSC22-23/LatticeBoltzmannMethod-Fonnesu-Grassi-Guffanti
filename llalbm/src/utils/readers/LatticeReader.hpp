@@ -521,6 +521,14 @@ namespace llalbm::util::reader
         logger.info("LATTICE READING COMPLETED");
     }
 
+    /**
+     * @brief Reads the obstacle file and populates the obstacle nodes vector
+     * 
+     * @tparam dim number of physical dimensions
+     * @param path path to the input file
+     * @param obstacle_nodes_coord vector containing the coordinates of the obstacle nodes
+     * @param lattice_dimensions extension of each lattice dimension
+     */
     template<std::size_t dim>
     void read_obstacle_file(
         const std::string& path,

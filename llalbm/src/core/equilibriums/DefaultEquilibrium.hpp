@@ -24,16 +24,33 @@
 namespace llalbm::core::equilibrium
 {
 
+    /**
+     * @brief Generic class for the equilibrium distribution of the populations.
+     * 
+     * @tparam dim physical dimensions of the lattice
+     */
     template<
         std::size_t dim
         >
     class DefaultEquilibrium : SequentialTag
     {};
 
+    /**
+     * @brief Specialization of the DefaultEquilibrium class for the D2Q9 lattice.
+     * 
+     */
     template<>
     class DefaultEquilibrium<2> : SequentialTag {    
     
     public:
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for fluid nodes.
+         * 
+         * @param fluid_nodes vector containing all the fluid nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<Point<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
@@ -60,6 +77,14 @@ namespace llalbm::core::equilibrium
             }            
         }
 
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for (open)boundary nodes.
+         * 
+         * @param fluid_nodes vector containing all the (open)boundary nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<BoundaryPoint<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
@@ -130,14 +155,31 @@ namespace llalbm::core::equilibrium
         }
     };
 
+    /**
+     * @brief Generic class for the equilibrium distribution of the populations, using OpenMP for parallelization.
+     * 
+     * @tparam dim physical dimensions of the lattice
+     */
     template<std::size_t dim>
     class OMPDefaultEquilibrium : OMPTag
     {}; 
 
+    /**
+     * @brief Specialization of the OMPDefaultEquilibrium class for the D2Q9 lattice. Here, OpenMP used for parallelization.
+     * 
+     */
     template<>
     class OMPDefaultEquilibrium<2> : OMPTag {    
     
     public:
+        /**
+     * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for fluid nodes. This method uses OpenMP for parallelization.
+     * 
+     * @param fluid_nodes vector containing all the fluid nodes of the lattice
+     * @param equilibrium_populations tensor containing the equilibrium populations
+     * @param global_u global velocity tensor
+     * @param global_rho global density tensor
+     */
     static void calc_equilibrium(std::vector<Point<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
         double rho,ux,uy,u2;
         constexpr double two9 = (2.0/9.0);
@@ -165,6 +207,14 @@ namespace llalbm::core::equilibrium
         }            
     }
 
+    /**
+     * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for (open) boundary nodes. This method uses OpenMP for parallelization.
+     * 
+     * @param fluid_nodes vector containing all the (open) boundary nodes of the lattice
+     * @param equilibrium_populations tensor containing the equilibrium populations
+     * @param global_u global velocity tensor
+     * @param global_rho global density tensor
+     */
     static void calc_equilibrium(std::vector<BoundaryPoint<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
         double rho,ux,uy,u2;
         constexpr double two9 = (2.0/9.0);
@@ -238,16 +288,32 @@ namespace llalbm::core::equilibrium
 
 };
 
+    /**
+     * @brief Generic class for the equilibrium distribution of the populations, using std::execution policies for parallelization.
+     * 
+     * @tparam dim physical dimensions of the lattice
+     */
     template<
         std::size_t dim
         >
     class STDExecDefaultEquilibrium : STDExecTag
     {};
-
+    /**
+     * @brief Specialization of the STDExecDefaultEquilibrium class for the D2Q9 lattice. Here, std::execution policies are used for parallelization.
+     * 
+     */
     template<>
     class STDExecDefaultEquilibrium<2> : STDExecTag {    
     
     public:
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for fluid nodes. This method uses std::execution policies for parallelization.
+         * 
+         * @param fluid_nodes vector containing all the fluid nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<Point<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
@@ -275,6 +341,14 @@ namespace llalbm::core::equilibrium
             });            
         }
 
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for (open) boundary nodes. This method uses std::execution policies for parallelization.
+         * 
+         * @param fluid_nodes vector containing all the (open) boundary nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<BoundaryPoint<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
@@ -346,16 +420,33 @@ namespace llalbm::core::equilibrium
         }
     };
 
+    /**
+     * @brief Generic class for the equilibrium distribution of the populations, using OpenACC for parallelization.
+     * 
+     * @tparam dim physical dimensions of the lattice
+     */
     template<
         std::size_t dim
         >
     class OpenACCDefaultEquilibrium : OpenACCTag
     {};
 
+    /**
+     * @brief Specialization of the OpenACCDefaultEquilibrium class for the D2Q9 lattice. Here, OpenACC is used for parallelization.
+     * 
+     */
     template<>
     class OpenACCDefaultEquilibrium<2> : OpenACCTag {    
     
     public:
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for fluid nodes.This method uses OpenACC for parallelization.
+         * 
+         * @param fluid_nodes vector containing all the fluid nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<Point<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);
@@ -414,6 +505,14 @@ namespace llalbm::core::equilibrium
             delete[] equilibrium_populations_buffer;
         }
 
+        /**
+         * @brief Evaluates the equilibrium populations for the D2Q9 lattice, for (open) boundary nodes. This method uses OpenACC for parallelization.
+         * 
+         * @param fluid_nodes vector containing all the (open) boundary nodes of the lattice
+         * @param equilibrium_populations tensor containing the equilibrium populations
+         * @param global_u global velocity tensor
+         * @param global_rho global density tensor
+         */
         static void calc_equilibrium(std::vector<BoundaryPoint<2>> &fluid_nodes, Tensor<double, 3> &equilibrium_populations, Tensor<double, 3> &global_u, Tensor<double,2> &global_rho){
             double rho,ux,uy,u2;
             constexpr double two9 = (2.0/9.0);

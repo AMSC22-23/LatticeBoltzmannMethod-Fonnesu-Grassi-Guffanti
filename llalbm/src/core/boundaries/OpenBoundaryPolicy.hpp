@@ -1,13 +1,4 @@
-/**
- * @file OpenBoundaryPolicy.hpp
- * @author your name (you@domain.com)
- * @brief 
- * @version 0.1
- * @date 2024-02-20
- * 
- * @copyright Copyright (c) 2024
- * 
- */
+
 
 #ifndef LLALBM_OPENBOUNDARYPOLICY_HPP
 #define LLALBM_OPENBOUNDARYPOLICY_HPP
@@ -37,6 +28,7 @@ namespace llalbm::core::boundaries
     template<std::size_t d>
     using Point = Matrix<std::size_t, d, 1>;
 
+
     template<std::size_t dim>
     class OpenBoundaryPolicy : public BoundaryPolicyTag, public SequentialTag
     {
@@ -55,6 +47,14 @@ namespace llalbm::core::boundaries
     class OpenBoundaryPolicy<2> : public BoundaryPolicyTag, public SequentialTag
     {       
         public: 
+            /**
+             * @brief This method does nothing as the open boundary condition does not require any update
+             * 
+             * @param populations population tensor (unused)
+             * @param boundary_coord vector of coordinates of boundary nodes (unused)
+             * @param global_rho density tensor (unused)
+             * @param global_u velocity tensor (unused)
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 return;
@@ -82,6 +82,14 @@ namespace llalbm::core::boundaries
     {       
         public: 
 
+            /**
+             * @brief This method does nothing as the open boundary condition does not require any update
+             * 
+             * @param populations population tensor (unused)
+             * @param boundary_coord vector of coordinates of boundary nodes (unused)
+             * @param global_rho density tensor (unused)
+             * @param global_u velocity tensor (unused)
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 return;
@@ -108,6 +116,14 @@ namespace llalbm::core::boundaries
     {       
         public: 
 
+            /**
+             * @brief This method does nothing as the open boundary condition does not require any update
+             * 
+             * @param populations population tensor (unused)
+             * @param boundary_coord vector of coordinates of boundary nodes (unused)
+             * @param global_rho density tensor (unused)
+             * @param global_u velocity tensor (unused)
+             */
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 return;
@@ -131,7 +147,15 @@ namespace llalbm::core::boundaries
     template<>
     class OpenACCOpenBoundaryPolicy<2> : public BoundaryPolicyTag, public OpenACCTag
     {       
-        public: 
+        public:
+            /**
+             * @brief This method does nothing as the open boundary condition does not require any update
+             * 
+             * @param populations population tensor (unused)
+             * @param boundary_coord vector of coordinates of boundary nodes (unused)
+             * @param global_rho density tensor (unused)
+             * @param global_u velocity tensor (unused)
+             */ 
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
                 return;

@@ -24,9 +24,6 @@
 #include "../../utils/analysis/FlowAnalyzer.hpp"
 // =======================================
 
-//6 2 5
-//3 0 1
-//7 4 8
 
 namespace llalbm::core
 {
@@ -278,8 +275,16 @@ namespace llalbm::core
                     point.set_b(b_value);
                 }
             }
-        }
+        }   
 
+        /**
+         * @brief Executes the LBM simulation for the specified time.
+         * 
+         * @param time total time of the simulation
+         * @param time_step time interval of the simulation
+         * @param save_step number of iterations between each save
+         * @param should_save whether Lattice should save the results
+         */
         void perform_lbm(const double time, const double time_step = 1, const std::size_t save_step = 1, const bool should_save = true)
         {
             assert(time_step > 0 && "ERROR: time step must be greater than 0");
@@ -621,6 +626,11 @@ namespace llalbm::core
 
         }
 
+        /**
+         * @brief Attaches a flow analyzer to the lattice object trhough a shared pointer
+         * 
+         * @param flow_analyzer_ std::shared_ptr<FlowAnalyzer<dim>>, instantiated by the user, to be attached to the lattice
+         */
         void attach_flow_analyzer(std::shared_ptr<FlowAnalyzer<dim>> flow_analyzer_)
         {
             flow_analyzer = flow_analyzer_->shared_from_this();
