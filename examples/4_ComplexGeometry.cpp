@@ -33,17 +33,19 @@ int main()
     ConstructionInfo<2> info;
 
     // First we need to define the computational domain
-    info.attach_domain_dimensions({50, 1000});
+    info.attach_domain_dimensions({50, 300});
     // Then we will place boundaries all along the perimeter
     info.add_perimeter_nodes(NonFluidNodeType::BOUNDARY);
     // We will place an inlet on the left
     info.add_nodes_interval({1, 0}, {48, 0}, NonFluidNodeType::INLET);
     // And an outlet on the right
-    info.add_nodes_interval({1, 999}, {48, 999}, NonFluidNodeType::OUTLET);
+    info.add_nodes_interval({1, 299}, {48, 299}, NonFluidNodeType::OUTLET);
     // Add the first rectangle
     info.add_obstacle_hyper_rectangle({0,50}, {20,40});
     // Add the second rectangle
     info.add_obstacle_hyper_rectangle({28,120}, {20,40});
+    // Add a sphere
+    info.add_obstacle_hyper_sphere({20, 60}, 14);
 
     // The lattice is ready to be built, and to do that we just need to call build_lattice!
     build_lattice<2, Parallelization>(lattice, 9, info);
