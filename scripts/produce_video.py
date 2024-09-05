@@ -67,6 +67,14 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
             print("\n\n"+self.usage_message)
         
 
+    
+    # =============================================================================
+    # CHANGE THESE PARAMETERS TO MODIFY THE BEHAVIOR OF THE SCRIPT
+    # =============================================================================
+    # =============================================================================
+    # =============================================================================
+
+
         self.input_dir      :str            = sys.argv[1]
         self.quantity       :str            = sys.argv[2]
         self.file_paths     :list           = []
@@ -86,6 +94,13 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
         self.interpolation  :str            = "none"
         self.frame_index    :int            = 0
         self.frame_number   :int            = 360
+
+    # =============================================================================
+    # =============================================================================
+    # =============================================================================
+    # =============================================================================
+    # =============================================================================
+    # =============================================================================
 
 
     def check_input_data(self) -> bool:
@@ -152,37 +167,46 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
 
 
     def update_u_frame_2D_all(self, frame):
-        print(f"Frame {self.frame_index} out of {self.frame_number}")
+        try:
+            
+            print(f"Frame {self.frame_index} out of {self.frame_number}")
 
-        if self.save_imgs:
-            plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
-        if self.frame_index < self.frame_number:
-            self.frame_index += 1
-        
-        self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
-        self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
-        self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
+            if self.save_imgs:
+                plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
+            if self.frame_index < self.frame_number:
+                self.frame_index += 1
+            
+            self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
+            self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
+            self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
 
-        self.im_x.set_array(self.matrix_x)        
-        self.im_y.set_array(self.matrix_y)
-        self.im_n.set_array(self.matrix_norm)
-        return self.im_x, self.im_y, self.im_n
-    
+            self.im_x.set_array(self.matrix_x)        
+            self.im_y.set_array(self.matrix_y)
+            self.im_n.set_array(self.matrix_norm)
+            return self.im_x, self.im_y, self.im_n
+        except:
+            print("No more files can be opened")
+            exit()
     def update_u_frame_2D_norm(self, frame):
-        print(f"Frame {self.frame_index} out of {self.frame_number}")
+        try:
+            print(f"Frame {self.frame_index} out of {self.frame_number}")
 
-        if self.save_imgs:
-            plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
-        if self.frame_index < self.frame_number:
-            self.frame_index += 1
-        
-        self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
-        self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
-        self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
+            if self.save_imgs:
+                plt.savefig(f"{self.output_dir}/image{self.frame_index}.png")
+            if self.frame_index < self.frame_number:
+                self.frame_index += 1
+            
+            self.matrix_x = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_x.txt")
+            self.matrix_y = np.loadtxt(f"{self.input_dir}output-{self.frame_index}{self.quantity_u}_y.txt")
+            self.matrix_norm = np.sqrt(np.multiply(self.matrix_x, self.matrix_x) + np.multiply(self.matrix_y, self.matrix_y))
 
-        
-        self.im_n.set_array(self.matrix_norm)
-        return self.im_n
+            
+            self.im_n.set_array(self.matrix_norm)
+            return self.im_n
+        except:
+            print("No more files can be opened")
+            exit()
+
 
     def render_and_animate_u_2D(self):
 
@@ -204,9 +228,13 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
             self.c_n.ax.tick_params(labelsize=8)
             plt.tight_layout()
 
-            self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_norm, frames=self.frame_number, interval=self.interval_ms)
-            self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
-            print("Finished")
+            try:
+                self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_norm, frames=self.frame_number, interval=self.interval_ms)
+            except:
+                pass
+            finally:
+                self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
+                print("Finished")
 
         else:
             self.figure, (self.ax_x, self.ax_y, self.ax_n) = plt.subplots(figsize=(15, 5), ncols=3, nrows=1)
@@ -242,9 +270,14 @@ USAGE: python ./scripts/render.py path_to_input_dir (rho|u) [save path_to_output
             self.c_n = plt.colorbar(self.im_n, ax=self.ax_n, shrink=0.3)
             self.c_n.ax.tick_params(labelsize=8)
             plt.tight_layout()
-
-            self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_all, frames=self.frame_number, interval=self.interval_ms)
-            self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
+           
+            try:
+                self.animator = FuncAnimation(fig=self.figure, func=self.update_u_frame_2D_all, frames=self.frame_number, interval=self.interval_ms)
+            except:
+                pass
+            finally:
+                self.animator.save(self.animation_name, dpi=self.dpi, fps=15)
+                print("Finished")
             print("Finished")
 
 
