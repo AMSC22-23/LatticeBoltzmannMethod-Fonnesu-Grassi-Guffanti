@@ -41,10 +41,9 @@ namespace llalbm::core::boundaries
     class OpenBoundaryPolicy : public BoundaryPolicyTag, public SequentialTag
     {
     private:
-        /* data */
         Logger log;
     public:
-        OpenBoundaryPolicy(/* args */)
+        OpenBoundaryPolicy()
         : log("Generic OpenBoundary" , std::cout)
         {
             log.error("Generic OpenBoundary not implemented");
@@ -119,10 +118,9 @@ namespace llalbm::core::boundaries
     class OpenACCOpenBoundaryPolicy : public BoundaryPolicyTag, public OpenACCTag
     {
     private:
-        /* data */
         Logger log;
     public:
-        OpenACCOpenBoundaryPolicy(/* args */)
+        OpenACCOpenBoundaryPolicy()
         : log("Generic OpenBoundary" , std::cout)
         {
             log.error("Generic OpenBoundary not implemented");

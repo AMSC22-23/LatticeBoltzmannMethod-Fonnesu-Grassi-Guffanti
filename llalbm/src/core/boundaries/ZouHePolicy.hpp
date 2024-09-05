@@ -37,14 +37,18 @@ namespace llalbm::core::boundaries
     template<std::size_t d>
     using Point = Matrix<std::size_t, d, 1>;
 
+    /**
+     * @brief Generic Zou HE technique for calculation populations on boundaries
+     * 
+     * @tparam dim 
+     */
     template<std::size_t dim>
     class ZouHePolicy : public BoundaryPolicyTag, public SequentialTag
     {
     private:
-        /* data */
         Logger log;
     public:
-        ZouHePolicy(/* args */)
+        ZouHePolicy()
         : log("Generic ZH" , std::cout)
         {
             log.error("Generic ZH not implemented");
@@ -56,10 +60,6 @@ namespace llalbm::core::boundaries
     class ZouHePolicy<2> : public BoundaryPolicyTag, public SequentialTag
     {       
         public: 
-            /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
-                lattice_nodes = l;
-                boundary_nodes = b;
-            }*/
             static constexpr double two_thirds = 2.0/3.0;
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
@@ -245,10 +245,6 @@ namespace llalbm::core::boundaries
     class STDExecZouHePolicy<2> : public BoundaryPolicyTag, public STDExecTag
     {       
         public: 
-            /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
-                lattice_nodes = l;
-                boundary_nodes = b;
-            }*/
             static constexpr double two_thirds = 2.0/3.0;
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
@@ -259,7 +255,6 @@ namespace llalbm::core::boundaries
                 Eigen::Index i, j;
                 double rho, ru, rv;
                 
-                //for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++)
                 std::for_each(std::execution::par,boundary_coord.begin(),boundary_coord.end(),[&](const auto bnode)
                 {
                     i = bnode.coords[0];
@@ -341,25 +336,22 @@ namespace llalbm::core::boundaries
     class OpenACCZouHePolicy<2> : public BoundaryPolicyTag, public OpenACCTag
     {       
         public: 
-            /*void load_nodes(std::array<Eigen::Index, 2> &l, std::vector<Point<2>> &b){
-                lattice_nodes = l;
-                boundary_nodes = b;
-            }*/
+           
             static constexpr double two_thirds = 2.0/3.0;
             static constexpr double one_sixth = 1.0/6.0;
             static constexpr double one_half = 0.5;
 
             static void update_boundaries(Tensor<double, 3> &populations, std::vector<BoundaryPoint<2>> &boundary_coord, Tensor<double, 2> global_rho, Tensor<double, 3> global_u)
             {
-                // Supponiamo che le dimensioni siano note
+                
                 auto n_rows = populations.dimensions()[0];
                 auto n_cols = populations.dimensions()[1];
                 const std::size_t num_directions = 9;
 
-                // Crea il buffer per populations
+               
                 double* populations_buffer = new double[n_rows * n_cols * num_directions];
 
-                // Copia i dati da populations al buffer
+               
                 for (Eigen::Index i = 0; i < n_rows; ++i) {
                     for (Eigen::Index j = 0; j < n_cols; ++j) {
                         for (std::size_t d = 0; d < num_directions; ++d) {
@@ -368,7 +360,7 @@ namespace llalbm::core::boundaries
                     }
                 }
 
-                // Mappa il buffer nella GPU
+                
                 #pragma acc data copy(populations_buffer[0:n_rows * n_cols * num_directions])
                 #pragma acc cache(populations_buffer[0:n_rows * n_cols * num_directions])
                 {
@@ -379,7 +371,6 @@ namespace llalbm::core::boundaries
                         Eigen::Index j = boundary_coord[bnode].coords[1];
                         double rho, ru, rv;
 
-                        // Calcola l'indice lineare del buffer per l'accesso diretto
                         std::size_t base_idx = i * n_cols * num_directions + j * num_directions;
 
                         switch (boundary_coord[bnode].type)
@@ -462,7 +453,6 @@ namespace llalbm::core::boundaries
                     }
                 }
 
-                // Copia i dati modificati indietro in populations
                 for (Eigen::Index i = 0; i < n_rows; ++i) {
                     for (Eigen::Index j = 0; j < n_cols; ++j) {
                         for (std::size_t d = 0; d < num_directions; ++d) {
@@ -474,69 +464,6 @@ namespace llalbm::core::boundaries
                 delete[] populations_buffer;
 
 
-                /*Eigen::Index i, j;
-                double rho, ru, rv;
-                
-                #pragma acc parallel loop
-                for (size_t bnode = 0; bnode < boundary_coord.size(); bnode++)
-                {
-                    i = boundary_coord[bnode].coords[0];
-                    j = boundary_coord[bnode].coords[1];
-                    switch (boundary_coord[bnode].type)
-                    {
-                    case TOP_WALL:     
-                        rho = (populations(i,j,0) + populations(i,j,1) + populations(i,j,3) + 2.0 * (populations(i,j,2) + populations(i,j,5) + populations(i,j,6))) / (1.0 + global_u(i,j,1)); 
-                        global_rho(i,j) = rho;
-                        ru = rho * global_u(i,j,0);
-                        rv = rho * global_u(i,j,1);
-
-                        populations(i,j,4) = populations(i,j,2) - two_thirds * rv;
-                        populations(i,j,7) = populations(i,j,5) - one_sixth * rv - one_half * ru + one_half * (populations(i,j,1) - populations(i,j,3));
-                        populations(i,j,8) = populations(i,j,6) - one_sixth * rv + one_half * ru - one_half * (populations(i,j,1) - populations(i,j,3));
-                        
-                        break;
-                    
-                    case BOTTOM_WALL:
-                        rho = (populations(i,j,0) + populations(i,j,1) + populations(i,j,3) + 2.0 * (populations(i,j,4) + populations(i,j,7) + populations(i,j,8))) / (1.0 - global_u(i,j,1)); 
-                        
-                        global_rho(i,j) = rho;
-                        ru = rho * global_u(i,j,0);
-                        rv = rho * global_u(i,j,1);
-                        
-                        populations(i,j,2) = populations(i,j,4) + two_thirds * rv;
-                        populations(i,j,5) = populations(i,j,7) + one_sixth * rv + one_half * ru - one_half * (populations(i,j,1) - populations(i,j,3));
-                        populations(i,j,6) = populations(i,j,8) + one_sixth * rv - one_half * ru + one_half * (populations(i,j,1) - populations(i,j,3));
-
-                        break;
-                    case LEFT_WALL:
-                        rho = (populations(i,j,0) + populations(i,j,2) + populations(i,j,4) + 2.0 * (populations(i,j,3) + populations(i,j,7) + populations(i,j,6))) / (1.0 - global_u(i,j,0)); 
-
-                        global_rho(i,j) = rho;
-                        ru = rho * global_u(i,j,0);
-                        rv = rho * global_u(i,j,1);
-
-                        populations(i,j,1) = populations(i,j,3) + two_thirds * ru;
-                        populations(i,j,5) = populations(i,j,7) + one_sixth * ru + one_half * rv - one_half * (populations(i,j,2) - populations(i,j,4));
-                        populations(i,j,8) = populations(i,j,6) + one_sixth * ru - one_half * rv + one_half * (populations(i,j,2) - populations(i,j,4));
-
-                        break;
-
-                    case RIGHT_WALL:
-                        rho = (populations(i,j,0) + populations(i,j,2) + populations(i,j,4) + 2.0 * (populations(i,j,1) + populations(i,j,5) + populations(i,j,8))) / (1.0 + global_u(i,j,0)); 
-                        
-                        global_rho(i,j) = rho;
-                        ru = rho * global_u(i,j,0);
-                        rv = rho * global_u(i,j,1);
-
-                        populations(i,j,3) = populations(i,j,1) - two_thirds * ru;
-                        populations(i,j,7) = populations(i,j,5) - one_sixth * ru - one_half * rv + one_half * (populations(i,j,2) - populations(i,j,4));
-                        populations(i,j,6) = populations(i,j,8) - one_sixth * ru + one_half * rv - one_half * (populations(i,j,2) - populations(i,j,4));
-
-                        break;
-                    default:
-                        break;
-                    }
-                }*/
             }
     };
     

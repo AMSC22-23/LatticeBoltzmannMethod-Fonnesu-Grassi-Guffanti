@@ -344,7 +344,11 @@ namespace llalbm::core::collisions
 
     };
 
-
+    /**
+     * @brief Generic class for TRT collision operator with OMP ParallelPolicy
+     * 
+     * @tparam dim 
+     */
     template<std::size_t dim>
     class OMPTRTCollisionPolicy : public CollisionPolicyTag, public OMPTag
     {
@@ -649,7 +653,7 @@ namespace llalbm::core::collisions
 
 
         /**
-     * @brief Most generic version of the TRT collision operator.
+     * @brief Most generic version of the TRT collision operator with STD::Exec policy.
      * 
      * @tparam dim the total number of spatial dimensions.
      */
@@ -760,7 +764,6 @@ namespace llalbm::core::collisions
 
             Eigen::Index j, i;
 
-            //for(const auto& fluid_node : fluid_nodes)
             std::for_each(std::execution::par,fluid_nodes.begin(),fluid_nodes.end(), [&](const auto fluid_node){
                 i = fluid_node.coords[0];
                 j = fluid_node.coords[1];
@@ -811,11 +814,8 @@ namespace llalbm::core::collisions
          */
         static void stream(Tensor<double, 3> &populations, Tensor<double, 3> &after_collision_populations, const std::vector<Point<2>> &fluid_nodes)
         {
-
             Eigen::Index j, i;
 
-            
-            //for(const auto& fluid_node : fluid_nodes)
             std::for_each(std::execution::par,fluid_nodes.begin(),fluid_nodes.end(), [&](const auto fluid_node)
             {
                 i = fluid_node.coords[0];
@@ -848,7 +848,6 @@ namespace llalbm::core::collisions
 
         Eigen::Index j, i;
 
-        //for(const auto& open_boundary : open_boundary_nodes)
         std::for_each(std::execution::par,open_boundary_nodes.begin(),open_boundary_nodes.end(), [&](const auto open_boundary)
         {
             i = open_boundary.coords[0];
@@ -960,7 +959,7 @@ namespace llalbm::core::collisions
 
 
         /**
-     * @brief Most generic version of the TRT collision operator.
+     * @brief Most generic version of the TRT collision operator with OPENACC policy.
      * 
      * @tparam dim the total number of spatial dimensions.
      */
@@ -1075,6 +1074,9 @@ namespace llalbm::core::collisions
             auto n_cols = populations.dimensions()[1];
             auto n_dirs = populations.dimensions()[2]; 
 
+
+            //Since Tensors are not handled by the copy function of OpenACC we need to copy our data in a temporary buffer to 
+            //work on them with a GPU, this is definetely expensive overhead, but with a good GPU working on the main for it might save time
             double* populations_buffer = new double[n_rows * n_cols * n_dirs];
             double* equilibrium_populations_buffer = new double[n_rows * n_cols * n_dirs];
             double* after_collision_populations_buffer = new double[n_rows * n_cols * n_dirs];
@@ -1089,7 +1091,9 @@ namespace llalbm::core::collisions
                 }
             }
 
+            //Copying data on the GPU to work on it
             #pragma acc data copy(after_collision_populations_buffer[n_rows * n_cols * n_dirs]) copyin(equilibrium_populations_buffer[n_rows * n_cols * n_dirs], populations_buffer[n_rows * n_cols * n_dirs])
+            //We store it in the cache to have faster access
             #pragma acc cache(populations_buffer[n_rows * n_cols * n_dirs], equilibrium_populations_buffer[n_rows * n_cols * n_dirs], after_collision_populations_buffer[n_rows * n_cols * n_dirs])
             {
                 #pragma acc parallel loop
@@ -1145,52 +1149,6 @@ namespace llalbm::core::collisions
             delete[] populations_buffer;
             delete[] after_collision_populations_buffer;
             delete[] equilibrium_populations_buffer;
-
-
-            /*Eigen::Index j, i;
-            
-            #pragma acc parallel loop
-            //for(const auto& fluid_node : fluid_nodes)
-            for(size_t fnode=0; fnode < fluid_nodes.size(); fnode++)
-            {
-                i = fluid_nodes[fnode].coords[0];
-                j = fluid_nodes[fnode].coords[1];
-                after_collision_populations(i,j,0) = populations(i,j,0) - 
-                    (1.0/tau_even) * (populations(i,j,0) - equilibrium_populations(i,j,0));
-                
-                after_collision_populations(i,j,1) = populations(i,j,1) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,1) + populations(i,j,3) - equilibrium_populations(i,j,1) - equilibrium_populations(i,j,3)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,1) - populations(i,j,3) - equilibrium_populations(i,j,1) + equilibrium_populations(i,j,3));
-                
-                after_collision_populations(i,j,2) = populations(i,j,2) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,2) + populations(i,j,4) - equilibrium_populations(i,j,2) - equilibrium_populations(i,j,4)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,2) - populations(i,j,4) - equilibrium_populations(i,j,2) + equilibrium_populations(i,j,4));
-                
-                after_collision_populations(i,j,3) = populations(i,j,3) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,3) + populations(i,j,1) - equilibrium_populations(i,j,3) - equilibrium_populations(i,j,1)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,3) - populations(i,j,1) - equilibrium_populations(i,j,3) + equilibrium_populations(i,j,1));
-                
-                after_collision_populations(i,j,4) = populations(i,j,4) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,4) + populations(i,j,2) - equilibrium_populations(i,j,4) - equilibrium_populations(i,j,2)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,4) - populations(i,j,2) - equilibrium_populations(i,j,4) + equilibrium_populations(i,j,2));
-                
-                after_collision_populations(i,j,5) = populations(i,j,5) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,5) + populations(i,j,7) - equilibrium_populations(i,j,5) - equilibrium_populations(i,j,7)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,5) - populations(i,j,7) - equilibrium_populations(i,j,5) + equilibrium_populations(i,j,7));
-                
-                after_collision_populations(i,j,6) = populations(i,j,6) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,6) + populations(i,j,8) - equilibrium_populations(i,j,6) - equilibrium_populations(i,j,8)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,6) - populations(i,j,8) - equilibrium_populations(i,j,6) + equilibrium_populations(i,j,8));
-                
-                after_collision_populations(i,j,7) = populations(i,j,7) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,7) + populations(i,j,5) - equilibrium_populations(i,j,7) - equilibrium_populations(i,j,5)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,7) - populations(i,j,5) - equilibrium_populations(i,j,7) + equilibrium_populations(i,j,5));
-                
-                after_collision_populations(i,j,8) = populations(i,j,8) - 
-                    0.5 * (1.0/tau_even) * (populations(i,j,8) + populations(i,j,6) - equilibrium_populations(i,j,8) - equilibrium_populations(i,j,6)) -
-                    0.5 * (1.0/tau_odd) * (populations(i,j,8) - populations(i,j,6) - equilibrium_populations(i,j,8) + equilibrium_populations(i,j,6));
-                
-            }*/
         }
 
         /**
@@ -1210,7 +1168,6 @@ namespace llalbm::core::collisions
             double* populations_buffer = new double[n_rows * n_cols * num_directions];
             double* after_collision_populations_buffer = new double[n_rows * n_cols * num_directions];
 
-            // Copia i dati da after_collision_populations al buffer after_collision_populations_buffer
             for (Eigen::Index i = 0; i < n_rows; ++i) {
                 for (Eigen::Index j = 0; j < n_cols; ++j) {
                     for (std::size_t d = 0; d < num_directions; ++d) {
@@ -1219,7 +1176,6 @@ namespace llalbm::core::collisions
                 }
             }
 
-            // Loop parallelo per aggiornare populations
             #pragma acc data copy(populations_buffer[0:n_rows*n_cols*num_directions])
             {
                 #pragma acc parallel loop
@@ -1227,7 +1183,6 @@ namespace llalbm::core::collisions
                     size_t i = fluid_nodes[fnode].coords[0];
                     size_t j = fluid_nodes[fnode].coords[1];
 
-                    // Aggiorna il buffer di populations
                     populations_buffer[i * n_cols * num_directions + j * num_directions + 0] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 0];
                     populations_buffer[i * n_cols * num_directions + (j + 1) * num_directions + 1] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 1];
                     populations_buffer[(i - 1) * n_cols * num_directions + j * num_directions + 2] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 2];
@@ -1239,27 +1194,8 @@ namespace llalbm::core::collisions
                     populations_buffer[(i + 1) * n_cols * num_directions + (j + 1) * num_directions + 8] = after_collision_populations_buffer[i * n_cols * num_directions + j * num_directions + 8];
                 }
             }
-            // Libera la memoria allocata dinamicamente
             delete[] populations_buffer;
             delete[] after_collision_populations_buffer;
-
-            /*#pragma acc parallel loop
-            //for(const auto& fluid_node : fluid_nodes)
-            for(size_t fnode=0; fnode < fluid_nodes.size(); fnode++)
-            {
-                i = fluid_nodes[fnode].coords[0];
-                j = fluid_nodes[fnode].coords[1];
-                
-                populations(i, j, 0) = after_collision_populations(i,j,0);
-                populations(i, j+1, 1) = after_collision_populations(i,j,1);
-                populations(i-1, j, 2) = after_collision_populations(i,j,2);
-                populations(i, j-1, 3) = after_collision_populations(i,j,3);
-                populations(i+1, j, 4) = after_collision_populations(i,j,4);
-                populations(i-1, j+1, 5) = after_collision_populations(i,j,5);
-                populations(i-1, j-1, 6) = after_collision_populations(i,j,6);
-                populations(i+1, j-1, 7) = after_collision_populations(i,j,7);
-                populations(i+1, j+1, 8) = after_collision_populations(i,j,8);
-            }*/
         }
 
     /**
@@ -1351,48 +1287,6 @@ namespace llalbm::core::collisions
         delete[] populations_buffer;
         delete[] after_collision_populations_buffer;
         delete[] equilibrium_populations_buffer;
-        /*#pragma acc parallel loop
-        //for(const auto& open_boundary : open_boundary_nodes)
-        for(size_t onode=0; onode < open_boundary_nodes.size(); onode++)
-        {
-            i = open_boundary_nodes[onode].coords[0];
-            j = open_boundary_nodes[onode].coords[1];
-            after_collision_populations(i,j,0) = populations(i,j,0) - 
-                (1.0/tau_even) * (populations(i,j,0) - equilibrium_populations(i,j,0));
-            
-            after_collision_populations(i,j,1) = populations(i,j,1) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,1) + populations(i,j,3) - equilibrium_populations(i,j,1) - equilibrium_populations(i,j,3)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,1) - populations(i,j,3) - equilibrium_populations(i,j,1) + equilibrium_populations(i,j,3));
-            
-            after_collision_populations(i,j,2) = populations(i,j,2) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,2) + populations(i,j,4) - equilibrium_populations(i,j,2) - equilibrium_populations(i,j,4)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,2) - populations(i,j,4) - equilibrium_populations(i,j,2) + equilibrium_populations(i,j,4));
-            
-            after_collision_populations(i,j,3) = populations(i,j,3) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,3) + populations(i,j,1) - equilibrium_populations(i,j,3) - equilibrium_populations(i,j,1)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,3) - populations(i,j,1) - equilibrium_populations(i,j,3) + equilibrium_populations(i,j,1));
-            
-            after_collision_populations(i,j,4) = populations(i,j,4) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,4) + populations(i,j,2) - equilibrium_populations(i,j,4) - equilibrium_populations(i,j,2)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,4) - populations(i,j,2) - equilibrium_populations(i,j,4) + equilibrium_populations(i,j,2));
-            
-            after_collision_populations(i,j,5) = populations(i,j,5) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,5) + populations(i,j,7) - equilibrium_populations(i,j,5) - equilibrium_populations(i,j,7)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,5) - populations(i,j,7) - equilibrium_populations(i,j,5) + equilibrium_populations(i,j,7));
-            
-            after_collision_populations(i,j,6) = populations(i,j,6) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,6) + populations(i,j,8) - equilibrium_populations(i,j,6) - equilibrium_populations(i,j,8)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,6) - populations(i,j,8) - equilibrium_populations(i,j,6) + equilibrium_populations(i,j,8));
-            
-            after_collision_populations(i,j,7) = populations(i,j,7) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,7) + populations(i,j,5) - equilibrium_populations(i,j,7) - equilibrium_populations(i,j,5)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,7) - populations(i,j,5) - equilibrium_populations(i,j,7) + equilibrium_populations(i,j,5));
-            
-            after_collision_populations(i,j,8) = populations(i,j,8) - 
-                0.5 * (1.0/tau_even) * (populations(i,j,8) + populations(i,j,6) - equilibrium_populations(i,j,8) - equilibrium_populations(i,j,6)) -
-                0.5 * (1.0/tau_odd) * (populations(i,j,8) - populations(i,j,6) - equilibrium_populations(i,j,8) + equilibrium_populations(i,j,6));
-            
-        }*/
     }
 
     /**
@@ -1409,8 +1303,7 @@ namespace llalbm::core::collisions
 
         auto n_rows = populations.dimensions()[0];
         auto n_cols = populations.dimensions()[1];
-        auto n_dirs = populations.dimensions()[2]; // Presumendo che le direzioni siano la terza dimensione
-
+        auto n_dirs = populations.dimensions()[2];
         
         double* populations_buffer = new double[n_rows * n_cols * n_dirs];
         double* after_collision_populations_buffer= new double[n_rows * n_cols * n_dirs];
@@ -1425,7 +1318,6 @@ namespace llalbm::core::collisions
             }
         }
 
-        // Uso dei buffer
         #pragma acc data copy(populations_buffer[n_rows * n_cols * n_dirs], after_collision_populations_buffer[n_rows * n_cols * n_dirs])
         {
             #pragma acc parallel loop
@@ -1472,60 +1364,6 @@ namespace llalbm::core::collisions
         }
         delete[] populations_buffer;
         delete[] after_collision_populations_buffer;
-
-        /*auto n_rows = populations.dimensions()[0];
-        auto n_cols = populations.dimensions()[1];
-
-        #pragma acc parallel loop
-        //for(const auto& open_boundary : open_boundary_nodes)
-        for(size_t onode=0; onode < open_boundary_nodes.size(); onode++)
-        {
-            i = open_boundary_nodes[onode].coords[0];
-            j = open_boundary_nodes[onode].coords[1];
-
-            populations(i, j, 0) = after_collision_populations(i,j,0);
-            
-            // If the node is not on the left wall we can propagate to the left
-            if(j != 0)
-            {
-                populations(i, j-1, 3) = after_collision_populations(i, j, 3);
-            }
-            // If the node is not on the bottom wall we can propagate downwards
-            if(i != n_rows-1)
-            {
-                populations(i+1, j, 4) = after_collision_populations(i, j, 4);
-            }
-            // If the node is not on the right wall we can propagate to the right
-            if(j != n_cols-1)
-            {
-                populations(i, j+1, 1) = after_collision_populations(i, j, 1);
-            }
-            // If the node is not on the top wall we can propagate upwards
-            if(i != 0)
-            {
-                populations(i-1, j, 2) = after_collision_populations(i, j, 2);
-            }
-            // If the node is not on the bottom left corner we can propagate to the bottom left
-            if(i != n_rows-1 && j != 0)
-            {
-                populations(i+1, j-1, 7) = after_collision_populations(i, j, 7);
-            }
-            // If the node is not on the bottom right corner we can propagate to the bottom right
-            if(i != n_rows-1 && j != n_cols-1)
-            {
-                populations(i+1, j+1, 8) = after_collision_populations(i, j, 8);
-            }
-            // If the node is not on the top right corner we can propagate to the top right
-            if(i != 0 && j != n_cols-1)
-            {
-                populations(i-1, j+1, 5) = after_collision_populations(i, j, 5);
-            }
-            // If the node is not on the top left corner we can propagate to the top left
-            if(i != 0 && j != 0)
-            {
-                populations(i-1, j-1, 6) = after_collision_populations(i, j, 6);
-            }
-        }*/
     }
 
     };
@@ -1548,7 +1386,7 @@ namespace llalbm::core::collisions
     double STDExecTRTCollisionPolicy<2>::tau_odd = 0.0;
     double STDExecTRTCollisionPolicy<2>::sound_velocity = 0.0;
 
-    // initialization of the relaxation constants in the 2-D TRT collision operator.
+    // initialization of the relaxation constants in the 2-D TRT collision operator(for OpenACC class).
     double OpenACCTRTCollisionPolicy<2>::tau_even = 0.0;
     double OpenACCTRTCollisionPolicy<2>::tau_odd = 0.0;
     double OpenACCTRTCollisionPolicy<2>::sound_velocity = 0.0;

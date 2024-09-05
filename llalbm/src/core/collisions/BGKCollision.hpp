@@ -139,7 +139,7 @@ namespace llalbm::core::collisions
                 p7 = populations(i,j,7);
                 p8 = populations(i,j,8);
 
-                t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+                t = 1.0 / tau;
                 o_m_t = 1.0 - t;
 
                 after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -221,7 +221,7 @@ namespace llalbm::core::collisions
             p7 = populations(i,j,7);
             p8 = populations(i,j,8);
 
-            t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+            t = 1.0 / tau;
             o_m_t = 1.0 - t;
 
             after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -413,7 +413,7 @@ namespace llalbm::core::collisions
                 p7 = populations(i,j,7);
                 p8 = populations(i,j,8);
 
-                t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+                t = 1.0 / tau; 
                 o_m_t = 1.0 - t;
 
                 after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -498,7 +498,7 @@ namespace llalbm::core::collisions
             p7 = populations(i,j,7);
             p8 = populations(i,j,8);
 
-            t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+            t = 1.0 / tau; 
             o_m_t = 1.0 - t;
 
             after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -676,7 +676,6 @@ namespace llalbm::core::collisions
             double t;
             double o_m_t;
 
-            //for(const auto& fluid_node : fluid_nodes)
             std::for_each(std::execution::par,fluid_nodes.begin(),fluid_nodes.end(),[&](const auto fluid_node)
             {
                 i = fluid_node.coords[0];
@@ -692,7 +691,7 @@ namespace llalbm::core::collisions
                 p7 = populations(i,j,7);
                 p8 = populations(i,j,8);
 
-                t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+                t = 1.0 / tau; 
                 o_m_t = 1.0 - t;
 
                 after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -759,7 +758,6 @@ namespace llalbm::core::collisions
         double t;
         double o_m_t;
 
-        //for(const auto& open_boundary : open_boundary_nodes)
         std::for_each(std::execution::par,open_boundary_nodes.begin(),open_boundary_nodes.end(),[&](const auto open_boundary)
         {
             i = open_boundary.coords[0];
@@ -775,7 +773,7 @@ namespace llalbm::core::collisions
             p7 = populations(i,j,7);
             p8 = populations(i,j,8);
 
-            t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+            t = 1.0 / tau;
             o_m_t = 1.0 - t;
 
             after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -952,7 +950,6 @@ namespace llalbm::core::collisions
             double o_m_t;
             
             #pragma acc parallel loop
-            //for(const auto& fluid_node : fluid_nodes)
             for(size_t fnode=0; fnode < fluid_nodes.size(); fnode++)
             {
                 i = fluid_nodes[fnode].coords[0];
@@ -968,7 +965,7 @@ namespace llalbm::core::collisions
                 p7 = populations(i,j,7);
                 p8 = populations(i,j,8);
 
-                t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+                t = 1.0 / tau;  
                 o_m_t = 1.0 - t;
 
                 after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -1002,7 +999,6 @@ namespace llalbm::core::collisions
             auto n_cols = populations.dimensions()[1];
 
             #pragma acc parallel loop
-            //for(const auto& fluid_node : fluid_nodes)
             for(size_t fnode=0; fnode < fluid_nodes.size(); fnode++)
             {
                 i = fluid_nodes[fnode].coords[0];
@@ -1039,7 +1035,6 @@ namespace llalbm::core::collisions
         double o_m_t;
 
         #pragma acc parallel loop
-        //for(const auto& open_boundary : open_boundary_nodes)
         for(size_t onode=0; onode < open_boundary_nodes.size(); onode++)
         {
             i = open_boundary_nodes[onode].coords[0];
@@ -1055,7 +1050,7 @@ namespace llalbm::core::collisions
             p7 = populations(i,j,7);
             p8 = populations(i,j,8);
 
-            t = 1.0 / tau;  // TIME STEP IS IN LATTICE UNITS PORCO ZIO
+            t = 1.0 / tau; 
             o_m_t = 1.0 - t;
 
             after_collision_populations(i,j,0) = o_m_t * p0 + t * equilibrium_populations(i,j,0);
@@ -1089,7 +1084,6 @@ namespace llalbm::core::collisions
         auto n_cols = populations.dimensions()[1];
 
         #pragma acc parallel loop
-        //for(const auto& open_boundary : open_boundary_nodes)
         for(size_t onode=0; onode < open_boundary_nodes.size(); onode++)
         {
             i = open_boundary_nodes[onode].coords[0];
@@ -1144,7 +1138,7 @@ namespace llalbm::core::collisions
 
 
 
-    // initialization of the relaxation constant in the 2-D BGK collision operator.
+    // initialization of the relaxation constant in the 2-D BGK collision operator.(for all parallel policies)
     double BGKCollisionPolicy<2>::tau = 0.0;
     double OMPBGKCollisionPolicy<2>::tau = 0.0;
     double STDExecBGKCollisionPolicy<2>::tau = 0.0;

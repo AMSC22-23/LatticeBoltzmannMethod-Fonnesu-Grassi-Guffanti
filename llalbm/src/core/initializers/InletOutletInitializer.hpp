@@ -366,7 +366,6 @@ template<std::size_t dim>
             // calling the update function for each dimension
             Eigen::array<Eigen::Index, dim+1> coordinates;
 
-            //for (std::size_t i = 0; i < inlet_size; ++i)
             std::for_each(std::execution::par,inlet_nodes.begin(),inlet_nodes.end(),[&](const auto inlet_node)
             {
                 for (std::size_t k = 0; k < dim; ++k)
@@ -383,7 +382,6 @@ template<std::size_t dim>
             });
 
             // And also update the outlet nodes
-            //for (std::size_t i = 0; i < outlet_size; ++i)
             std::for_each(std::execution::par,outlet_nodes.begin(),outlet_nodes.end(),[&](const auto outlet_node)
             {
                 for (std::size_t k = 0; k < dim; ++k)
@@ -503,7 +501,6 @@ template<std::size_t dim>
             // calling the update function for each dimension
             Eigen::array<Eigen::Index, dim+1> coordinates;
 
-            //#pragma acc parallel loop
             for (std::size_t i = 0; i < inlet_size; ++i)
             {
                 for (std::size_t k = 0; k < dim; ++k)
@@ -520,7 +517,7 @@ template<std::size_t dim>
             }
 
             // And also update the outlet nodes
-            //#pragma acc parallel loop
+            
             for (std::size_t i = 0; i < outlet_size; ++i)
             {
                 for (std::size_t k = 0; k < dim; ++k)
