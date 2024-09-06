@@ -5,7 +5,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_library(LLALBM INTERFACE)
 
 # Find dependencies: MPI, OpenMP, and Eigen
-find_package(MPI REQUIRED)
+# find_package(MPI REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE HINTS $ENV{mkEigenPrefix})
 
