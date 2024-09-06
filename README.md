@@ -14,10 +14,11 @@ Before working with LLALBM, please make sure you have all the libraries we depen
 - __Eigen__
 - __OpenMP__
 - __OpenACC__
-- __MPI__
+- (__MPI__) not yet employed
 - __CMAKE__
 
-We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk), but it's useful in order to implement it with later versions.
+We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk)
+
 
 <blockquote style="color: red;">
 Modules are preferred over git submodules thanks to their flexibility, and actual use in high performance systems.
