@@ -110,6 +110,9 @@ a simulation of a Flat Bottom aerofoil.
 The simulation is used to produce an animation and a lift and drag analysis is put in place to understand whether the use of a Flat Bottom aerofoil is beneficial.
 
 ![FlatBottomAeroGifLaminar](/examples/videos/example_7.gif)
+<img src="/examples/data/images/7_Lift_new.png" alt="drag7" width="500">
+<img src="/examples/data/images/7_drag_new.png" alt="lift7" width="500">
+<img src="/examples/data/images/7_Lift_Drag_new-1.png" alt="liftdrag7" width="500">
 
 ### [8_1NACAProfileFlight](/examples/8_1NACAProfileFlight.cpp)
 In this example a NACA aerofoil is explored in normal flight conditions in two different viscosity conditions. A uniform horizontal 
