@@ -17,7 +17,7 @@ Before working with LLALBM, please make sure you have all the libraries we depen
 - __MPI__
 - __CMAKE__
 
-We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk).
+We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk), but it's useful in order to implement it with later versions.
 
 <blockquote style="color: red;">
 Modules are preferred over git submodules thanks to their flexibility, and actual use in high performance systems.
@@ -63,7 +63,7 @@ LLALBM comes packaged with a number of example that show its capabilities, and w
 the [examples](/examples/) directory. C++ files containing the example code have the same 
 name of the example you find right here.
 ### [1_LidDrivenCavity](/examples/1_LidDrivenCavity.cpp) and [1_LidDrivenCavity129](/examples/1_LidDrivenCavity129.cpp)
-The Lid Driven Cavity example is the basic computational fluid dynamics benchmark. We impose a horinzontal flow modeling
+The Lid Driven Cavity example is the basic computational fluid dynamics benchmark. We impose a horizontal flow modeling
 a moving wall on the top boundary of the domain. The two files represent simulations with two different sizes. This first example is
 used to show how easy it is to generate a computational domain with the built-in lattice generation system.
 ![LidDrivenGif](/examples/videos/example_1.gif)
