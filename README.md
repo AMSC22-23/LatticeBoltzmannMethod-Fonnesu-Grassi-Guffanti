@@ -120,10 +120,12 @@ velocity is enforced on the inlet nodes that present on the left of the domain. 
 the aerofoil in the flow.
 
 The above simulation is executed in a fluid with high viscosity, while the one below happens in a less viscous fluid. 
+
 ![NacaFlightLaminar](/examples/videos/example_8_1_LOWRE.gif)
 ![NacaFlightTurbulent](/examples/videos/example_8_1_HIGHRE.gif)
 
 And the flow analysis is presented here: on the left the forces for the viscous fluid, and on the right the forces for the smooth fluid.
+
 <img src="/examples/data/images/8_1_Lift_Drag_LOWRE_new-1.png" alt="draglift8" width="500">
 <img src="/examples/data/images/8_1_lift_drag_HIGHRE_new-1.png" alt="draglift82" width="500">
 
@@ -134,10 +136,13 @@ to simulate a variation in angle of attack. In a first phase a uniform horizonta
 Again, a lift and drag analysis is performed during the simulations, which are constructed in a laminar regime and in a turbulent regime.
 
 The above simulation is executed in a fluid with high viscosity, while the one below is in a less viscous fluid.
+
 ![NacaTakeOffLaminar](/examples/videos/example_8_2_LOWRE.gif)
 ![NacaTakeOffTurbulent](/examples/videos/example_8_2_HIGHRE.gif)
 
 The results of the analysis are presented here, with the laminar regime on the left and the turbulent regime on the right.
+
+
 <img src="/examples/data/images/8_2_Lift_Drag_LOWRE_new-1.png" alt="draglift812" width="500">
 <img src="/examples/data/images/8_2_lift_drag_HIGHRE_new-1.png" alt="draglift822" width="500">
 
