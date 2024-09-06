@@ -82,7 +82,7 @@ are put in place, the first with a viscous fluid (altough a hint of vortices is 
 ![VortexVisc](/examples/videos/example_3_LOWRE_1.gif)
 ![VortexNotVisc](/examples/videos/example_3_HIGHRE.gif)
 
-### [4_ComplexGeneration](/examples/4_ComplexGeneration.cpp) 
+### [4_ComplexGeometry](/examples/4_ComplexGeometry.cpp) 
 LLALBM in-code domain generation is very well suited for generating lattices with a big number of obstacles. Up to now LLALBM supports natively
 the generation of Rectangles, Squares, Spheres. Nonetheless, functionalities exposed by the lattice reading infrastructure allow the reading
 of obstacle information from an input stream, greatly extending the range of constructable domains. (Lattice reading to introduce obstacle is 
