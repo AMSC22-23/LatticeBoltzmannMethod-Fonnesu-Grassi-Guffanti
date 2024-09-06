@@ -55,7 +55,7 @@ int main()
     lattice.print_lattice_structure(out);
 
     // Setting up the collider and initializer
-    collisions::OMPTRTCollisionPolicy<2>::initialize(0.58, 1.72, 1.0/std::sqrt(3.0));
+    collisions::OMPTRTCollisionPolicy<2>::initialize(0.8, 1.1, 1.0/std::sqrt(3.0));
 
     // Now we define the inlet velocities
     std::array<std::function<double(double, BoundaryPoint<2>)>, 2> inlets = {
@@ -77,5 +77,5 @@ int main()
     initializers::OMPVelocityInitializer<2>::attach_update_functions(inlets, outlets);
 
     // We are done! Let's start the simulation!
-    lattice.perform_lbm(10000, 1, 30);
+    lattice.perform_lbm(4000, 1, 30);
 }
