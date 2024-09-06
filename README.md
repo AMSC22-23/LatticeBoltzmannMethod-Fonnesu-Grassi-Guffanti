@@ -1,4 +1,4 @@
-# LLALBM, A Ligthweight, Lightspeed and Adaptable LBM implementation.
+# LLALBM, A Lightweight, Lightspeed and Adaptable LBM implementation.
 In this repository we present __LLALBM__, a templated and header only C++ library implementing the Lattice Boltzmann Method for computational fluid dynamics
 
 <blockquote style="color: red;">
@@ -18,6 +18,11 @@ Before working with LLALBM, please make sure you have all the libraries we depen
 - __CMAKE__
 
 We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk).
+
+<blockquote style="color: red;">
+Modules are preferred over git submodules thanks to their flexibility, and actual use in high performance systems.
+</blockquote>  
+
 ### Cloning
 In order to work with LLALBM, start by cloning the repository.
 ```shell
