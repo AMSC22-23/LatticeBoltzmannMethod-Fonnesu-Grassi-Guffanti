@@ -151,27 +151,12 @@ in the code. The example is shown below
 ## Visualising the results yourself
 In order to build the simulations and plots that are presented in the previous sections, you will need to use some __Python__ scripts!
 However, our scripts depend on a few libraries you will need to install. The approach we suggest is constructing a virtual environment in which 
-you can freely download packages without the risk of collisions with already present packages.
-### Installing Python environment and packages
-First, make sure you have __Python>=3.3__, as virtual environments have been introduced by that release.
+you can freely download packages without the risk of collisions with already present packages. You will need the following packages, that you can install with pip
+- __numpy__
+- __matplotlib__
+- __pandas__
+- __pillow__
 
-Then, build and a virtual environment with
-```shell
-python -m venv path_to_venv_directory
-```
-and activate it with
-```shell
-source path_to_venv_directory/bin/activate
-```
-To install packages you will just need pip, which is distributed with Python.
-First, upgrade pip with 
-```shell
-python -m pip install --upgrade pip 
-```
-and you can now download packages by running
-```shell
-pip install -r requirements.txt 
-```
 You should now be up and running!
 ### Python scripts
 In this repository, in the [scripts](/scripts) folder, you find a few scripts that can be used
