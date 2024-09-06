@@ -17,7 +17,7 @@ Before working with LLALBM, please make sure you have all the libraries we depen
 - __MPI__
 - __CMAKE__
 
-We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk).
+We used __mk modules__ by the __MOX__ laboratory of __Politecnico di Milano__. You can find them [here](https://github.com/pcafrica/mk). Regarding MPI, it is not strictly necessary, but it's useful in order to implement it with later versions.
 ### Cloning
 In order to work with LLALBM, start by cloning the repository.
 ```shell
@@ -36,7 +36,7 @@ choosing whether to enable compilation of tests by acting on the `should_Test` o
 are accessible in the [examples](/examples/) directory.
 
 Once you have chosen how to compile LLALBM, you are ready to actually build it. To do so,
-create a `build/` folder in the root of the repository and move into it
+create a `build/` folder in the root of the repository and move into it.
 ```shell
 mkdir build
 cd build/
@@ -58,7 +58,7 @@ LLALBM comes packaged with a number of example that show its capabilities, and w
 the [examples](/examples/) directory. C++ files containing the example code have the same 
 name of the example you find right here.
 ### [1_LidDrivenCavity](/examples/1_LidDrivenCavity.cpp) and [1_LidDrivenCavity129](/examples/1_LidDrivenCavity129.cpp)
-The Lid Driven Cavity example is the basic computational fluid dynamics benchmark. We impose a horinzontal flow modeling
+The Lid Driven Cavity example is the basic computational fluid dynamics benchmark. We impose a horizontal flow modeling
 a moving wall on the top boundary of the domain. The two files represent simulations with two different sizes. This first example is
 used to show how easy it is to generate a computational domain with the built-in lattice generation system.
 ![LidDrivenGif](/examples/videos/example_1.gif)
@@ -86,7 +86,7 @@ showcased in the following examples.)
 
 ### [5_RandomGeneration](/examples/5_RandomGeneration.cpp)
 As a way of trying to simulate how a flow would behave in a porous media, or in a solid media where nucleation phenomena occurred, LLALBM supports 
-a random domain generation. Thus, this example shows how a random domain can be built by using this functionality, with the capability of creaing interesting flows.
+a random domain generation. Thus, this example shows how a random domain can be built by using this functionality, with the capability of creating interesting flows.
 Random number generation employs the random number generation infrastructure put in place by the C++ standard library
 ![Randomgif](/examples/videos/example_5_Random_1.gif)
 

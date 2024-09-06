@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # find required packages
 # find MPI
-find_package(MPI REQUIRED)
+# find_package(MPI REQUIRED)
 # find OpenMP
 cmake_policy(SET CMP0074 NEW)
 find_package(OpenMP REQUIRED)
